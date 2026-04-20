@@ -26,3 +26,11 @@ repos:
         language: system
         types: [python]
         pass_filenames: false
+
+      - id: commit-message-style
+        name: commit message style
+        language: pygrep
+        entry: '^(build|chore|ci|docs|feat|fix|perf|refactor|revert|style|test)(\([a-zA-Z0-9\-._]+\))?(!)?: [A-Za-z0-9](?:[^\n]*(?:\.\.\.|\.[a-zA-Z0-9]|[^\n.][^\n.])|[^\n.])?(\n[\s\S]*)?$'
+        args: [--multiline, --negate]
+        stages: [commit-msg]
+        always_run: true
