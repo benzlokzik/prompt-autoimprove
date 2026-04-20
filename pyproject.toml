@@ -46,3 +46,21 @@ ignore = ["PLR0913", "PLR2004"]
 quote-style = "double"
 indent-style = "space"
 line-ending = "lf"
+
+[tool.ty.src]
+include = ["src"]
+
+[tool.ty.rules]
+unresolved-import = "error"
+invalid-argument-type = "error"
+missing-argument = "error"
+unknown-argument = "error"
+
+[tool.ty.environment]
+python-version = "3.12"
+
+[tool.pytest.ini_options]
+minversion = "8.0"
+addopts = "-ra --strict-markers --strict-config"
+testpaths = ["tests"]
+asyncio_mode = "auto"
