@@ -1,0 +1,12 @@
+name: qwen2-vl-7b
+family: qwen
+format: safetensors
+context_window: 32768
+max_output_tokens: 2048
+supports_vision: true
+supports_tools: false
+reasoning_mode: none
+cost_per_1k_input: 0.0
+cost_per_1k_output: 0.0
+p50_latency_ms: 2200
+tags: [vision, multimodal]

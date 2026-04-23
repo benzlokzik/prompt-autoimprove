@@ -1,0 +1,12 @@
+name: gemma2-9b
+family: gemma
+format: safetensors
+context_window: 8192
+max_output_tokens: 2048
+supports_vision: false
+supports_tools: false
+reasoning_mode: none
+cost_per_1k_input: 0.0
+cost_per_1k_output: 0.0
+p50_latency_ms: 950
+tags: [hf, instruct]
