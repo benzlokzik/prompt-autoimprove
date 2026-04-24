@@ -1,0 +1,12 @@
+name: claude-opus-4-7
+family: other
+format: api
+context_window: 200000
+max_output_tokens: 8192
+supports_vision: true
+supports_tools: true
+reasoning_mode: thinking
+cost_per_1k_input: 15.0
+cost_per_1k_output: 75.0
+p50_latency_ms: 4500
+tags: [api, anthropic, frontier]

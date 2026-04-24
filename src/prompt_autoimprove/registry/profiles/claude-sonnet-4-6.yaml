@@ -1,0 +1,12 @@
+name: claude-sonnet-4-6
+family: other
+format: api
+context_window: 200000
+max_output_tokens: 8192
+supports_vision: true
+supports_tools: true
+reasoning_mode: hybrid
+cost_per_1k_input: 3.0
+cost_per_1k_output: 15.0
+p50_latency_ms: 1800
+tags: [api, anthropic, balanced]
