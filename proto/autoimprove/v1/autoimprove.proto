@@ -1,0 +1,66 @@
+syntax = "proto3";
+
+package autoimprove.v1;
+
+option go_package = "github.com/benzlokzik/prompt-autoimprove/gen/go/autoimprove/v1;autoimprovev1";
+
+service AutoImprove {
+  rpc Improve(ImproveRequest) returns (stream ImproveEvent);
+}
+
+message ImproveRequest {
+  string prompt = 1;
+  string profile = 2;
+  string locale_hint = 3;
+  bool sensitive = 4;
+  repeated Attachment attachments = 5;
+}
+
+message Attachment {
+  string modality = 1;
+  string uri = 2;
+  string mime_type = 3;
+  uint64 bytes_size = 4;
+}
+
+message ImproveEvent {
+  string stage = 1;
+  oneof body {
+    Normalization normalization = 2;
+    StrategySelected strategy_selected = 3;
+    Candidate candidate = 4;
+    PartialEval partial_eval = 5;
+    FinalDecision final_decision = 6;
+  }
+}
+
+message Normalization {
+  string language = 1;
+  string task = 2;
+  repeated string missing_parameters = 3;
+  repeated string safety_flags = 4;
+}
+
+message StrategySelected {
+  string strategy = 1;
+  string reason = 2;
+}
+
+message Candidate {
+  string text = 1;
+  string rationale = 2;
+  uint32 estimated_tokens = 3;
+}
+
+message PartialEval {
+  string metric = 1;
+  double value = 2;
+  double weight = 3;
+}
+
+message FinalDecision {
+  double integrated_score = 1;
+  string explanation = 2;
+  string adapter = 3;
+  string profile = 4;
+}
