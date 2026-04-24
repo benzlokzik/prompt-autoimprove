@@ -18,6 +18,9 @@ dependencies = [
     "asyncpg>=0.31.0",
     "alembic>=1.18.4",
     "aiokafka>=0.14.0",
+    "fastapi>=0.136.1",
+    "uvicorn>=0.47.0",
+    "slowapi>=0.1.9",
 ]
 
 [dependency-groups]
