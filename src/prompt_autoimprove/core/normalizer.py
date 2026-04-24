@@ -1,7 +1,3 @@
-"""Prompt normalization: language, task, missing parameters, safety."""
-
-from __future__ import annotations
-
 import re
 import unicodedata
 from collections.abc import Iterable

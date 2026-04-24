@@ -1,7 +1,3 @@
-"""OpenTelemetry tracer and meter setup."""
-
-from __future__ import annotations
-
 from opentelemetry import metrics, trace
 from opentelemetry.sdk.metrics import MeterProvider
 from opentelemetry.sdk.metrics.export import (

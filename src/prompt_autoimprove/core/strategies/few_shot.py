@@ -1,7 +1,3 @@
-"""Few-shot strategy: include task-specific examples when budget permits."""
-
-from __future__ import annotations
-
 from dataclasses import dataclass, field
 
 from prompt_autoimprove.core.strategies.base import (

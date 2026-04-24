@@ -1,7 +1,3 @@
-"""Task type taxonomy used by the normalizer and strategy selector."""
-
-from __future__ import annotations
-
 from enum import StrEnum
 
 

@@ -1,7 +1,3 @@
-"""Chain-decomposition strategy: explicit step-by-step plan."""
-
-from __future__ import annotations
-
 from dataclasses import dataclass
 
 from prompt_autoimprove.core.strategies.base import (

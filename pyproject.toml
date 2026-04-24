@@ -3,7 +3,7 @@ name = "prompt-autoimprove"
 version = "0.1.0"
 description = "Microservices system for automatic improvement of LLM prompts"
 readme = "README.md"
-requires-python = ">=3.12"
+requires-python = ">=3.13"
 license = { text = "MIT" }
 authors = [{ name = "benzlokzik" }]
 dependencies = [
@@ -14,6 +14,9 @@ dependencies = [
     "opentelemetry-api>=1.27",
     "httpx>=0.28.1",
     "pyyaml>=6.0.3",
+    "sqlalchemy[asyncio]>=2",
+    "asyncpg>=0.31.0",
+    "alembic>=1.18.4",
 ]
 
 [dependency-groups]
@@ -37,7 +40,7 @@ packages = ["src/prompt_autoimprove"]
 
 [tool.ruff]
 line-length = 100
-target-version = "py312"
+target-version = "py313"
 src = ["src", "tests"]
 
 [tool.ruff.lint]
@@ -65,7 +68,7 @@ missing-argument = "error"
 unknown-argument = "error"
 
 [tool.ty.environment]
-python-version = "3.12"
+python-version = "3.13"
 
 [tool.pytest.ini_options]
 minversion = "8.0"

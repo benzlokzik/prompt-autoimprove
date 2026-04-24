@@ -1,7 +1,3 @@
-"""Model profile: capabilities and constraints of a target LLM."""
-
-from __future__ import annotations
-
 from dataclasses import dataclass, field
 from enum import StrEnum
 

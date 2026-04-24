@@ -1,7 +1,3 @@
-"""Role-based strategy: prepend an explicit expert role and audience."""
-
-from __future__ import annotations
-
 from dataclasses import dataclass
 
 from prompt_autoimprove.core.strategies.base import (

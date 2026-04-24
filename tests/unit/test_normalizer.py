@@ -1,7 +1,3 @@
-"""Unit tests for the prompt normalizer."""
-
-from __future__ import annotations
-
 import pytest
 
 from prompt_autoimprove.core.normalizer import (

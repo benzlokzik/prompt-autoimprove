@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 from prompt_autoimprove.core.strategies.base import CandidatePrompt
 from prompt_autoimprove.domain.evaluation import Score
 

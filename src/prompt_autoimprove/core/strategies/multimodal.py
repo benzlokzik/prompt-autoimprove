@@ -1,7 +1,3 @@
-"""Multimodal adaptation: hint the model about attached images or audio."""
-
-from __future__ import annotations
-
 from dataclasses import dataclass
 
 from prompt_autoimprove.core.strategies.base import (

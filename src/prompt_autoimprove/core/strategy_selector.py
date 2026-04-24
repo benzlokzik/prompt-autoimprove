@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 from collections.abc import Sequence
 
 from prompt_autoimprove.core.strategies.base import Strategy

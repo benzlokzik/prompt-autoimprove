@@ -1,7 +1,3 @@
-"""Evaluation entities: per-metric results and the integrated score."""
-
-from __future__ import annotations
-
 from dataclasses import dataclass, field
 from datetime import UTC, datetime
 from enum import StrEnum

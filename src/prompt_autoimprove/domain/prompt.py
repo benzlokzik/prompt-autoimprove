@@ -1,7 +1,3 @@
-"""Prompt entities: raw input, normalized form, and revisions."""
-
-from __future__ import annotations
-
 from dataclasses import dataclass, field
 from datetime import UTC, datetime
 from enum import StrEnum

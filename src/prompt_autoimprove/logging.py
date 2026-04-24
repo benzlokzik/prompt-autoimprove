@@ -1,7 +1,3 @@
-"""structlog wiring with JSON output for production and pretty for dev."""
-
-from __future__ import annotations
-
 import logging
 import sys
 
