@@ -1,16 +1,20 @@
 from collections.abc import AsyncIterator
-from dataclasses import dataclass
 from typing import Any
+
+import prompt_autoimprove.api.grpc.generated  # noqa: F401
+
+from autoimprove.v1 import autoimprove_pb2 as pb
+from autoimprove.v1 import autoimprove_pb2_grpc as pb_grpc
 
 from prompt_autoimprove.domain.prompt import Modality, Prompt, PromptAttachment
 from prompt_autoimprove.services.orchestrator import AutoImproveOrchestrator
 
 
-@dataclass(slots=True)
-class AutoImproveService:
-    orchestrator: AutoImproveOrchestrator
+class AutoImproveService(pb_grpc.AutoImproveServicer):
+    def __init__(self, orchestrator: AutoImproveOrchestrator) -> None:
+        self.orchestrator = orchestrator
 
-    async def Improve(self, request: Any, _context: Any) -> AsyncIterator[Any]:
+    async def Improve(self, request: Any, context: Any) -> AsyncIterator[Any]:  # noqa: ARG002
         prompt = Prompt(
             text=request.prompt,
             locale_hint=request.locale_hint or None,
@@ -27,10 +31,6 @@ class AutoImproveService:
         )
         result = await self.orchestrator.run(
             prompt, request.profile, sensitive=request.sensitive
-        )
-
-        from prompt_autoimprove.api.grpc.generated import (  # noqa: PLC0415
-            autoimprove_pb2 as pb,
         )
 
         yield pb.ImproveEvent(
