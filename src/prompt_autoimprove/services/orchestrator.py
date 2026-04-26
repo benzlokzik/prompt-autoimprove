@@ -76,7 +76,15 @@ class AutoImproveOrchestrator:
         runner_ups = [s for c, s in scored if c is not chosen]
         explanation = explainer.explain(chosen, best, runner_ups)
 
-        routing = self.router.pick([profile], chosen.id, sensitive=sensitive)
+        if self.adapters:
+            routing = self.router.pick([profile], chosen.id, sensitive=sensitive)
+        else:
+            routing = RoutingDecision(
+                profile=profile,
+                adapter_name="dry-run",
+                reason="no adapters configured (improvement-only mode)",
+                revision_id=chosen.id,
+            )
 
         run = EvaluationRun(
             revision_id=chosen.id,

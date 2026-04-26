@@ -23,6 +23,8 @@ dependencies = [
     "slowapi>=0.1.9",
     "grpcio>=1.80.0",
     "grpcio-tools>=1.80.0",
+    "typer>=0.25.1",
+    "rich>=15.0.0",
 ]
 
 [dependency-groups]
@@ -36,6 +38,9 @@ dev = [
     "hypothesis>=6",
     "respx>=0.21",
 ]
+
+[project.scripts]
+pai = "prompt_autoimprove.cli.main:app"
 
 [build-system]
 requires = ["hatchling"]
