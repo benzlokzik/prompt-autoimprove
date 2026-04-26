@@ -86,3 +86,15 @@ minversion = "8.0"
 addopts = "-ra --strict-markers --strict-config"
 testpaths = ["tests"]
 asyncio_mode = "auto"
+
+[tool.alembic]
+script_location = "src/prompt_autoimprove/persistence/migrations"
+prepend_sys_path = ["."]
+file_template = "%%(year)d%%(month).2d%%(day).2d_%%(hour).2d%%(minute).2d_%%(slug)s"
+timezone = "UTC"
+
+[[tool.alembic.post_write_hooks]]
+name = "ruff"
+type = "console_scripts"
+entrypoint = "ruff"
+options = "format REVISION_SCRIPT_FILENAME"
