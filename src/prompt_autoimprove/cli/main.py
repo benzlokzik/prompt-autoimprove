@@ -5,6 +5,7 @@ import typer
 from rich.console import Console
 from rich.table import Table
 
+from prompt_autoimprove.adapters.circuit_breaker import CircuitBreakerAdapter
 from prompt_autoimprove.adapters.factory import build_adapters_from_env
 from prompt_autoimprove.config import get_settings
 from prompt_autoimprove.core.evaluator import IntegratedScorer
@@ -22,7 +23,8 @@ def _build_orchestrator() -> AutoImproveOrchestrator:
     settings = get_settings()
     profiles = load_profiles(Path(settings.profiles_dir))
     publisher = EventPublisher()
-    adapters: dict = build_adapters_from_env(profiles)
+    raw = build_adapters_from_env(profiles)
+    adapters: dict = {name: CircuitBreakerAdapter(inner=ad) for name, ad in raw.items()}
     return AutoImproveOrchestrator(
         profiles=profiles,
         adapters=adapters,
