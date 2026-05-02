@@ -39,6 +39,8 @@ dev = [
     "respx>=0.21",
     "aiosqlite>=0.22.1",
     "httpx>=0.28.1",
+    "mkdocs>=1.6.1",
+    "mkdocs-material>=9.7.6",
 ]
 
 [project.scripts]
