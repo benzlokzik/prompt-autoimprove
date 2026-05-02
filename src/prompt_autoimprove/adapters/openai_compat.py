@@ -27,6 +27,12 @@ class OpenAICompatAdapter:
             h["authorization"] = f"Bearer {self.api_key}"
         return h
 
+    def _endpoint(self) -> str:
+        base = self.base_url.rstrip("/")
+        if not base.endswith("/v1"):
+            base = f"{base}/v1"
+        return f"{base}/chat/completions"
+
     def _payload(self, request: GenerationRequest, *, stream: bool) -> dict[str, object]:
         return {
             "model": self.model,
@@ -42,7 +48,7 @@ class OpenAICompatAdapter:
         async with httpx.AsyncClient(timeout=self.timeout) as client:
             try:
                 resp = await client.post(
-                    f"{self.base_url.rstrip('/')}/v1/chat/completions",
+                    self._endpoint(),
                     headers=self._headers(),
                     json=self._payload(request, stream=False),
                 )
@@ -66,7 +72,7 @@ class OpenAICompatAdapter:
         async with httpx.AsyncClient(timeout=self.timeout) as client:
             async with client.stream(
                 "POST",
-                f"{self.base_url.rstrip('/')}/v1/chat/completions",
+                self._endpoint(),
                 headers=self._headers(),
                 json=self._payload(request, stream=True),
             ) as resp:

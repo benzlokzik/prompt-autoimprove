@@ -1,0 +1,12 @@
+name: ollama-qwen-1_5b
+family: qwen
+format: api
+context_window: 32768
+max_output_tokens: 1024
+supports_vision: false
+supports_tools: false
+reasoning_mode: none
+cost_per_1k_input: 0.0
+cost_per_1k_output: 0.0
+p50_latency_ms: 800
+tags: [local, ollama, q4]
