@@ -13,9 +13,12 @@ from prompt_autoimprove.services.orchestrator import AutoImproveOrchestrator
 @pytest.fixture
 async def app(profiles, monkeypatch):
     monkeypatch.setenv("PAI_API__API_KEY", "test-key")
+    monkeypatch.setenv("PAI_API__RATE_LIMIT_PER_MINUTE", "3")
+    from prompt_autoimprove.api.http.rate_limit import limiter
     from prompt_autoimprove.config import get_settings
 
     get_settings.cache_clear()
+    limiter.reset()
 
     engine = create_async_engine("sqlite+aiosqlite:///:memory:", future=True)
     async with engine.begin() as conn:
@@ -90,3 +93,14 @@ async def test_unknown_profile_returns_404(client: httpx.AsyncClient) -> None:
         json={"prompt": "hi", "profile": "no-such-profile"},
     )
     assert resp.status_code == 404
+
+
+@pytest.mark.asyncio
+async def test_rate_limit_kicks_in(client: httpx.AsyncClient) -> None:
+    headers = {"x-api-key": "test-key"}
+    body = {"prompt": "Summarize", "profile": "qwen3-7b"}
+    statuses = []
+    for _ in range(5):
+        resp = await client.post("/v1/improve", headers=headers, json=body)
+        statuses.append(resp.status_code)
+    assert 429 in statuses, f"expected at least one 429, got {statuses}"
