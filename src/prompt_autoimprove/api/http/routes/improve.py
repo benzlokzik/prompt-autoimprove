@@ -18,8 +18,11 @@ async def improve(
     if body.profile not in profiles:
         raise HTTPException(status.HTTP_404_NOT_FOUND, detail=f"unknown profile {body.profile!r}")
     prompt = Prompt(text=body.prompt, locale_hint=body.locale_hint)
-    result = await orchestrator.run(prompt, body.profile, sensitive=body.sensitive)
+    result = await orchestrator.run(
+        prompt, body.profile, sensitive=body.sensitive, session_id=body.session_ref
+    )
     return ImproveResponse(
+        session_id=str(result.session_id),
         strategy=result.chosen.strategy.value,
         candidate=result.chosen.text,
         rationale=result.chosen.rationale,
@@ -29,4 +32,5 @@ async def improve(
             for m in result.score.metrics
         ],
         explanation=result.run.explanation,
+        probation=result.probation.text if result.probation else None,
     )

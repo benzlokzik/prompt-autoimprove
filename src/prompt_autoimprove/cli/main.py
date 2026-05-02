@@ -5,6 +5,7 @@ import typer
 from rich.console import Console
 from rich.table import Table
 
+from prompt_autoimprove.adapters.factory import build_adapters_from_env
 from prompt_autoimprove.config import get_settings
 from prompt_autoimprove.core.evaluator import IntegratedScorer
 from prompt_autoimprove.domain.prompt import Prompt
@@ -21,7 +22,7 @@ def _build_orchestrator() -> AutoImproveOrchestrator:
     settings = get_settings()
     profiles = load_profiles(Path(settings.profiles_dir))
     publisher = EventPublisher()
-    adapters: dict = {}
+    adapters: dict = build_adapters_from_env(profiles)
     return AutoImproveOrchestrator(
         profiles=profiles,
         adapters=adapters,
@@ -58,6 +59,10 @@ def improve(
         console.print()
         console.print("[bold]Explanation:[/]")
         console.print(result.run.explanation)
+        if result.probation is not None:
+            console.print()
+            console.print("[bold]Probation output:[/]")
+            console.print(result.probation.text)
 
     asyncio.run(_run())
 

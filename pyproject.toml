@@ -37,6 +37,8 @@ dev = [
     "pytest-cov>=5",
     "hypothesis>=6",
     "respx>=0.21",
+    "aiosqlite>=0.22.1",
+    "httpx>=0.28.1",
 ]
 
 [project.scripts]
