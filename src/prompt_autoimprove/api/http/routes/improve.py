@@ -1,5 +1,8 @@
-from fastapi import APIRouter, Depends, HTTPException, Request, status
+import json
+
+from fastapi import APIRouter, Depends, HTTPException, Query, Request, status
 from slowapi.util import get_remote_address
+from sse_starlette.sse import EventSourceResponse
 
 from prompt_autoimprove.api.http.auth import require_api_key
 from prompt_autoimprove.api.http.rate_limit import limiter
@@ -44,3 +47,24 @@ async def improve(
         explanation=result.run.explanation,
         probation=result.probation.text if result.probation else None,
     )
+
+
+@router.get("/improve/stream")
+async def improve_stream(
+    request: Request,
+    prompt: str = Query(..., min_length=1, max_length=20000),
+    profile: str = Query(...),
+    locale_hint: str | None = Query(None),
+    _: str = Depends(require_api_key),
+) -> EventSourceResponse:
+    orchestrator = request.app.state.orchestrator
+    profiles = request.app.state.profiles
+    if profile not in profiles:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, detail=f"unknown profile {profile!r}")
+
+    async def event_gen():
+        prompt_obj = Prompt(text=prompt, locale_hint=locale_hint)
+        async for stage, payload in orchestrator.stream(prompt_obj, profile):
+            yield {"event": stage, "data": json.dumps(payload)}
+
+    return EventSourceResponse(event_gen())
