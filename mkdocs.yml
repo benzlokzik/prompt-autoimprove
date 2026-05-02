@@ -1,35 +1,39 @@
 site_name: prompt-autoimprove
-site_description: Microservice system for automatic LLM prompt improvement
+site_description: Automatic prompt improvement for LLMs and multimodal models
+site_author: benzlokzik
+
 repo_url: https://github.com/benzlokzik/prompt-autoimprove
 repo_name: benzlokzik/prompt-autoimprove
-edit_uri: edit/main/docs/
 
 theme:
   name: material
+  language: en
+  palette:
+    - scheme: slate
+      primary: indigo
+      accent: indigo
+      toggle:
+        icon: material/brightness-7
+        name: Switch to light mode
+    - scheme: default
+      primary: indigo
+      accent: indigo
+      toggle:
+        icon: material/brightness-4
+        name: Switch to dark mode
   features:
+    - navigation.path
     - navigation.instant
-    - navigation.tracking
+    - navigation.instant.prefetch
+    - navigation.instant.progress
     - navigation.sections
-    - navigation.top
+    - navigation.indexes
+    - navigation.tracking
+    - navigation.footer
+    - toc.follow
     - content.code.copy
     - content.code.annotate
-    - search.suggest
-    - search.highlight
-  palette:
-    - media: "(prefers-color-scheme: light)"
-      scheme: default
-      primary: indigo
-      accent: indigo
-      toggle:
-        icon: material/weather-night
-        name: Switch to dark mode
-    - media: "(prefers-color-scheme: dark)"
-      scheme: slate
-      primary: indigo
-      accent: indigo
-      toggle:
-        icon: material/weather-sunny
-        name: Switch to light mode
+    - content.tabs.link
 
 nav:
   - Home: index.md
@@ -39,21 +43,49 @@ nav:
   - CLI: cli.md
 
 markdown_extensions:
-  - admonition
+  - abbr
   - attr_list
   - def_list
   - footnotes
+  - md_in_html
   - tables
+  - admonition
   - toc:
-      permalink: true
-  - pymdownx.details
-  - pymdownx.superfences
-  - pymdownx.highlight:
-      anchor_linenums: true
-  - pymdownx.inlinehilite
-  - pymdownx.snippets
+      permalink: ""
+  - smarty:
+      smart_quotes: false
+  - pymdownx.betterem
+  - pymdownx.caret
+  - pymdownx.tilde
+  - pymdownx.mark
+  - pymdownx.keys
+  - pymdownx.smartsymbols
+  - pymdownx.saneheaders
+  - pymdownx.fancylists:
+      inject_style: true
+  - pymdownx.magiclink:
+      repo_url_shorthand: true
+      social_url_shorthand: true
   - pymdownx.tasklist:
       custom_checkbox: true
+  - pymdownx.details
+  - pymdownx.tabbed:
+      alternate_style: true
+  - pymdownx.highlight:
+      anchor_linenums: true
+      line_spans: __codeline
+      line_anchors: __codelineno
+      linenums_style: pymdownx-inline
+  - pymdownx.inlinehilite
+  - pymdownx.snippets
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
+  - pymdownx.emoji:
+      emoji_index: !!python/name:material.extensions.emoji.twemoji
+      emoji_generator: !!python/name:material.extensions.emoji.to_svg
 
 plugins:
   - search
