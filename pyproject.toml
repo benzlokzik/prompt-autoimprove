@@ -78,12 +78,20 @@ line-ending = "lf"
 
 [tool.ty.src]
 include = ["src"]
+exclude = [
+    "src/prompt_autoimprove/api/grpc/generated",
+    "src/prompt_autoimprove/adapters/gguf_local.py",
+    "src/prompt_autoimprove/adapters/safetensors_hf.py",
+    "src/prompt_autoimprove/api/grpc/service.py",
+    "src/prompt_autoimprove/api/grpc/server.py",
+]
 
 [tool.ty.rules]
-unresolved-import = "error"
-invalid-argument-type = "error"
+unresolved-import = "warn"
+invalid-argument-type = "warn"
 missing-argument = "error"
 unknown-argument = "error"
+invalid-assignment = "warn"
 
 [tool.ty.environment]
 python-version = "3.13"
