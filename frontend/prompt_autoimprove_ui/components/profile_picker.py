@@ -11,13 +11,12 @@ _FAMILY_ICON: dict[str, str] = {
 }
 
 
-def _profile_card(profile: dict) -> rx.Component:
+def _profile_card(profile) -> rx.Component:
     name = profile["name"]
-    family = profile.get("family", "other")
     return rx.card(
         rx.vstack(
             rx.hstack(
-                rx.icon(_FAMILY_ICON.get(family, "box"), size=16),
+                rx.icon("box", size=16),
                 rx.text(name, weight="bold", size="2"),
                 rx.spacer(),
                 rx.cond(
@@ -29,7 +28,7 @@ def _profile_card(profile: dict) -> rx.Component:
                 align="center",
             ),
             rx.text(
-                f"{profile['format']} · ctx {profile['context_window']}",
+                profile["format"],
                 size="1",
                 color=rx.color("gray", 11),
             ),

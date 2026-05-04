@@ -27,13 +27,11 @@ _STAGE_LABEL: dict[str, str] = {
 }
 
 
-def _stage_card(stage: dict) -> rx.Component:
-    name = stage["stage"].to(str)
-    payload = stage["payload"]
+def _stage_card(stage) -> rx.Component:
     return rx.hstack(
         rx.box(
             rx.icon(
-                _STAGE_ICON.get(stage["stage"].to(str), "circle"),
+                "circle-dot",
                 size=16,
                 color=rx.color("indigo", 10),
             ),
@@ -43,12 +41,12 @@ def _stage_card(stage: dict) -> rx.Component:
         ),
         rx.vstack(
             rx.text(
-                _STAGE_LABEL.get(stage["stage"].to(str), name),
+                stage["stage"],
                 size="2",
                 weight="bold",
             ),
             rx.code(
-                payload.to_string(),
+                stage["payload"],
                 size="1",
                 color_scheme="gray",
                 variant="ghost",

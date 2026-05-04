@@ -11,18 +11,19 @@ _METRIC_LABEL: dict[str, str] = {
 }
 
 
-def _metric_row(metric: dict) -> rx.Component:
+def _metric_row(metric) -> rx.Component:
     return rx.vstack(
         rx.hstack(
-            rx.text(_METRIC_LABEL.get(metric["name"].to(str), metric["name"]), size="2"),
+            rx.text(metric["name"], size="2"),
             rx.spacer(),
             rx.text(
-                "weight " + metric["weight"].to_string(),
+                "weight ",
+                metric["weight"],
                 size="1",
                 color=rx.color("gray", 11),
             ),
             rx.text(
-                metric["value"].to_string(),
+                metric["value"],
                 size="2",
                 weight="bold",
                 color=rx.color("indigo", 11),
@@ -30,7 +31,11 @@ def _metric_row(metric: dict) -> rx.Component:
             width="100%",
             align="center",
         ),
-        rx.progress(value=metric["value"] * 100, color_scheme="indigo", size="2"),
+        rx.progress(
+            value=(metric["value"] * 100).to(int),
+            color_scheme="indigo",
+            size="2",
+        ),
         spacing="1",
         align="stretch",
         width="100%",
@@ -45,7 +50,7 @@ def metric_breakdown() -> rx.Component:
                 rx.heading("Score", size="3"),
                 rx.spacer(),
                 rx.heading(
-                    PipelineState.integrated_score.to_string(),
+                    PipelineState.integrated_score,
                     size="6",
                     color=rx.color("indigo", 11),
                 ),

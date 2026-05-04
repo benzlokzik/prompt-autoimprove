@@ -1,5 +1,5 @@
 import contextlib
-from typing import Any
+from typing import TypedDict
 
 import reflex as rx
 
@@ -13,14 +13,49 @@ EXAMPLE_PROMPTS = (
 )
 
 
+class ProfileItem(TypedDict):
+    name: str
+    family: str
+    format: str
+    context_window: int
+    supports_vision: bool
+
+
+class StageItem(TypedDict):
+    stage: str
+    payload: str
+
+
+class MetricItem(TypedDict):
+    name: str
+    value: float
+    weight: float
+
+
+class RevisionItem(TypedDict):
+    revision_id: str
+    text: str
+    strategy: str
+    rationale: str
+    created_at: str
+
+
+class HistoryItem(TypedDict):
+    prompt_id: str
+    text: str
+    modality: str
+    created_at: str
+    revisions: list[RevisionItem]
+
+
 class PipelineState(rx.State):
     prompt: str = ""
     profile: str = "qwen3-7b"
     session_ref: str = ""
-    profiles: list[dict[str, Any]] = []
-    history_items: list[dict[str, Any]] = []
-    stages: list[dict[str, Any]] = []
-    metrics: list[dict[str, Any]] = []
+    profiles: list[ProfileItem] = []
+    history_items: list[HistoryItem] = []
+    stages: list[StageItem] = []
+    metrics: list[MetricItem] = []
     candidate_text: str = ""
     candidate_strategy: str = ""
     candidate_rationale: str = ""
@@ -33,7 +68,17 @@ class PipelineState(rx.State):
     @rx.event
     async def load_profiles(self) -> None:
         try:
-            self.profiles = await BackendClient.from_env().list_profiles()
+            data = await BackendClient.from_env().list_profiles()
+            self.profiles = [
+                ProfileItem(
+                    name=p["name"],
+                    family=p["family"],
+                    format=p["format"],
+                    context_window=int(p["context_window"]),
+                    supports_vision=bool(p["supports_vision"]),
+                )
+                for p in data
+            ]
         except Exception as exc:
             self.error = f"Failed to load profiles: {exc}"
 
@@ -43,7 +88,26 @@ class PipelineState(rx.State):
             self.history_items = []
             return
         try:
-            self.history_items = await BackendClient.from_env().history(self.session_ref)
+            data = await BackendClient.from_env().history(self.session_ref)
+            self.history_items = [
+                HistoryItem(
+                    prompt_id=item["prompt_id"],
+                    text=item["text"],
+                    modality=item["modality"],
+                    created_at=item["created_at"],
+                    revisions=[
+                        RevisionItem(
+                            revision_id=r["revision_id"],
+                            text=r["text"],
+                            strategy=r["strategy"],
+                            rationale=r["rationale"],
+                            created_at=r["created_at"],
+                        )
+                        for r in item.get("revisions", [])
+                    ],
+                )
+                for item in data
+            ]
         except Exception as exc:
             self.error = f"Failed to load history: {exc}"
 
@@ -90,8 +154,13 @@ class PipelineState(rx.State):
             async for stage, payload in client.stream_improve(
                 prompt=self.prompt, profile=self.profile
             ):
+                import json as _json
+
                 async with self:
-                    self.stages = [*self.stages, {"stage": stage, "payload": payload}]
+                    self.stages = [
+                        *self.stages,
+                        StageItem(stage=stage, payload=_json.dumps(payload)),
+                    ]
                     if stage == "candidate":
                         self.candidate_text = payload.get("text", "")
                         self.candidate_rationale = payload.get("rationale", "")
@@ -109,7 +178,14 @@ class PipelineState(rx.State):
                 session_ref=self.session_ref or None,
             )
             async with self:
-                self.metrics = full.get("metrics", [])
+                self.metrics = [
+                    MetricItem(
+                        name=m["name"],
+                        value=float(m["value"]),
+                        weight=float(m["weight"]),
+                    )
+                    for m in full.get("metrics", [])
+                ]
                 if not self.session_ref:
                     self.session_ref = full.get("session_id", "")
         except Exception as exc:
@@ -120,6 +196,4 @@ class PipelineState(rx.State):
                 self.is_running = False
                 if self.session_ref:
                     with contextlib.suppress(Exception):
-                        self.history_items = await BackendClient.from_env().history(
-                            self.session_ref
-                        )
+                        await self.load_history()

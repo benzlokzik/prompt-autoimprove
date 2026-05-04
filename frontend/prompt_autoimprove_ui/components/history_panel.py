@@ -3,7 +3,7 @@ import reflex as rx
 from prompt_autoimprove_ui.state import PipelineState
 
 
-def _history_row(item: dict) -> rx.Component:
+def _history_row(item) -> rx.Component:
     return rx.box(
         rx.vstack(
             rx.text(
@@ -14,7 +14,7 @@ def _history_row(item: dict) -> rx.Component:
             ),
             rx.hstack(
                 rx.text(
-                    item["created_at"][:19].replace("T", " "),
+                    item["created_at"],
                     size="1",
                     color=rx.color("gray", 11),
                 ),
