@@ -23,7 +23,9 @@ async def test_multimodal_strategy_picks_when_supported(
     prompt = Prompt(
         text="Describe what is in this picture",
         modality=Modality.IMAGE,
-        attachments=[PromptAttachment(modality=Modality.IMAGE, uri="file://x.png", mime_type="image/png")],
+        attachments=[
+            PromptAttachment(modality=Modality.IMAGE, uri="file://x.png", mime_type="image/png")
+        ],
     )
     result = await orchestrator.run(prompt, "gemma-4-e2b")
     strategies_used = {c.strategy.value for c in result.candidates}

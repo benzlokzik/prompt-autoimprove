@@ -60,7 +60,9 @@ class AnthropicAdapter:
             raise AdapterError(f"upstream {resp.status_code}: {resp.text}")
         data = resp.json()
         content_blocks = data.get("content", [])
-        text = "".join(block.get("text", "") for block in content_blocks if block.get("type") == "text")
+        text = "".join(
+            block.get("text", "") for block in content_blocks if block.get("type") == "text"
+        )
         usage = data.get("usage", {})
         return GenerationResult(
             text=text,
@@ -70,17 +72,19 @@ class AnthropicAdapter:
         )
 
     async def stream(self, request: GenerationRequest) -> AsyncIterator[str]:
-        async with httpx.AsyncClient(timeout=self.timeout) as client:
-            async with client.stream(
+        async with (
+            httpx.AsyncClient(timeout=self.timeout) as client,
+            client.stream(
                 "POST",
                 f"{self.base_url.rstrip('/')}/v1/messages",
                 headers=self._headers(stream=True),
                 json=self._payload(request, stream=True),
-            ) as resp:
-                async for line in resp.aiter_lines():
-                    if not line or not line.startswith("data:"):
-                        continue
-                    payload = line.removeprefix("data:").strip()
-                    if not payload or payload == "[DONE]":
-                        continue
-                    yield payload
+            ) as resp,
+        ):
+            async for line in resp.aiter_lines():
+                if not line or not line.startswith("data:"):
+                    continue
+                payload = line.removeprefix("data:").strip()
+                if not payload or payload == "[DONE]":
+                    continue
+                yield payload

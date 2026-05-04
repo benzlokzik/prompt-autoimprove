@@ -27,9 +27,9 @@ async def serve() -> None:
     )
     service = AutoImproveService(orchestrator=orchestrator)
 
-    import prompt_autoimprove.api.grpc.generated  # noqa: F401, PLC0415
+    import prompt_autoimprove.api.grpc.generated  # noqa: F401
 
-    from autoimprove.v1 import autoimprove_pb2_grpc as grpc_mod  # noqa: PLC0415
+    from autoimprove.v1 import autoimprove_pb2_grpc as grpc_mod  # isort: skip
 
     server = grpc.aio.server()
     grpc_mod.add_AutoImproveServicer_to_server(service, server)

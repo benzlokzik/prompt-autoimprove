@@ -3,8 +3,8 @@ from typing import Any
 
 import prompt_autoimprove.api.grpc.generated  # noqa: F401
 
-from autoimprove.v1 import autoimprove_pb2 as pb
-from autoimprove.v1 import autoimprove_pb2_grpc as pb_grpc
+from autoimprove.v1 import autoimprove_pb2 as pb  # isort: skip
+from autoimprove.v1 import autoimprove_pb2_grpc as pb_grpc  # isort: skip
 
 from prompt_autoimprove.domain.prompt import Modality, Prompt, PromptAttachment
 from prompt_autoimprove.services.orchestrator import AutoImproveOrchestrator
@@ -29,9 +29,7 @@ class AutoImproveService(pb_grpc.AutoImproveServicer):
                 for att in request.attachments
             ],
         )
-        result = await self.orchestrator.run(
-            prompt, request.profile, sensitive=request.sensitive
-        )
+        result = await self.orchestrator.run(prompt, request.profile, sensitive=request.sensitive)
 
         yield pb.ImproveEvent(
             stage="normalized",

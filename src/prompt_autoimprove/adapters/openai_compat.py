@@ -69,17 +69,19 @@ class OpenAICompatAdapter:
         )
 
     async def stream(self, request: GenerationRequest) -> AsyncIterator[str]:
-        async with httpx.AsyncClient(timeout=self.timeout) as client:
-            async with client.stream(
+        async with (
+            httpx.AsyncClient(timeout=self.timeout) as client,
+            client.stream(
                 "POST",
                 self._endpoint(),
                 headers=self._headers(),
                 json=self._payload(request, stream=True),
-            ) as resp:
-                async for line in resp.aiter_lines():
-                    if not line or not line.startswith("data:"):
-                        continue
-                    payload = line.removeprefix("data:").strip()
-                    if payload == "[DONE]":
-                        return
-                    yield payload
+            ) as resp,
+        ):
+            async for line in resp.aiter_lines():
+                if not line or not line.startswith("data:"):
+                    continue
+                payload = line.removeprefix("data:").strip()
+                if payload == "[DONE]":
+                    return
+                yield payload

@@ -64,11 +64,11 @@ def test_cost_drops_with_long_prompt() -> None:
 
 
 def test_custom_weights_are_renormalized() -> None:
-    scorer = IntegratedScorer(weights={n: 1.0 for n in MetricName})
+    scorer = IntegratedScorer(weights=dict.fromkeys(MetricName, 1.0))
     total = sum(scorer.weights.values())
     assert math.isclose(total, 1.0, abs_tol=1e-9)
 
 
 def test_zero_weights_rejected() -> None:
     with pytest.raises(ValueError):
-        IntegratedScorer(weights={n: 0.0 for n in MetricName})
+        IntegratedScorer(weights=dict.fromkeys(MetricName, 0.0))

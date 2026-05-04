@@ -53,12 +53,8 @@ class Router:
             and profile.cost_per_1k_output > self.policy.max_cost_per_1k_output
         ):
             return False
-        if (
-            self.policy.max_p50_latency_ms is not None
-            and profile.p50_latency_ms > self.policy.max_p50_latency_ms
-        ):
-            return False
-        return True
+        cap = self.policy.max_p50_latency_ms
+        return not (cap is not None and profile.p50_latency_ms > cap)
 
     @staticmethod
     def _reason(profile: ModelProfile, *, sensitive: bool) -> str:

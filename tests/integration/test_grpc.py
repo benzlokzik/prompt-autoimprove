@@ -3,8 +3,8 @@ import pytest
 
 import prompt_autoimprove.api.grpc.generated  # noqa: F401
 
-from autoimprove.v1 import autoimprove_pb2 as pb
-from autoimprove.v1 import autoimprove_pb2_grpc as pb_grpc
+from autoimprove.v1 import autoimprove_pb2 as pb  # isort: skip
+from autoimprove.v1 import autoimprove_pb2_grpc as pb_grpc  # isort: skip
 
 from prompt_autoimprove.api.grpc.service import AutoImproveService
 from prompt_autoimprove.services.orchestrator import AutoImproveOrchestrator

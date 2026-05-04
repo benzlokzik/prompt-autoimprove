@@ -57,7 +57,7 @@ def test_normalize_collapses_whitespace_and_keeps_newlines() -> None:
     result = normalize(prompt)
     assert result.cleaned_text == "Hello world\n\nfoo"
     assert result.detected_language == "en"
-    assert result.detected_task == TaskType.QA.value or result.detected_task == TaskType.OTHER.value
+    assert result.detected_task in (TaskType.QA.value, TaskType.OTHER.value)
 
 
 def test_normalize_uses_locale_hint() -> None:

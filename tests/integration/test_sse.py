@@ -1,17 +1,13 @@
 import httpx
 import pytest
 
-from tests.integration.test_http_api import app, client  # noqa: F401
-
 
 @pytest.mark.asyncio
 async def test_sse_stream_emits_pipeline_stages(client: httpx.AsyncClient) -> None:
     headers = {"x-api-key": "test-key", "accept": "text/event-stream"}
     params = {"prompt": "Summarize this article", "profile": "qwen3-7b"}
     seen_events: list[str] = []
-    async with client.stream(
-        "GET", "/v1/improve/stream", headers=headers, params=params
-    ) as resp:
+    async with client.stream("GET", "/v1/improve/stream", headers=headers, params=params) as resp:
         assert resp.status_code == 200
         async for line in resp.aiter_lines():
             if line.startswith("event:"):
