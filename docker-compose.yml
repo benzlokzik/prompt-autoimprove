@@ -59,6 +59,22 @@ services:
       - "8000:8000"
       - "50051:50051"
 
+  frontend:
+    profiles: ["app"]
+    build:
+      context: .
+      dockerfile: frontend/Dockerfile
+    image: prompt-autoimprove-frontend:dev
+    depends_on:
+      - app
+    environment:
+      PAI_BACKEND_URL: http://app:8000
+      PAI_FRONTEND_BACKEND_URL: http://app:8000
+      PAI_API_KEY: dev-key
+    ports:
+      - "3000:3000"
+      - "8001:8001"
+
 volumes:
   pg_data:
   minio_data:
