@@ -17,7 +17,9 @@ API), evaluates the result with a hybrid score, and explains its decision.
   and Anthropic Claude.
 - Integrated quality score `S = 0.30·q_c + 0.25·q_p + 0.20·q_s + 0.15·q_t + 0.10·q_l`.
 - HTTP API (FastAPI) and gRPC server-streaming `AutoImproveService`.
+- SSE pipeline stream at `/v1/improve/stream` for live UI updates.
 - Persistence via SQLAlchemy 2 + Alembic; events via Kafka (Redpanda in dev).
+- Reflex web frontend with dark Radix theme — see [docs/frontend.md](docs/frontend.md).
 - CLI: `pai improve --prompt ... --profile qwen3-7b`.
 
 ## Quickstart
@@ -40,8 +42,21 @@ uv run python -m prompt_autoimprove.api.grpc.server                      # grpc 
 ./scripts/gen_proto.sh                                                   # regen grpc stubs
 uv run alembic upgrade head                                              # apply migrations
 docker compose up -d                                                     # postgres + redpanda + minio
-docker compose --profile app up --build                                  # full stack incl. app
+docker compose --profile app up --build                                  # full stack incl. app + frontend
 ```
+
+## Web client
+
+```bash
+uv sync --group frontend
+cd frontend
+PAI_API_KEY=dev-key PAI_BACKEND_URL=http://127.0.0.1:8000 \
+  uv run --group frontend reflex run --frontend-port 3000 --backend-port 8001
+```
+
+Open <http://localhost:3000>. See [docs/frontend.md](docs/frontend.md) for the
+layout and [docs/local-models.md](docs/local-models.md) for running the
+pipeline against a local Ollama / LM Studio / HF model.
 
 ## Configuration
 
