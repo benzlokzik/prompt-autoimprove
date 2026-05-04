@@ -237,3 +237,7 @@ pyrightconfig.json
 *.safetensors
 .env
 .env.local
+pai.db
+*.db-journal
+frontend/.web/
+frontend/.states/
