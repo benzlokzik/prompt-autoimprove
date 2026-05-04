@@ -41,6 +41,8 @@ nav:
   - Strategies: strategies.md
   - Scoring: scoring.md
   - CLI: cli.md
+  - Frontend: frontend.md
+  - Local models: local-models.md
 
 markdown_extensions:
   - abbr
