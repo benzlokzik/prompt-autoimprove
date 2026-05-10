@@ -42,7 +42,6 @@ services:
       - minio_data:/data
 
   app:
-    profiles: ["app"]
     build: .
     image: prompt-autoimprove:dev
     depends_on:
@@ -60,7 +59,6 @@ services:
       - "50051:50051"
 
   frontend:
-    profiles: ["app"]
     build:
       context: .
       dockerfile: frontend/Dockerfile

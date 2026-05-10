@@ -58,7 +58,7 @@ the Improved prompt card.
 
 ## Docker
 
-`docker compose --profile app up --build` brings up `postgres`, `redpanda`,
-`minio`, the FastAPI `app` (8000 / 50051), and the Reflex `frontend` (3000 /
-8001) together. The frontend image is built from `frontend/Dockerfile` against
+`docker compose up --build` brings up `postgres`, `redpanda`, `minio`, the
+FastAPI `app` (8000 / 50051), and the Reflex `frontend` (3000 / 8001)
+together — no profile flag needed. The frontend image is built from `frontend/Dockerfile` against
 the same uv lockfile, only pulling the `frontend` dependency group.

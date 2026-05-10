@@ -24,6 +24,7 @@ dependencies = [
     "grpcio>=1.80.0",
     "grpcio-tools>=1.80.0",
     "typer>=0.25.1",
+    "sse-starlette>=3.4.4",
 ]
 
 [dependency-groups]
@@ -43,7 +44,6 @@ dev = [
 ]
 frontend = [
     "reflex>=0.9.2.post1",
-    "sse-starlette>=3.4.4",
 ]
 
 [project.scripts]
