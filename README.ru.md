@@ -1,6 +1,6 @@
 # prompt-autoimprove
 
-[![DOI](https://zenodo.org/badge/1239347854.svg)](https://doi.org/10.5281/zenodo.20214349)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.20214350.svg)](https://doi.org/10.5281/zenodo.20214350)
 
 `prompt-autoimprove` — Python-сервис для улучшения промптов до отправки в
 большие языковые или мультимодальные модели. Он нормализует исходный запрос,
