@@ -1,20 +1,70 @@
 # prompt-autoimprove
 
-Microservices system that automatically improves prompts for large language and
-multimodal models.
+<section class="pai-hero" markdown>
+<p class="pai-kicker">Prompt optimization pipeline</p>
 
-## What it does
+`prompt-autoimprove` improves raw prompts before they reach a target model. It
+normalizes input, selects candidate strategies, scores the results, routes the
+winner, optionally runs a model probation probe, and explains the decision.
 
-1. **Normalize** the raw user prompt — clean control chars, detect language and
-   task type, surface missing parameters, redact PII, raise safety flags.
-2. **Generate candidates** with up to six strategies: role-based, structured
-   output, chain decomposition, few-shot, self-verification, multimodal.
-3. **Score** every candidate with the integrated formula
-   `S = 0.30·q_c + 0.25·q_p + 0.20·q_s + 0.15·q_t + 0.10·q_l`.
-4. **Route** the winner to a target model — local GGUF, HF safetensors,
-   OpenAI-compatible API, or Anthropic Claude.
-5. **Probate** (optionally) on the chosen model and persist the run.
-6. **Explain** the decision in human terms.
+<p class="pai-lede">
+The project is designed for local experiments, API-backed services, and
+repeatable evaluation workflows where every prompt revision should be traceable.
+</p>
+</section>
+
+## Pipeline
+
+<div class="pai-pipeline" markdown>
+<div class="pai-step" markdown>Normalize text, locale, task type, missing parameters, PII, and safety flags.</div>
+<div class="pai-step" markdown>Generate candidates with task-aware strategies.</div>
+<div class="pai-step" markdown>Validate structure, length, contradictions, and safety constraints.</div>
+<div class="pai-step" markdown>Score candidates with the integrated quality formula.</div>
+<div class="pai-step" markdown>Route the winner to a local or API-backed profile.</div>
+<div class="pai-step" markdown>Explain the winning revision and persist the run.</div>
+</div>
+
+## Start here
+
+<div class="pai-links" markdown>
+[Architecture](architecture.md){ .md-button }
+[CLI](cli.md){ .md-button }
+[Scoring](scoring.md){ .md-button }
+[Local models](local-models.md){ .md-button }
+</div>
+
+## Capabilities
+
+<div class="pai-grid" markdown>
+<div class="pai-card" markdown>
+### CLI
+Run `pai improve` for local prompt improvement and inspect the selected
+strategy, score, and explanation.
+</div>
+
+<div class="pai-card" markdown>
+### API
+Use the FastAPI HTTP backend, SSE pipeline stream at `/v1/improve/stream`, or
+gRPC `AutoImproveService`.
+</div>
+
+<div class="pai-card" markdown>
+### Frontend
+Operate the pipeline from a Reflex web client with profile selection, live
+stage updates, scoring details, and history.
+</div>
+
+<div class="pai-card" markdown>
+### Scoring
+Compare revisions with `S = 0.30·q_c + 0.25·q_p + 0.20·q_s + 0.15·q_t + 0.10·q_l`.
+</div>
+
+<div class="pai-card" markdown>
+### Local models
+Route to Ollama, LM Studio, local GGUF, Hugging Face safetensors, or
+OpenAI-compatible endpoints.
+</div>
+</div>
 
 ## Quickstart
 
@@ -22,13 +72,6 @@ multimodal models.
 uv sync --all-groups
 uv run pai improve --prompt "Summarize this PR" --profile qwen3-7b
 ```
-
-## Browse the docs
-
-- [Architecture](architecture.md) — components and data flow.
-- [Strategies](strategies.md) — what each improvement strategy does.
-- [Scoring](scoring.md) — the integrated metric.
-- [CLI](cli.md) — `pai` command reference.
 
 ## Develop the docs
 

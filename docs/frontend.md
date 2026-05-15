@@ -1,23 +1,23 @@
 # Frontend
 
-The web client lives in `frontend/` and is built with [Reflex](https://reflex.dev),
-which compiles a pure-Python definition to a Next.js + React + Tailwind +
-Radix Themes app. State sync between browser and server is over WebSocket;
-streaming pipeline events arrive through Server-Sent Events from the FastAPI
-backend at `/v1/improve/stream`.
+The web client lives in `frontend/` and is built with
+[Reflex](https://reflex.dev). Reflex compiles the Python UI definition into a
+Next.js, React, Tailwind, and Radix Themes app. Browser/server state sync uses
+WebSocket, while pipeline events stream from the FastAPI backend through
+Server-Sent Events at `/v1/improve/stream`.
 
 ## Layout
 
-```
+```text
 frontend/
 ├── rxconfig.py                        # api_url + port config
 ├── Dockerfile                         # multi-stage build with uv
 └── prompt_autoimprove_ui/
-    ├── prompt_autoimprove_ui.py       # rx.App + dark indigo theme
-    ├── state.py                       # PipelineState (typed stages/metrics/history)
-    ├── api_client.py                  # httpx wrapper that consumes SSE events
-    ├── pages/home.py                  # three-column layout
-    └── components/                    # 8 focused UI cards
+    ├── prompt_autoimprove_ui.py       # rx.App + theme
+    ├── state.py                       # PipelineState stages, metrics, history
+    ├── api_client.py                  # httpx wrapper for SSE events
+    ├── pages/home.py                  # main workspace layout
+    └── components/
         ├── header.py
         ├── profile_picker.py
         ├── prompt_card.py
@@ -31,7 +31,7 @@ frontend/
 ## Run locally
 
 ```bash
-# 1. start the FastAPI backend (port 8000)
+# 1. start the FastAPI backend on port 8000
 uv run uvicorn prompt_autoimprove.api.http.app:app --port 8000
 
 # 2. in another shell, start the Reflex dev server
@@ -41,24 +41,25 @@ PAI_API_KEY=dev-key PAI_BACKEND_URL=http://127.0.0.1:8000 \
 ```
 
 Open <http://localhost:3000>. The left rail lists model profiles fetched from
-`/v1/profiles`. Pick one, paste a prompt, hit **Improve**. The pipeline timeline
-fills in stage by stage; the metric breakdown and explanation card light up at
-the end. If you set `ANTHROPIC_API_KEY` or the `OPENAI_*` envs on the backend,
-the candidate is also probated against the real model and the result shows in
-the Improved prompt card.
+`/v1/profiles`. Pick a profile, paste a prompt, and select **Improve**. The
+pipeline timeline fills in stage by stage; the metric breakdown and explanation
+card update when scoring completes. If the backend has `ANTHROPIC_API_KEY` or
+the `OPENAI_*` variables configured, the selected candidate can also run through
+a real-model probation probe and show the result in the improved prompt panel.
 
 ## Environment
 
 | Variable | Default | Purpose |
 | --- | --- | --- |
-| `PAI_BACKEND_URL` | `http://localhost:8000` | Backend base URL the SPA calls. |
-| `PAI_API_KEY` | `dev-key` | Sent as `x-api-key` on every call. |
+| `PAI_BACKEND_URL` | `http://localhost:8000` | Backend base URL called by the SPA. |
+| `PAI_API_KEY` | `dev-key` | Sent as `x-api-key` on every request. |
 | `PAI_FRONTEND_PORT` | `3000` | Reflex dev server port. |
-| `PAI_FRONTEND_BACKEND_PORT` | `8001` | Reflex's internal WebSocket port. |
+| `PAI_FRONTEND_BACKEND_PORT` | `8001` | Reflex internal WebSocket port. |
 
 ## Docker
 
-`docker compose up --build` brings up `postgres`, `redpanda`, `minio`, the
-FastAPI `app` (8000 / 50051), and the Reflex `frontend` (3000 / 8001)
-together — no profile flag needed. The frontend image is built from `frontend/Dockerfile` against
-the same uv lockfile, only pulling the `frontend` dependency group.
+`docker compose --profile app up --build` starts `postgres`, `redpanda`,
+`minio`, the FastAPI `app` on ports `8000` and `50051`, and the Reflex
+`frontend` on ports `3000` and `8001`. The frontend image is built from
+`frontend/Dockerfile` with the `frontend` dependency group from the same
+`uv.lock`.

@@ -1,24 +1,36 @@
 # CLI usage
 
+The `pai` command is the fastest way to exercise the improvement pipeline from
+a terminal.
+
+## List profiles
+
 ```bash
 uv run pai profiles
 ```
-Lists available model profiles in a table.
+
+This prints the profiles loaded from `src/prompt_autoimprove/registry/profiles/`.
+
+## Improve a prompt
 
 ```bash
 uv run pai improve --prompt "Extract emails from this text" --profile claude-sonnet-4-6
 ```
-Runs the full pipeline and prints the chosen strategy, candidate prompt,
-integrated score, and the explanation.
 
-Common flags:
+The command prints the selected strategy, candidate prompt, integrated score,
+and explanation.
 
-| Flag         | Default     | Notes                                            |
-| ------------ | ----------- | ------------------------------------------------ |
-| `--profile`  | `qwen3-7b`  | Any profile from `registry/profiles/*.yaml`.     |
-| `--locale`   | unset       | Force language detection (`en`, `ru`, …).        |
-| `--sensitive`| `false`     | Restrict routing to local profiles only.         |
+## Common flags
 
-The CLI runs in improvement-only mode by default — no real model is called.
-Wire an adapter (Anthropic, OpenAI-compatible, GGUF, HF) into
-`AutoImproveOrchestrator.adapters` to actually execute the candidate.
+| Flag | Default | Notes |
+| --- | --- | --- |
+| `--profile` | `qwen3-7b` | Any profile from `registry/profiles/*.yaml`. |
+| `--locale` | unset | Forces language detection, for example `en` or `ru`. |
+| `--sensitive` | `false` | Restricts routing to local profiles only. |
+
+## Model execution
+
+The CLI runs in improvement-only mode unless an adapter is wired into
+`AutoImproveOrchestrator.adapters`. Configure Anthropic, OpenAI-compatible,
+GGUF, or HF adapters when you want the selected candidate to be executed by a
+real model during the probation probe.

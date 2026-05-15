@@ -1,31 +1,31 @@
 site_name: prompt-autoimprove
+site_url: https://benzlokzik-university.github.io/prompt-autoimprove/
 site_description: Automatic prompt improvement for LLMs and multimodal models
 site_author: benzlokzik
 
-repo_url: https://github.com/benzlokzik/prompt-autoimprove
-repo_name: benzlokzik/prompt-autoimprove
+repo_url: https://github.com/benzlokzik-university/prompt-autoimprove
+repo_name: benzlokzik-university/prompt-autoimprove
 
 theme:
   name: material
   language: en
   palette:
-    - scheme: slate
-      primary: indigo
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: blue grey
       accent: indigo
       toggle:
-        icon: material/brightness-7
-        name: Switch to light mode
-    - scheme: default
-      primary: indigo
-      accent: indigo
-      toggle:
-        icon: material/brightness-4
+        icon: material/weather-night
         name: Switch to dark mode
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: blue grey
+      accent: indigo
+      toggle:
+        icon: material/weather-sunny
+        name: Switch to light mode
   features:
     - navigation.path
-    - navigation.instant
-    - navigation.instant.prefetch
-    - navigation.instant.progress
     - navigation.sections
     - navigation.indexes
     - navigation.tracking
@@ -92,7 +92,42 @@ markdown_extensions:
       generic: true
 
 plugins:
-  - search
+  - search:
+      lang:
+        - en
+        - ru
+  - i18n:
+      reconfigure_material: true
+      reconfigure_search: true
+      languages:
+        - locale: en
+          name: English
+          build: true
+          default: true
+          nav_translations:
+            Home: Home
+            Architecture: Architecture
+            Strategies: Strategies
+            Scoring: Scoring
+            CLI: CLI
+            Frontend: Frontend
+            Local models: Local models
+        - locale: ru
+          name: Русский
+          build: true
+          link: /ru/
+          site_description: Автоматическое улучшение промптов для LLM и мультимодальных моделей
+          nav_translations:
+            Home: Главная
+            Architecture: Архитектура
+            Strategies: Стратегии
+            Scoring: Оценка
+            CLI: CLI
+            Frontend: Фронтенд
+            Local models: Локальные модели
+
+extra_css:
+  - assets/stylesheets/extra.css
 
 extra_javascript:
   - https://unpkg.com/mathjax@3/es5/tex-mml-chtml.js

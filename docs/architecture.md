@@ -1,8 +1,8 @@
 # Architecture
 
-`prompt-autoimprove` is organized as a set of cooperating modules that may be
-deployed in-process or split into independent services. The end-to-end pipeline
-is the same in both deployments.
+`prompt-autoimprove` is organized as a set of cooperating modules that can run
+inside one Python process or be split into independently deployed services. The
+pipeline shape stays the same in both modes.
 
 ## Pipeline
 
@@ -15,14 +15,9 @@ flowchart LR
     validator --> evaluator[Evaluator]
     evaluator --> router[Router]
     router --> adapter[Model adapter]
-    adapter --> probation[Probation run]
+    adapter --> probation[Probation probe]
     probation --> explainer[Explainer]
     explainer --> result([Final decision])
-
-    classDef io fill:#1e293b,stroke:#6366f1,color:#fff
-    classDef core fill:#312e81,stroke:#6366f1,color:#fff
-    class user,result io
-    class normalizer,selector,generator,validator,evaluator,router,adapter,probation,explainer core
 ```
 
 ## Component graph
@@ -65,33 +60,26 @@ flowchart TB
     orchestrator --> strategies --> evaluator --> router --> adapters
     orchestrator --> pg
     orchestrator --> kafka
-
-    classDef io fill:#1e293b,stroke:#6366f1,color:#fff
-    classDef core fill:#312e81,stroke:#6366f1,color:#fff
-    classDef infra fill:#1f2937,stroke:#10b981,color:#fff
-    class cli,web,grpc_cli,http,grpc io
-    class orchestrator,strategies,evaluator,router,anthropic,openai,gguf,hf core
-    class pg,kafka infra
 ```
 
 ## Components
 
-| Module          | Responsibility                                                                |
-| --------------- | ----------------------------------------------------------------------------- |
-| `core/normalizer`      | Detects language, classifies task type, finds missing parameters, redacts PII. |
-| `core/strategies/*`    | Six strategies that produce improved candidates from a normalized prompt. |
-| `core/strategy_selector` | Picks a subset of strategies given $(\text{TaskType}, \text{ModelProfile})$. |
-| `core/validator`       | Static checks: length, contradictions, format, safety.                 |
-| `core/evaluator`       | Integrated score formula; produces `Score` and per-metric breakdown.  |
-| `core/explainer`       | Human-readable reasoning for the winning candidate.                    |
-| `adapters/*`           | `ModelAdapter` implementations: GGUF (llama-cpp), HF safetensors, OpenAI-compatible HTTP, Anthropic. |
-| `adapters/circuit_breaker` | Trips after $k$ consecutive failures, half-opens after a reset window. |
-| `registry`             | Loads YAML `ModelProfile`s.                                             |
-| `routing`              | Picks a deployment target based on availability, security, cost budget. |
-| `services/orchestrator`| Wires the pipeline; emits Kafka events on each stage transition.        |
-| `api/http`             | FastAPI public backend with API-key auth, rate limiting, SSE stream. |
-| `api/grpc`             | `AutoImproveService` server-streaming gRPC service.                     |
-| `persistence`          | SQLAlchemy 2 async ORM + Alembic migrations.                            |
+| Module | Responsibility |
+| --- | --- |
+| `core/normalizer` | Detects language, classifies task type, finds missing parameters, and redacts PII. |
+| `core/strategies/*` | Produces improved candidates from a normalized prompt. |
+| `core/strategy_selector` | Selects strategies for a pair of `TaskType` and `ModelProfile`. |
+| `core/validator` | Checks length, contradictions, format, and safety constraints. |
+| `core/evaluator` | Applies the integrated score formula and returns a per-metric breakdown. |
+| `core/explainer` | Creates human-readable reasoning for the winning candidate. |
+| `adapters/*` | Implements `ModelAdapter` for GGUF, HF safetensors, OpenAI-compatible HTTP, and Anthropic. |
+| `adapters/circuit_breaker` | Trips after `k` consecutive failures and half-opens after a reset window. |
+| `registry` | Loads YAML `ModelProfile` definitions. |
+| `routing` | Picks a deployment target from availability, security, and cost constraints. |
+| `services/orchestrator` | Wires the pipeline and emits Kafka events on stage transitions. |
+| `api/http` | FastAPI backend with API-key auth, rate limiting, and SSE streaming. |
+| `api/grpc` | `AutoImproveService` server-streaming gRPC service. |
+| `persistence` | SQLAlchemy 2 async ORM and Alembic migrations. |
 
 ## Data model
 
@@ -152,12 +140,12 @@ erDiagram
 
 ## Deployment topologies
 
-1. **All-in-one** — single Python process; great for local experiments and CI.
-2. **Split** — public backend, orchestrator, and adapters run as separate
-   containers, communicating over gRPC; events on Kafka; state in PostgreSQL.
+1. **All-in-one**: one Python process for local experiments, CI, and small demos.
+2. **Split services**: public backend, orchestrator, and adapters run as
+   separate containers; state lives in PostgreSQL and events flow through Kafka.
 
 ## Source layout
 
-See the top-level README for the directory tree. Domain types live in
-`prompt_autoimprove.domain` and are pure dataclasses with no I/O. All
-side-effecting code lives behind the protocols in `adapters/` and `persistence/`.
+Domain types live in `prompt_autoimprove.domain` and avoid I/O. Side-effecting
+code is behind protocols in `adapters/` and `persistence/`, while API transport
+logic stays in `api/http` and `api/grpc`.
