@@ -11,12 +11,13 @@ def _history_row(item) -> rx.Component:
                 size="2",
                 weight="medium",
                 no_of_lines=2,
+                color=rx.color("gray", 12),
             ),
             rx.hstack(
                 rx.text(
                     item["created_at"],
                     size="1",
-                    color=rx.color("gray", 11),
+                    color=rx.color("gray", 10),
                 ),
                 rx.spacer(),
                 rx.badge(
@@ -26,49 +27,68 @@ def _history_row(item) -> rx.Component:
                     size="1",
                 ),
                 width="100%",
+                align="center",
             ),
             spacing="1",
             align="start",
             width="100%",
         ),
-        padding="2",
-        border_radius="medium",
+        padding="3",
+        border_radius="10px",
         background=rx.color("gray", 2),
+        border=f"1px solid {rx.color('gray', 4)}",
         width="100%",
+        _hover={"border_color": rx.color("iris", 7)},
+        transition="border-color 120ms",
     )
 
 
 def history_panel() -> rx.Component:
-    return rx.vstack(
-        rx.hstack(
-            rx.icon("history", size=16, color=rx.color("gray", 11)),
-            rx.text("History", size="2", weight="bold", color=rx.color("gray", 11)),
-            width="100%",
-            align="center",
-        ),
-        rx.input(
-            placeholder="Session id or user ref",
-            value=PipelineState.session_ref,
-            on_change=PipelineState.set_session_ref,
-            on_blur=PipelineState.load_history,
-            size="2",
-            width="100%",
-        ),
-        rx.cond(
-            PipelineState.history_items.length() > 0,
-            rx.vstack(
-                rx.foreach(PipelineState.history_items, _history_row),
-                spacing="2",
-                align="stretch",
+    return rx.card(
+        rx.vstack(
+            rx.hstack(
+                rx.icon("history", size=16, color=rx.color("iris", 10)),
+                rx.heading("History", size="3"),
+                rx.spacer(),
+                rx.cond(
+                    PipelineState.history_items.length() > 0,
+                    rx.badge(
+                        PipelineState.history_items.length().to_string() + " runs",
+                        variant="soft",
+                        color_scheme="iris",
+                        size="1",
+                    ),
+                    rx.fragment(),
+                ),
+                width="100%",
+                align="center",
+            ),
+            rx.input(
+                rx.input.slot(rx.icon("search", size=14)),
+                placeholder="Session id or user ref",
+                value=PipelineState.session_ref,
+                on_change=PipelineState.set_session_ref,
+                on_blur=PipelineState.load_history,
+                size="2",
                 width="100%",
             ),
-            rx.text(
-                "No prior runs for this session yet.",
-                size="1",
-                color=rx.color("gray", 11),
+            rx.cond(
+                PipelineState.history_items.length() > 0,
+                rx.vstack(
+                    rx.foreach(PipelineState.history_items, _history_row),
+                    spacing="2",
+                    align="stretch",
+                    width="100%",
+                ),
+                rx.text(
+                    "Submit a prompt with a session id to start a history.",
+                    size="1",
+                    color=rx.color("gray", 10),
+                ),
             ),
+            spacing="3",
+            align="stretch",
         ),
-        spacing="3",
-        align="stretch",
+        size="2",
         width="100%",
     )

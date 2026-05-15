@@ -2,64 +2,44 @@ import reflex as rx
 
 from prompt_autoimprove_ui.state import PipelineState
 
-_STAGE_ICON: dict[str, str] = {
-    "received": "inbox",
-    "normalized": "broom",
-    "strategy_selected": "compass",
-    "candidate": "sparkles",
-    "partial_eval": "ruler",
-    "evaluated": "ruler",
-    "probation": "play",
-    "probation_failed": "triangle-alert",
-    "final_decision": "check-check",
-}
 
-_STAGE_LABEL: dict[str, str] = {
-    "received": "Received",
-    "normalized": "Normalized",
-    "strategy_selected": "Strategy chosen",
-    "candidate": "Candidate built",
-    "partial_eval": "Scoring",
-    "evaluated": "Evaluated",
-    "probation": "Probation run",
-    "probation_failed": "Probation failed",
-    "final_decision": "Final decision",
-}
-
-
-def _stage_card(stage) -> rx.Component:
-    return rx.hstack(
+def _stage_dot(stage) -> rx.Component:
+    return rx.vstack(
         rx.box(
-            rx.icon(
-                "circle-dot",
-                size=16,
-                color=rx.color("indigo", 10),
-            ),
-            background=rx.color("indigo", 3),
+            rx.icon("check", size=12, color="white"),
+            background=rx.color("iris", 9),
+            border_radius="999px",
             padding="2",
-            border_radius="full",
+            width="28px",
+            height="28px",
+            display="flex",
+            align_items="center",
+            justify_content="center",
+            box_shadow=f"0 0 0 4px {rx.color('iris', 3)}",
         ),
-        rx.vstack(
-            rx.text(
-                stage["stage"],
-                size="2",
-                weight="bold",
-            ),
-            rx.code(
-                stage["payload"],
-                size="1",
-                color_scheme="gray",
-                variant="ghost",
-            ),
-            spacing="1",
-            align="start",
-            width="100%",
+        rx.text(
+            stage["stage"],
+            size="1",
+            color=rx.color("gray", 11),
+            weight="medium",
         ),
-        spacing="3",
-        align="start",
-        padding="2",
-        width="100%",
-        border_left=f"2px solid {rx.color('indigo', 6)}",
+        spacing="1",
+        align="center",
+        flex_shrink="0",
+    )
+
+
+def _empty_state() -> rx.Component:
+    return rx.hstack(
+        rx.icon("activity", size=14, color=rx.color("gray", 9)),
+        rx.text(
+            "Submit a prompt to watch the pipeline run live",
+            size="2",
+            color=rx.color("gray", 11),
+        ),
+        spacing="2",
+        align="center",
+        padding_y="3",
     )
 
 
@@ -67,30 +47,51 @@ def pipeline_timeline() -> rx.Component:
     return rx.card(
         rx.vstack(
             rx.hstack(
-                rx.icon("activity", size=18, color=rx.color("indigo", 10)),
+                rx.icon("activity", size=16, color=rx.color("iris", 10)),
                 rx.heading("Pipeline", size="3"),
                 rx.spacer(),
                 rx.cond(
                     PipelineState.is_running,
-                    rx.spinner(size="2"),
-                    rx.fragment(),
+                    rx.hstack(
+                        rx.spinner(size="1"),
+                        rx.text(
+                            "running",
+                            size="1",
+                            color=rx.color("iris", 11),
+                            weight="medium",
+                        ),
+                        spacing="2",
+                        align="center",
+                    ),
+                    rx.cond(
+                        PipelineState.stages.length() > 0,
+                        rx.badge(
+                            "done",
+                            color_scheme="green",
+                            variant="soft",
+                            size="1",
+                        ),
+                        rx.fragment(),
+                    ),
                 ),
                 align="center",
                 width="100%",
             ),
             rx.cond(
                 PipelineState.stages.length() > 0,
-                rx.vstack(
-                    rx.foreach(PipelineState.stages, _stage_card),
-                    spacing="2",
-                    align="stretch",
+                rx.scroll_area(
+                    rx.hstack(
+                        rx.foreach(PipelineState.stages, _stage_dot),
+                        spacing="6",
+                        align="center",
+                        padding_y="2",
+                        padding_x="2",
+                    ),
+                    scrollbars="horizontal",
+                    type="hover",
                     width="100%",
                 ),
-                rx.text(
-                    "Submit a prompt to see the pipeline run live.",
-                    size="2",
-                    color=rx.color("gray", 11),
-                ),
+                _empty_state(),
             ),
             spacing="3",
             align="stretch",

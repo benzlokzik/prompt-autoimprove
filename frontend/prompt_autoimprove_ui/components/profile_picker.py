@@ -2,52 +2,80 @@ import reflex as rx
 
 from prompt_autoimprove_ui.state import PipelineState
 
-_FAMILY_ICON: dict[str, str] = {
-    "qwen": "circle-dot",
-    "llama": "flame",
-    "gemma": "gem",
-    "mistral": "wind",
-    "other": "box",
-}
 
-
-def _profile_card(profile) -> rx.Component:
-    name = profile["name"]
-    return rx.card(
-        rx.vstack(
-            rx.hstack(
-                rx.icon("box", size=16),
-                rx.text(name, weight="bold", size="2"),
-                rx.spacer(),
-                rx.cond(
-                    profile["supports_vision"],
-                    rx.badge("vision", color_scheme="purple", variant="soft", size="1"),
-                    rx.fragment(),
-                ),
-                width="100%",
-                align="center",
+def _chip(profile) -> rx.Component:
+    is_active = PipelineState.profile == profile["name"]
+    return rx.box(
+        rx.hstack(
+            rx.icon(
+                "box",
+                size=14,
+                color=rx.cond(is_active, "white", rx.color("gray", 11)),
             ),
             rx.text(
-                profile["format"],
-                size="1",
-                color=rx.color("gray", 11),
+                profile["name"],
+                size="2",
+                weight=rx.cond(is_active, "bold", "medium"),
+                color=rx.cond(is_active, "white", rx.color("gray", 12)),
             ),
-            spacing="1",
-            align="start",
+            rx.cond(
+                profile["supports_vision"],
+                rx.badge(
+                    "vision",
+                    color_scheme="purple",
+                    variant=rx.cond(is_active, "solid", "soft"),
+                    size="1",
+                ),
+                rx.fragment(),
+            ),
+            spacing="2",
+            align="center",
         ),
-        as_child=False,
-        size="1",
-        variant=rx.cond(PipelineState.profile == name, "surface", "ghost"),
-        on_click=PipelineState.set_profile(name),
+        padding_x="3",
+        padding_y="2",
+        border_radius="999px",
+        border=rx.cond(
+            is_active,
+            f"1px solid {rx.color('iris', 9)}",
+            f"1px solid {rx.color('gray', 5)}",
+        ),
+        background=rx.cond(is_active, rx.color("iris", 9), rx.color("gray", 2)),
         cursor="pointer",
-        width="100%",
+        on_click=PipelineState.set_profile(profile["name"]),
+        _hover={
+            "background": rx.cond(is_active, rx.color("iris", 10), rx.color("gray", 3)),
+            "border_color": rx.cond(is_active, rx.color("iris", 10), rx.color("gray", 7)),
+        },
+        transition="all 120ms ease",
+        flex_shrink="0",
     )
 
 
 def profile_picker() -> rx.Component:
     return rx.vstack(
-        rx.text("Profiles", size="2", weight="bold", color=rx.color("gray", 11)),
-        rx.foreach(PipelineState.profiles, _profile_card),
+        rx.hstack(
+            rx.icon("layers", size=14, color=rx.color("gray", 11)),
+            rx.text(
+                "Model profile",
+                size="1",
+                weight="bold",
+                color=rx.color("gray", 11),
+                letter_spacing="0.05em",
+                text_transform="uppercase",
+            ),
+            spacing="2",
+            align="center",
+        ),
+        rx.scroll_area(
+            rx.hstack(
+                rx.foreach(PipelineState.profiles, _chip),
+                spacing="2",
+                padding_bottom="2",
+            ),
+            scrollbars="horizontal",
+            type="hover",
+            width="100%",
+        ),
         spacing="2",
         align="stretch",
         width="100%",

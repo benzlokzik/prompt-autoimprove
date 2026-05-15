@@ -2,79 +2,91 @@ import reflex as rx
 
 from prompt_autoimprove_ui.state import PipelineState
 
-_METRIC_LABEL: dict[str, str] = {
-    "q_c": "Clarity",
-    "q_p": "Compliance",
-    "q_s": "Safety",
-    "q_t": "Token cost",
-    "q_l": "Latency",
-}
 
-
-def _metric_row(metric) -> rx.Component:
-    return rx.vstack(
-        rx.hstack(
-            rx.text(metric["name"], size="2"),
-            rx.spacer(),
-            rx.text(
-                "weight ",
-                metric["weight"],
-                size="1",
-                color=rx.color("gray", 11),
+def _metric_card(metric) -> rx.Component:
+    return rx.card(
+        rx.vstack(
+            rx.hstack(
+                rx.text(
+                    metric["name"],
+                    size="1",
+                    color=rx.color("gray", 11),
+                    weight="bold",
+                    letter_spacing="0.05em",
+                    text_transform="uppercase",
+                ),
+                rx.spacer(),
+                rx.text(
+                    "·",
+                    size="1",
+                    color=rx.color("gray", 9),
+                ),
+                rx.text(
+                    "w ",
+                    metric["weight"],
+                    size="1",
+                    color=rx.color("gray", 10),
+                ),
+                width="100%",
+                align="center",
             ),
-            rx.text(
+            rx.heading(
                 metric["value"],
-                size="2",
-                weight="bold",
-                color=rx.color("indigo", 11),
+                size="6",
+                color=rx.color("iris", 11),
             ),
+            rx.progress(
+                value=(metric["value"] * 100).to(int),
+                color_scheme="iris",
+                size="2",
+            ),
+            spacing="2",
+            align="stretch",
             width="100%",
-            align="center",
         ),
-        rx.progress(
-            value=(metric["value"] * 100).to(int),
-            color_scheme="indigo",
-            size="2",
-        ),
-        spacing="1",
-        align="stretch",
+        size="1",
         width="100%",
     )
 
 
 def metric_breakdown() -> rx.Component:
-    return rx.card(
+    return rx.cond(
+        PipelineState.metrics.length() > 0,
         rx.vstack(
             rx.hstack(
-                rx.icon("gauge", size=18, color=rx.color("indigo", 10)),
-                rx.heading("Score", size="3"),
+                rx.hstack(
+                    rx.icon("gauge", size=16, color=rx.color("iris", 10)),
+                    rx.heading("Score", size="3"),
+                    spacing="2",
+                    align="center",
+                ),
                 rx.spacer(),
-                rx.heading(
-                    PipelineState.integrated_score,
-                    size="6",
-                    color=rx.color("indigo", 11),
+                rx.box(
+                    rx.text(
+                        PipelineState.integrated_score,
+                        size="8",
+                        weight="bold",
+                        color=rx.color("iris", 11),
+                        style={"font_variant_numeric": "tabular-nums"},
+                    ),
+                    padding_x="4",
+                    padding_y="2",
+                    border_radius="12px",
+                    background=rx.color("iris", 3),
+                    border=f"1px solid {rx.color('iris', 6)}",
                 ),
-                width="100%",
                 align="center",
+                width="100%",
             ),
-            rx.cond(
-                PipelineState.metrics.length() > 0,
-                rx.vstack(
-                    rx.foreach(PipelineState.metrics, _metric_row),
-                    spacing="3",
-                    align="stretch",
-                    width="100%",
-                ),
-                rx.text(
-                    "Metric breakdown will appear after the run completes.",
-                    size="2",
-                    color=rx.color("gray", 11),
-                ),
+            rx.grid(
+                rx.foreach(PipelineState.metrics, _metric_card),
+                columns="5",
+                spacing="3",
+                width="100%",
             ),
             spacing="3",
             align="stretch",
             width="100%",
         ),
-        size="2",
-        width="100%",
+        rx.fragment(),
     )
