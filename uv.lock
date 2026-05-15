@@ -962,7 +962,7 @@ dev = [
     { name = "aiosqlite", specifier = ">=0.22.1" },
     { name = "httpx", specifier = ">=0.28.1" },
     { name = "hypothesis", specifier = ">=6" },
-    { name = "mkdocs", specifier = ">=1.6.1" },
+    { name = "mkdocs", specifier = ">=1.6.1,<2.0" },
     { name = "mkdocs-material", specifier = ">=9.7.6" },
     { name = "prek", specifier = ">=0.0.5" },
     { name = "pytest", specifier = ">=8" },
