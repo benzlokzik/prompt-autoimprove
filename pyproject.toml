@@ -74,6 +74,7 @@ ignore = ["PLR0913", "PLR2004", "PLW0603", "N818", "PLC0415"]
 [tool.ruff.lint.per-file-ignores]
 "tests/**" = ["ARG", "PLR2004", "S101"]
 "frontend/**" = ["RUF012", "BLE001"]
+"frontend/prompt_autoimprove_ui/i18n.py" = ["RUF001", "RUF002", "RUF003"]
 "src/prompt_autoimprove/api/grpc/**" = ["N802", "N803"]
 
 [tool.ruff.format]

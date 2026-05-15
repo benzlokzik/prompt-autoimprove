@@ -1,5 +1,6 @@
 import reflex as rx
 
+from prompt_autoimprove_ui.i18n import t
 from prompt_autoimprove_ui.state import PipelineState
 
 
@@ -48,12 +49,13 @@ def history_panel() -> rx.Component:
         rx.vstack(
             rx.hstack(
                 rx.icon("history", size=16, color=rx.color("iris", 10)),
-                rx.heading("History", size="3"),
+                rx.heading(t("history", PipelineState.language), size="3"),
                 rx.spacer(),
                 rx.cond(
                     PipelineState.history_items.length() > 0,
                     rx.badge(
-                        PipelineState.history_items.length().to_string() + " runs",
+                        PipelineState.history_items.length().to_string()
+                        + t("runs", PipelineState.language),
                         variant="soft",
                         color_scheme="iris",
                         size="1",
@@ -65,7 +67,7 @@ def history_panel() -> rx.Component:
             ),
             rx.input(
                 rx.input.slot(rx.icon("search", size=14)),
-                placeholder="Session id or user ref",
+                placeholder=t("search_session", PipelineState.language),
                 value=PipelineState.session_ref,
                 on_change=PipelineState.set_session_ref,
                 on_blur=PipelineState.load_history,
@@ -81,7 +83,7 @@ def history_panel() -> rx.Component:
                     width="100%",
                 ),
                 rx.text(
-                    "Submit a prompt with a session id to start a history.",
+                    t("history_empty", PipelineState.language),
                     size="1",
                     color=rx.color("gray", 10),
                 ),

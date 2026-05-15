@@ -1,10 +1,16 @@
 import reflex as rx
 
-from prompt_autoimprove_ui.state import EXAMPLE_PROMPTS, PipelineState
+from prompt_autoimprove_ui.i18n import t
+from prompt_autoimprove_ui.state import PipelineState
 
 
-def _example_chip(idx: int, text: str) -> rx.Component:
-    short = text if len(text) <= 70 else text[:67] + "…"
+def _example_chip(idx: int) -> rx.Component:
+    text_var = PipelineState.example_prompts[idx]
+    short = rx.cond(
+        text_var.length() > 70,
+        text_var[:67] + "…",
+        text_var,
+    )
     return rx.button(
         short,
         size="1",
@@ -21,7 +27,7 @@ def prompt_card() -> rx.Component:
             rx.hstack(
                 rx.hstack(
                     rx.icon("message-square", size=16, color=rx.color("iris", 10)),
-                    rx.heading("Your prompt", size="3"),
+                    rx.heading(t("your_prompt", PipelineState.language), size="3"),
                     spacing="2",
                     align="center",
                 ),
@@ -29,7 +35,7 @@ def prompt_card() -> rx.Component:
                 rx.cond(
                     PipelineState.session_ref != "",
                     rx.badge(
-                        "session " + PipelineState.session_ref[:8],
+                        t("session", PipelineState.language) + PipelineState.session_ref[:8],
                         variant="soft",
                         color_scheme="iris",
                     ),
@@ -39,8 +45,7 @@ def prompt_card() -> rx.Component:
                 align="center",
             ),
             rx.text_area(
-                placeholder="Paste a prompt and we'll route it through normalization, "
-                "six improvement strategies, scoring, routing, and a probation run.",
+                placeholder=t("placeholder", PipelineState.language),
                 value=PipelineState.prompt,
                 on_change=PipelineState.set_prompt,
                 rows="9",
@@ -56,12 +61,14 @@ def prompt_card() -> rx.Component:
             ),
             rx.flex(
                 rx.text(
-                    "Try one:",
+                    t("try_one", PipelineState.language),
                     size="1",
                     color=rx.color("gray", 11),
                     weight="medium",
                 ),
-                *[_example_chip(i, p) for i, p in enumerate(EXAMPLE_PROMPTS)],
+                _example_chip(0),
+                _example_chip(1),
+                _example_chip(2),
                 wrap="wrap",
                 gap="2",
                 align="center",
@@ -71,7 +78,7 @@ def prompt_card() -> rx.Component:
                 rx.hstack(
                     rx.icon("cpu", size=14, color=rx.color("gray", 10)),
                     rx.text(
-                        "Routing to ",
+                        t("routing_to", PipelineState.language),
                         rx.text.strong(PipelineState.profile, color=rx.color("iris", 11)),
                         size="2",
                         color=rx.color("gray", 11),
@@ -85,13 +92,13 @@ def prompt_card() -> rx.Component:
                         PipelineState.is_running,
                         rx.hstack(
                             rx.spinner(size="1"),
-                            rx.text("Improving…"),
+                            rx.text(t("improving", PipelineState.language)),
                             spacing="2",
                             align="center",
                         ),
                         rx.hstack(
                             rx.icon("zap", size=15),
-                            rx.text("Improve prompt"),
+                            rx.text(t("improve_btn", PipelineState.language)),
                             spacing="2",
                             align="center",
                         ),

@@ -4,13 +4,7 @@ from typing import TypedDict
 import reflex as rx
 
 from prompt_autoimprove_ui.api_client import BackendClient
-
-EXAMPLE_PROMPTS = (
-    "Summarize the key benefits of microservices in 3 bullet points",
-    "Extract all email addresses and phone numbers from this customer note: "
-    "alice@example.com called from +1 555 123 4567 about invoice #42.",
-    "Explain how the integrated quality score is computed and weight each component.",
-)
+from prompt_autoimprove_ui.i18n import EXAMPLE_PROMPTS_EN, EXAMPLE_PROMPTS_RU
 
 
 class ProfileItem(TypedDict):
@@ -52,6 +46,7 @@ class PipelineState(rx.State):
     prompt: str = ""
     profile: str = "qwen3-7b"
     session_ref: str = ""
+    language: str = "en"
     profiles: list[ProfileItem] = []
     history_items: list[HistoryItem] = []
     stages: list[StageItem] = []
@@ -64,6 +59,15 @@ class PipelineState(rx.State):
     probation_text: str = ""
     is_running: bool = False
     error: str = ""
+
+    @rx.var
+    def example_prompts(self) -> list[str]:
+        prompts = EXAMPLE_PROMPTS_RU if self.language == "ru" else EXAMPLE_PROMPTS_EN
+        return list(prompts)
+
+    @rx.event
+    def toggle_language(self) -> None:
+        self.language = "ru" if self.language == "en" else "en"
 
     @rx.event
     async def load_profiles(self) -> None:
@@ -125,8 +129,9 @@ class PipelineState(rx.State):
 
     @rx.event
     def use_example(self, idx: int) -> None:
-        if 0 <= idx < len(EXAMPLE_PROMPTS):
-            self.prompt = EXAMPLE_PROMPTS[idx]
+        examples = EXAMPLE_PROMPTS_RU if self.language == "ru" else EXAMPLE_PROMPTS_EN
+        if 0 <= idx < len(examples):
+            self.prompt = examples[idx]
 
     @rx.event
     def reset_run(self) -> None:
@@ -145,7 +150,7 @@ class PipelineState(rx.State):
         async with self:
             self.reset_run()
             if not self.prompt.strip():
-                self.error = "Prompt is empty"
+                self.error = "Prompt is empty" if self.language == "en" else "Промпт пустой"
                 return
             self.is_running = True
 

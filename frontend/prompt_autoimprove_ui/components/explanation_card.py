@@ -1,5 +1,6 @@
 import reflex as rx
 
+from prompt_autoimprove_ui.i18n import t
 from prompt_autoimprove_ui.state import PipelineState
 
 
@@ -10,7 +11,7 @@ def explanation_card() -> rx.Component:
             rx.vstack(
                 rx.hstack(
                     rx.icon("lightbulb", size=16, color=rx.color("amber", 10)),
-                    rx.heading("Why this candidate", size="3"),
+                    rx.heading(t("why_candidate", PipelineState.language), size="3"),
                     spacing="2",
                     align="center",
                 ),

@@ -1,5 +1,6 @@
 import reflex as rx
 
+from prompt_autoimprove_ui.i18n import t
 from prompt_autoimprove_ui.state import PipelineState
 
 
@@ -62,7 +63,7 @@ def profile_picker() -> rx.Component:
         rx.hstack(
             rx.icon("layers", size=14, color=rx.color("gray", 11)),
             rx.text(
-                "Model profile",
+                t("model_profile", PipelineState.language),
                 size="1",
                 weight="bold",
                 color=rx.color("gray", 11),

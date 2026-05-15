@@ -1,5 +1,6 @@
 import reflex as rx
 
+from prompt_autoimprove_ui.i18n import t
 from prompt_autoimprove_ui.state import PipelineState
 
 
@@ -7,13 +8,13 @@ def _empty() -> rx.Component:
     return rx.vstack(
         rx.icon("file-text", size=28, color=rx.color("gray", 8)),
         rx.text(
-            "The improved prompt appears here",
+            t("improved_empty_title", PipelineState.language),
             size="2",
             color=rx.color("gray", 11),
             weight="medium",
         ),
         rx.text(
-            "We'll show the candidate text, the picked strategy, and the model response.",
+            t("improved_empty_sub", PipelineState.language),
             size="1",
             color=rx.color("gray", 10),
             text_align="center",
@@ -32,7 +33,7 @@ def candidate_view() -> rx.Component:
             rx.hstack(
                 rx.hstack(
                     rx.icon("sparkles", size=16, color=rx.color("iris", 10)),
-                    rx.heading("Improved prompt", size="3"),
+                    rx.heading(t("improved_prompt", PipelineState.language), size="3"),
                     spacing="2",
                     align="center",
                 ),
@@ -71,7 +72,7 @@ def candidate_view() -> rx.Component:
                     rx.hstack(
                         rx.icon("play", size=14, color=rx.color("green", 10)),
                         rx.text(
-                            "Probation output",
+                            t("probation", PipelineState.language),
                             size="2",
                             weight="bold",
                             color=rx.color("gray", 12),

@@ -1,5 +1,8 @@
 import reflex as rx
 
+from prompt_autoimprove_ui.i18n import t
+from prompt_autoimprove_ui.state import PipelineState
+
 
 def header() -> rx.Component:
     return rx.hstack(
@@ -17,7 +20,7 @@ def header() -> rx.Component:
             rx.vstack(
                 rx.heading("prompt-autoimprove", size="4", weight="bold"),
                 rx.text(
-                    "Improve any prompt for any LLM",
+                    t("tagline", PipelineState.language),
                     size="1",
                     color=rx.color("gray", 11),
                 ),
@@ -29,10 +32,18 @@ def header() -> rx.Component:
         ),
         rx.spacer(),
         rx.hstack(
+            rx.button(
+                rx.icon("languages", size=14),
+                t("language", PipelineState.language),
+                on_click=PipelineState.toggle_language,
+                variant="soft",
+                color_scheme="iris",
+                size="2",
+            ),
             rx.link(
                 rx.button(
                     rx.icon("book-open", size=14),
-                    rx.text("Docs"),
+                    rx.text(t("docs", PipelineState.language)),
                     variant="ghost",
                     color_scheme="gray",
                     size="2",
@@ -43,7 +54,7 @@ def header() -> rx.Component:
             rx.link(
                 rx.button(
                     rx.icon("github", size=14),
-                    rx.text("GitHub"),
+                    rx.text(t("github", PipelineState.language)),
                     variant="ghost",
                     color_scheme="gray",
                     size="2",

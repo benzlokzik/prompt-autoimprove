@@ -1,5 +1,6 @@
 import reflex as rx
 
+from prompt_autoimprove_ui.i18n import t
 from prompt_autoimprove_ui.state import PipelineState
 
 
@@ -33,7 +34,7 @@ def _empty_state() -> rx.Component:
     return rx.hstack(
         rx.icon("activity", size=14, color=rx.color("gray", 9)),
         rx.text(
-            "Submit a prompt to watch the pipeline run live",
+            t("pipeline_empty", PipelineState.language),
             size="2",
             color=rx.color("gray", 11),
         ),
@@ -48,14 +49,14 @@ def pipeline_timeline() -> rx.Component:
         rx.vstack(
             rx.hstack(
                 rx.icon("activity", size=16, color=rx.color("iris", 10)),
-                rx.heading("Pipeline", size="3"),
+                rx.heading(t("pipeline", PipelineState.language), size="3"),
                 rx.spacer(),
                 rx.cond(
                     PipelineState.is_running,
                     rx.hstack(
                         rx.spinner(size="1"),
                         rx.text(
-                            "running",
+                            t("running", PipelineState.language),
                             size="1",
                             color=rx.color("iris", 11),
                             weight="medium",
@@ -66,7 +67,7 @@ def pipeline_timeline() -> rx.Component:
                     rx.cond(
                         PipelineState.stages.length() > 0,
                         rx.badge(
-                            "done",
+                            t("done", PipelineState.language),
                             color_scheme="green",
                             variant="soft",
                             size="1",

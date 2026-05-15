@@ -1,5 +1,6 @@
 import reflex as rx
 
+from prompt_autoimprove_ui.i18n import t
 from prompt_autoimprove_ui.state import PipelineState
 
 
@@ -56,7 +57,7 @@ def metric_breakdown() -> rx.Component:
             rx.hstack(
                 rx.hstack(
                     rx.icon("gauge", size=16, color=rx.color("iris", 10)),
-                    rx.heading("Score", size="3"),
+                    rx.heading(t("score", PipelineState.language), size="3"),
                     spacing="2",
                     align="center",
                 ),
