@@ -1,0 +1,13 @@
+name: ollama-phi3-mini
+family: phi
+family_default: true
+format: api
+context_window: 4096
+max_output_tokens: 2048
+supports_vision: false
+supports_tools: false
+reasoning_mode: none
+cost_per_1k_input: 0.0
+cost_per_1k_output: 0.0
+p50_latency_ms: 800
+tags: [local, ollama, phi3]

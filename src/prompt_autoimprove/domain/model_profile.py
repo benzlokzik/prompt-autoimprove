@@ -10,6 +10,9 @@ class ModelFamily(StrEnum):
     CLAUDE = "claude"
     GPT = "gpt"
     GPT_OSS = "gpt-oss"
+    PHI = "phi"
+    DEEPSEEK = "deepseek"
+    KIMI = "kimi"
     OTHER = "other"
 
 

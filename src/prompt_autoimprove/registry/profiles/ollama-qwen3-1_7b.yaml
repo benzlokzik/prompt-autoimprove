@@ -1,0 +1,12 @@
+name: ollama-qwen3-1_7b
+family: qwen
+format: api
+context_window: 32768
+max_output_tokens: 4096
+supports_vision: false
+supports_tools: true
+reasoning_mode: hybrid
+cost_per_1k_input: 0.0
+cost_per_1k_output: 0.0
+p50_latency_ms: 700
+tags: [local, ollama, qwen3]
