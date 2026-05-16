@@ -1,14 +1,3 @@
-"""LLM-powered rewrite strategy.
-
-Unlike the six template strategies, this one asks an *improver* model to
-produce a rewrite of the user's prompt. It is gated by the complexity
-classifier and the presence of an improver adapter, so deployments without
-an improver continue to behave exactly as before.
-
-Kept separate from the sync ``Strategy`` protocol because the rewrite needs
-to ``await`` the adapter; the orchestrator runs it explicitly.
-"""
-
 from __future__ import annotations
 
 import hashlib
@@ -59,8 +48,6 @@ def _cache_key(text: str, profile_name: str) -> str:
 
 @dataclass(slots=True)
 class LLMRewriter:
-    """Calls an improver adapter to produce a single rewritten candidate."""
-
     improver: ModelAdapter
     max_output_tokens: int = 1024
     _cache: dict[str, CandidatePrompt] = field(default_factory=dict)
@@ -69,9 +56,8 @@ class LLMRewriter:
         self,
         normalized: NormalizedPrompt,
         profile: ModelProfile,
-        config: StrategyConfig,  # noqa: ARG002 — reserved for future tuning
+        config: StrategyConfig,  # noqa: ARG002
     ) -> CandidatePrompt | None:
-        """Return an LLM-rewritten candidate, or ``None`` on adapter failure."""
         key = _cache_key(normalized.cleaned_text, profile.name)
         cached = self._cache.get(key)
         if cached is not None:

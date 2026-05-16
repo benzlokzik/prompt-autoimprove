@@ -1,10 +1,3 @@
-"""Heuristic complexity classifier (Tier A).
-
-Decides whether a normalized prompt should be escalated to the LLM-powered
-rewrite path. Pure-Python, zero deps, deterministic — safe to run in-process
-on every request.
-"""
-
 from dataclasses import dataclass
 from typing import Literal
 

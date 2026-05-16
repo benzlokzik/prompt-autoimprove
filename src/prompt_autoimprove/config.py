@@ -21,13 +21,6 @@ class KafkaSettings(BaseSettings):
 
 
 class ImproverSettings(BaseSettings):
-    """Configuration for the LLM-powered autoimprove path.
-
-    Disabled by default — when ``profile`` is ``None`` the pipeline behaves
-    exactly as before. Set ``PAI_IMPROVER__PROFILE`` (and any adapter env
-    vars the adapter factory needs) to enable AI rewrites on hard prompts.
-    """
-
     model_config = SettingsConfigDict(env_prefix="PAI_IMPROVER_")
 
     profile: str | None = None
