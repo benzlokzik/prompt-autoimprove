@@ -9,6 +9,7 @@ from prompt_autoimprove.api.http.rate_limit import limiter
 from prompt_autoimprove.api.http.schemas import ImproveRequest, ImproveResponse, MetricOut
 from prompt_autoimprove.config import get_settings
 from prompt_autoimprove.domain.prompt import Prompt
+from prompt_autoimprove.registry.loader import resolve_profile
 
 router = APIRouter(prefix="/v1", tags=["improve"])
 
@@ -26,8 +27,11 @@ async def improve(
 ) -> ImproveResponse:
     orchestrator = request.app.state.orchestrator
     profiles = request.app.state.profiles
-    if body.profile not in profiles:
-        raise HTTPException(status.HTTP_404_NOT_FOUND, detail=f"unknown profile {body.profile!r}")
+    try:
+        resolve_profile(profiles, body.profile)
+    except (KeyError, ValueError) as _:
+        detail = f"unknown profile {body.profile!r}"
+        raise HTTPException(status.HTTP_404_NOT_FOUND, detail=detail) from None
     prompt = Prompt(text=body.prompt, locale_hint=body.locale_hint)
     result = await orchestrator.run(
         prompt, body.profile, sensitive=body.sensitive, session_id=body.session_ref
@@ -57,8 +61,11 @@ async def improve_stream(
 ) -> EventSourceResponse:
     orchestrator = request.app.state.orchestrator
     profiles = request.app.state.profiles
-    if profile not in profiles:
-        raise HTTPException(status.HTTP_404_NOT_FOUND, detail=f"unknown profile {profile!r}")
+    try:
+        resolve_profile(profiles, profile)
+    except (KeyError, ValueError) as _:
+        detail = f"unknown profile {profile!r}"
+        raise HTTPException(status.HTTP_404_NOT_FOUND, detail=detail) from None
 
     async def event_gen():
         prompt_obj = Prompt(text=prompt, locale_hint=locale_hint)
