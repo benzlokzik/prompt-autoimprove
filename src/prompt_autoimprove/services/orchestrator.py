@@ -11,9 +11,11 @@ from prompt_autoimprove.adapters.base import (
     ModelAdapter,
 )
 from prompt_autoimprove.core import explainer
+from prompt_autoimprove.core.complexity import ComplexityVerdict, classify
 from prompt_autoimprove.core.evaluator import IntegratedScorer
 from prompt_autoimprove.core.normalizer import normalize
 from prompt_autoimprove.core.strategies.base import CandidatePrompt
+from prompt_autoimprove.core.strategies.llm_rewrite import LLMRewriter
 from prompt_autoimprove.core.strategy_selector import select
 from prompt_autoimprove.core.validator import validate
 from prompt_autoimprove.domain.evaluation import EvaluationRun, Score
@@ -36,6 +38,7 @@ class PipelineResult:
     run: EvaluationRun
     session_id: UUID
     probation: GenerationResult | None = None
+    complexity: ComplexityVerdict | None = None
 
 
 @dataclass(slots=True)
@@ -47,6 +50,7 @@ class AutoImproveOrchestrator:
     events: EventPublisher
     config: StrategyConfig = field(default_factory=StrategyConfig)
     session_factory: async_sessionmaker | None = None
+    rewriter: LLMRewriter | None = None
 
     async def run(
         self,
@@ -60,9 +64,7 @@ class AutoImproveOrchestrator:
         sid_str = session_id or str(uuid4())
         profile = self.profiles[profile_name]
 
-        await self.events.publish(
-            PipelineEvent.now("received", sid_str, {"profile": profile_name})
-        )
+        await self.events.publish(PipelineEvent.now("received", sid_str, {"profile": profile_name}))
 
         normalized = normalize(prompt)
         await self.events.publish(
@@ -77,6 +79,32 @@ class AutoImproveOrchestrator:
         candidates = [s.apply(normalized, profile, self.config) for s in strategies]
         if not candidates:
             raise RuntimeError("no strategy produced a candidate")
+
+        verdict = classify(normalized)
+        if self._should_escalate(verdict, normalized, sensitive=sensitive):
+            assert self.rewriter is not None  # narrowed by _should_escalate
+            rewritten = await self.rewriter.rewrite(normalized, profile, self.config)
+            if rewritten is not None:
+                candidates.append(rewritten)
+                await self.events.publish(
+                    PipelineEvent.now(
+                        "llm_rewrite",
+                        sid_str,
+                        {
+                            "complexity": verdict.label,
+                            "score": verdict.score,
+                            "reasons": list(verdict.reasons),
+                        },
+                    )
+                )
+            else:
+                await self.events.publish(
+                    PipelineEvent.now(
+                        "llm_rewrite_failed",
+                        sid_str,
+                        {"complexity": verdict.label, "score": verdict.score},
+                    )
+                )
 
         scored: list[tuple[CandidatePrompt, Score]] = []
         for cand in candidates:
@@ -126,9 +154,7 @@ class AutoImproveOrchestrator:
             )
         )
 
-        sid_uuid = await self._persist(
-            sid_str, prompt, chosen, routing, run, best
-        )
+        sid_uuid = await self._persist(sid_str, prompt, chosen, routing, run, best)
 
         return PipelineResult(
             normalized=normalized,
@@ -139,7 +165,23 @@ class AutoImproveOrchestrator:
             run=run,
             session_id=sid_uuid,
             probation=probation_result,
+            complexity=verdict,
         )
+
+    def _should_escalate(
+        self,
+        verdict: ComplexityVerdict,
+        normalized: NormalizedPrompt,
+        *,
+        sensitive: bool,
+    ) -> bool:
+        if self.rewriter is None:
+            return False
+        if sensitive:
+            return False
+        if any(flag.startswith("pii:") for flag in normalized.safety_flags):
+            return False
+        return verdict.label == "hard"
 
     async def _persist(
         self,
@@ -174,22 +216,21 @@ class AutoImproveOrchestrator:
                 profile_name=run.profile_name,
                 integrated_score=score.integrated,
                 explanation=run.explanation,
-                metrics=[
-                    (m.name.value, m.value, m.raw_value, m.weight) for m in score.metrics
-                ],
+                metrics=[(m.name.value, m.value, m.raw_value, m.weight) for m in score.metrics],
                 routing=(routing.adapter_name, routing.profile.name, routing.reason),
             )
             await db.commit()
             return session_row.id
 
-    async def stream(
-        self, prompt: Prompt, profile_name: str
-    ) -> AsyncIterator[tuple[str, dict]]:
+    async def stream(self, prompt: Prompt, profile_name: str) -> AsyncIterator[tuple[str, dict]]:
         result = await self.run(prompt, profile_name)
-        yield "normalized", {
-            "language": result.normalized.detected_language,
-            "task": result.normalized.detected_task,
-        }
+        yield (
+            "normalized",
+            {
+                "language": result.normalized.detected_language,
+                "task": result.normalized.detected_task,
+            },
+        )
         yield "strategy_selected", {"strategy": result.chosen.strategy.value}
         yield "candidate", {"text": result.chosen.text, "rationale": result.chosen.rationale}
         yield "evaluated", {"score": result.score.integrated}
