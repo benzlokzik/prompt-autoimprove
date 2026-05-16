@@ -20,6 +20,20 @@ class KafkaSettings(BaseSettings):
     enabled: bool = False
 
 
+class ImproverSettings(BaseSettings):
+    """Configuration for the LLM-powered autoimprove path.
+
+    Disabled by default — when ``profile`` is ``None`` the pipeline behaves
+    exactly as before. Set ``PAI_IMPROVER__PROFILE`` (and any adapter env
+    vars the adapter factory needs) to enable AI rewrites on hard prompts.
+    """
+
+    model_config = SettingsConfigDict(env_prefix="PAI_IMPROVER_")
+
+    profile: str | None = None
+    max_output_tokens: int = 1024
+
+
 class APISettings(BaseSettings):
     model_config = SettingsConfigDict(env_prefix="PAI_API_")
 
@@ -46,6 +60,7 @@ class Settings(BaseSettings):
     db: DatabaseSettings = Field(default_factory=DatabaseSettings)
     kafka: KafkaSettings = Field(default_factory=KafkaSettings)
     api: APISettings = Field(default_factory=APISettings)
+    improver: ImproverSettings = Field(default_factory=ImproverSettings)
 
 
 @lru_cache(maxsize=1)

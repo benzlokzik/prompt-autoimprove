@@ -23,9 +23,7 @@ def configure_tracing(service_name: str = "prompt-autoimprove") -> None:
     tracer_provider.add_span_processor(BatchSpanProcessor(ConsoleSpanExporter()))
     trace.set_tracer_provider(tracer_provider)
 
-    reader = PeriodicExportingMetricReader(
-        ConsoleMetricExporter(), export_interval_millis=60_000
-    )
+    reader = PeriodicExportingMetricReader(ConsoleMetricExporter(), export_interval_millis=60_000)
     meter_provider = MeterProvider(resource=resource, metric_readers=[reader])
     metrics.set_meter_provider(meter_provider)
 

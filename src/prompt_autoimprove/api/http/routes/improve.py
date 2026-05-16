@@ -18,9 +18,7 @@ def _rate_key(request: Request) -> str:
 
 
 @router.post("/improve", response_model=ImproveResponse)
-@limiter.limit(
-    lambda: f"{get_settings().api.rate_limit_per_minute}/minute", key_func=_rate_key
-)
+@limiter.limit(lambda: f"{get_settings().api.rate_limit_per_minute}/minute", key_func=_rate_key)
 async def improve(
     request: Request,
     body: ImproveRequest,

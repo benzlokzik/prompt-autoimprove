@@ -47,8 +47,6 @@ def validate(candidate: CandidatePrompt, profile: ModelProfile) -> ValidationRep
             issues.append(ValidationIssue("unsafe", f"Contains forbidden fragment: {fragment!r}"))
 
     if "respond with a single json object" in lowered and "no prose" not in lowered:
-        issues.append(
-            ValidationIssue("format_drift", "JSON contract weakened", severity="warning")
-        )
+        issues.append(ValidationIssue("format_drift", "JSON contract weakened", severity="warning"))
 
     return ValidationReport(candidate_id=str(candidate.id), issues=tuple(issues))
