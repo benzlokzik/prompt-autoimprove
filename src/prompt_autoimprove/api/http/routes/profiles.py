@@ -15,6 +15,7 @@ async def list_profiles(request: Request, _: str = Depends(require_api_key)) -> 
             format=p.format.value,
             context_window=p.context_window,
             supports_vision=p.supports_vision,
+            family_default=p.family_default,
         )
         for p in request.app.state.profiles.values()
     ]

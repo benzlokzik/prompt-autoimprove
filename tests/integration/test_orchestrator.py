@@ -39,10 +39,11 @@ async def test_stream_emits_expected_stages(orchestrator: AutoImproveOrchestrato
         Prompt(text="Translate to French: hello world"), "claude-sonnet-4-6"
     ):
         stages.append(stage)
-    assert stages == [
-        "normalized",
-        "strategy_selected",
-        "candidate",
-        "evaluated",
-        "final_decision",
-    ]
+    assert "normalized" in stages
+    assert "complexity_checked" in stages
+    assert "strategy_selected" in stages
+    assert "candidate" in stages
+    assert "evaluated" in stages
+    assert "final_decision" in stages
+    assert stages.index("normalized") < stages.index("complexity_checked")
+    assert stages.index("complexity_checked") < stages.index("strategy_selected")

@@ -250,7 +250,18 @@ class AutoImproveOrchestrator:
                 "task": result.normalized.detected_task,
             },
         )
+        if result.complexity is not None:
+            yield (
+                "complexity_checked",
+                {
+                    "label": result.complexity.label,
+                    "score": round(result.complexity.score, 3),
+                },
+            )
         yield "strategy_selected", {"strategy": result.chosen.strategy.value}
+        llm_cand = next((c for c in result.candidates if c.strategy.value == "llm_rewrite"), None)
+        if llm_cand is not None and llm_cand is not result.chosen:
+            yield "llm_rewrite_candidate", {"text": llm_cand.text}
         yield "candidate", {"text": result.chosen.text, "rationale": result.chosen.rationale}
         yield "evaluated", {"score": result.score.integrated}
         if result.probation is not None:

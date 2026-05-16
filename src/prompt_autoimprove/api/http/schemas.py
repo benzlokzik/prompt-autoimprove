@@ -32,6 +32,7 @@ class ProfileOut(BaseModel):
     format: str
     context_window: int
     supports_vision: bool
+    family_default: bool = False
 
 
 class HistoryRevision(BaseModel):
