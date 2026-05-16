@@ -27,8 +27,7 @@ _TEMPLATES: dict[str, str] = {
         "No commentary outside the block."
     ),
     "bullet-list": (
-        "Return a markdown bullet list. Each bullet is one short sentence. "
-        "Avoid headings."
+        "Return a markdown bullet list. Each bullet is one short sentence. Avoid headings."
     ),
     "plain": "Return only the translated text, with no quotes and no notes.",
     "markdown": "Format the answer as concise markdown with at most one heading.",

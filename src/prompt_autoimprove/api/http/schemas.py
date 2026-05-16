@@ -31,7 +31,14 @@ class ProfileOut(BaseModel):
     family: str
     format: str
     context_window: int
+    max_output_tokens: int = 0
     supports_vision: bool
+    reasoning_mode: str = "none"
+    cost_per_1k_input: float = 0.0
+    cost_per_1k_output: float = 0.0
+    p50_latency_ms: int = 0
+    supports_tools: bool = False
+    family_default: bool = False
 
 
 class HistoryRevision(BaseModel):

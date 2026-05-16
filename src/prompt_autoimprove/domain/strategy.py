@@ -9,6 +9,7 @@ class StrategyName(StrEnum):
     FEW_SHOT = "few_shot"
     SELF_VERIFICATION = "self_verification"
     MULTIMODAL = "multimodal"
+    LLM_REWRITE = "llm_rewrite"
 
 
 @dataclass(slots=True, frozen=True)

@@ -2,7 +2,7 @@ syntax = "proto3";
 
 package autoimprove.v1;
 
-option go_package = "github.com/benzlokzik/prompt-autoimprove/gen/go/autoimprove/v1;autoimprovev1";
+option go_package = "github.com/benzlokzik-university/prompt-autoimprove/gen/go/autoimprove/v1;autoimprovev1";
 
 service AutoImprove {
   rpc Improve(ImproveRequest) returns (stream ImproveEvent);

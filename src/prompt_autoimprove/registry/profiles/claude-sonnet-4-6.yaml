@@ -1,5 +1,6 @@
 name: claude-sonnet-4-6
-family: other
+family: claude
+family_default: true
 format: api
 context_window: 200000
 max_output_tokens: 8192

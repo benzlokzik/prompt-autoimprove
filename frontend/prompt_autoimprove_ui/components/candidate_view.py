@@ -27,6 +27,70 @@ def _empty() -> rx.Component:
     )
 
 
+def _complexity_badge() -> rx.Component:
+    return rx.cond(
+        PipelineState.complexity_label != "",
+        rx.hstack(
+            rx.badge(
+                PipelineState.complexity_label,
+                color_scheme=rx.cond(PipelineState.complexity_label == "hard", "red", "green"),
+                variant="soft",
+                size="1",
+            ),
+            rx.text(
+                PipelineState.complexity_score,
+                size="1",
+                color=rx.color("gray", 10),
+                font_family="ui-monospace, monospace",
+            ),
+            spacing="1",
+            align="center",
+        ),
+        rx.fragment(),
+    )
+
+
+def _llm_rewrite_section() -> rx.Component:
+    return rx.cond(
+        PipelineState.llm_rewrite_text != "",
+        rx.vstack(
+            rx.hstack(
+                rx.icon("bot", size=14, color=rx.color("violet", 10)),
+                rx.text(
+                    t("llm_rewrite_candidate", PipelineState.language),
+                    size="2",
+                    weight="bold",
+                    color=rx.color("gray", 12),
+                ),
+                rx.spacer(),
+                rx.tooltip(
+                    rx.icon("info", size=13, color=rx.color("gray", 9)),
+                    content=t("llm_rewrite_note", PipelineState.language),
+                ),
+                spacing="2",
+                align="center",
+                width="100%",
+            ),
+            rx.code_block(
+                PipelineState.llm_rewrite_text,
+                can_copy=True,
+                wrap_long_lines=True,
+                language="markdown",
+                theme=rx.code_block.themes.atom_dark,
+                width="100%",
+            ),
+            spacing="2",
+            align="stretch",
+            width="100%",
+            padding="3",
+            border_radius="8px",
+            background=rx.color("violet", 2),
+            border=f"1px solid {rx.color('violet', 4)}",
+        ),
+        rx.fragment(),
+    )
+
+
 def candidate_view() -> rx.Component:
     return rx.card(
         rx.vstack(
@@ -38,6 +102,7 @@ def candidate_view() -> rx.Component:
                     align="center",
                 ),
                 rx.spacer(),
+                _complexity_badge(),
                 rx.cond(
                     PipelineState.candidate_strategy != "",
                     rx.badge(
@@ -48,8 +113,10 @@ def candidate_view() -> rx.Component:
                     ),
                     rx.fragment(),
                 ),
+                gap="2",
                 width="100%",
                 align="center",
+                wrap="wrap",
             ),
             rx.cond(
                 PipelineState.candidate_text != "",
@@ -66,6 +133,7 @@ def candidate_view() -> rx.Component:
                 ),
                 _empty(),
             ),
+            _llm_rewrite_section(),
             rx.cond(
                 PipelineState.probation_text != "",
                 rx.vstack(

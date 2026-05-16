@@ -11,8 +11,7 @@ def explain(candidate: CandidatePrompt, score: Score, runner_ups: list[Score]) -
     lines.append("Component breakdown:")
     for metric in score.metrics:
         lines.append(
-            f"  - {metric.name.value}: value={metric.value:.2f} "
-            f"weight={metric.weight:.2f}"
+            f"  - {metric.name.value}: value={metric.value:.2f} weight={metric.weight:.2f}"
         )
     if runner_ups:
         gap = score.integrated - max(s.integrated for s in runner_ups)

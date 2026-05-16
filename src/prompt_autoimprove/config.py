@@ -1,7 +1,10 @@
 from functools import lru_cache
+from typing import Literal
 
 from pydantic import Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
+
+ClassifierBackend = Literal["heuristic", "embeddings", "judge", "composite"]
 
 
 class DatabaseSettings(BaseSettings):
@@ -18,6 +21,23 @@ class KafkaSettings(BaseSettings):
     bootstrap_servers: str = "localhost:9092"
     client_id: str = "prompt-autoimprove"
     enabled: bool = False
+
+
+class ImproverSettings(BaseSettings):
+    model_config = SettingsConfigDict(env_prefix="PAI_IMPROVER_")
+
+    profile: str | None = None
+    max_output_tokens: int = 1024
+
+
+class ClassifierSettings(BaseSettings):
+    model_config = SettingsConfigDict(env_prefix="PAI_CLASSIFIER_")
+
+    backend: ClassifierBackend = "heuristic"
+    embedding_model: str = "sentence-transformers/all-MiniLM-L6-v2"
+    device: str = "cpu"
+    composite_lo: float = 0.30
+    composite_hi: float = 0.55
 
 
 class APISettings(BaseSettings):
@@ -46,6 +66,8 @@ class Settings(BaseSettings):
     db: DatabaseSettings = Field(default_factory=DatabaseSettings)
     kafka: KafkaSettings = Field(default_factory=KafkaSettings)
     api: APISettings = Field(default_factory=APISettings)
+    improver: ImproverSettings = Field(default_factory=ImproverSettings)
+    classifier: ClassifierSettings = Field(default_factory=ClassifierSettings)
 
 
 @lru_cache(maxsize=1)

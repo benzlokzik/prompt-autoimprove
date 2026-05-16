@@ -9,6 +9,7 @@ from prompt_autoimprove.api.http.rate_limit import limiter
 from prompt_autoimprove.api.http.schemas import ImproveRequest, ImproveResponse, MetricOut
 from prompt_autoimprove.config import get_settings
 from prompt_autoimprove.domain.prompt import Prompt
+from prompt_autoimprove.registry.loader import ProfileNotFoundError, resolve_profile
 
 router = APIRouter(prefix="/v1", tags=["improve"])
 
@@ -18,9 +19,7 @@ def _rate_key(request: Request) -> str:
 
 
 @router.post("/improve", response_model=ImproveResponse)
-@limiter.limit(
-    lambda: f"{get_settings().api.rate_limit_per_minute}/minute", key_func=_rate_key
-)
+@limiter.limit(lambda: f"{get_settings().api.rate_limit_per_minute}/minute", key_func=_rate_key)
 async def improve(
     request: Request,
     body: ImproveRequest,
@@ -28,8 +27,12 @@ async def improve(
 ) -> ImproveResponse:
     orchestrator = request.app.state.orchestrator
     profiles = request.app.state.profiles
-    if body.profile not in profiles:
-        raise HTTPException(status.HTTP_404_NOT_FOUND, detail=f"unknown profile {body.profile!r}")
+    try:
+        resolve_profile(profiles, body.profile)
+    except ProfileNotFoundError as exc:
+        raise HTTPException(
+            status.HTTP_404_NOT_FOUND, detail=f"unknown profile {body.profile!r}"
+        ) from exc
     prompt = Prompt(text=body.prompt, locale_hint=body.locale_hint)
     result = await orchestrator.run(
         prompt, body.profile, sensitive=body.sensitive, session_id=body.session_ref
@@ -59,8 +62,12 @@ async def improve_stream(
 ) -> EventSourceResponse:
     orchestrator = request.app.state.orchestrator
     profiles = request.app.state.profiles
-    if profile not in profiles:
-        raise HTTPException(status.HTTP_404_NOT_FOUND, detail=f"unknown profile {profile!r}")
+    try:
+        resolve_profile(profiles, profile)
+    except ProfileNotFoundError as exc:
+        raise HTTPException(
+            status.HTTP_404_NOT_FOUND, detail=f"unknown profile {profile!r}"
+        ) from exc
 
     async def event_gen():
         prompt_obj = Prompt(text=prompt, locale_hint=locale_hint)

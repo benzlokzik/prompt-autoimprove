@@ -1,0 +1,12 @@
+name: ollama-gemma3-4b
+family: gemma
+format: api
+context_window: 32768
+max_output_tokens: 4096
+supports_vision: true
+supports_tools: false
+reasoning_mode: none
+cost_per_1k_input: 0.0
+cost_per_1k_output: 0.0
+p50_latency_ms: 1200
+tags: [local, ollama, gemma3, multimodal]

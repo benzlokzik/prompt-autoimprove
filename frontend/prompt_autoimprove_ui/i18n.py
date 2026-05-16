@@ -69,6 +69,17 @@ STRINGS: dict[str, dict[str, str]] = {
     },
     "prompt_empty_error": {"en": "Prompt is empty", "ru": "Промпт пустой"},
     "language": {"en": "EN", "ru": "RU"},
+    "model_family": {"en": "Model family", "ru": "Семейство моделей"},
+    "vision": {"en": "vision", "ru": "vision"},
+    "complexity": {"en": "Complexity", "ru": "Сложность"},
+    "llm_rewrite_candidate": {
+        "en": "LLM rewrite candidate",
+        "ru": "Кандидат от LLM-переписи",
+    },
+    "llm_rewrite_note": {
+        "en": "The LLM produced this rewrite but the deterministic strategy scored higher.",
+        "ru": "LLM переписал промпт, но детерминированная стратегия набрала больше баллов.",
+    },
 }
 
 

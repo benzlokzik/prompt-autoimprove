@@ -14,8 +14,6 @@ COPY pyproject.toml uv.lock README.md ./
 RUN --mount=type=cache,target=/root/.cache/uv \
     uv sync --frozen --no-install-project --group frontend --no-dev
 
-COPY src ./src
-COPY proto ./proto
 COPY frontend ./frontend
 
 ENV PATH="/app/.venv/bin:$PATH" \
@@ -25,4 +23,4 @@ WORKDIR /app/frontend
 
 EXPOSE 3000 8001
 
-CMD ["uv", "run", "--group", "frontend", "reflex", "run", "--env", "dev", "--frontend-port", "3000", "--backend-port", "8001"]
+CMD ["reflex", "run", "--env", "dev", "--frontend-port", "3000", "--backend-port", "8001"]

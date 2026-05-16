@@ -1,13 +1,12 @@
-name: llama3-8b
+name: ollama-llama3_2-1b
 family: llama
-format: safetensors
-context_window: 8192
+format: api
+context_window: 131072
 max_output_tokens: 2048
 supports_vision: false
 supports_tools: false
 reasoning_mode: none
 cost_per_1k_input: 0.0
 cost_per_1k_output: 0.0
-p50_latency_ms: 800
-tags: [hf, instruct]
-family_default: true
+p50_latency_ms: 500
+tags: [local, ollama, llama3]

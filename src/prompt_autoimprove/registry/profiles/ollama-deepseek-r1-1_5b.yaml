@@ -1,0 +1,13 @@
+name: ollama-deepseek-r1-1_5b
+family: deepseek
+family_default: true
+format: api
+context_window: 131072
+max_output_tokens: 4096
+supports_vision: false
+supports_tools: false
+reasoning_mode: thinking
+cost_per_1k_input: 0.0
+cost_per_1k_output: 0.0
+p50_latency_ms: 1000
+tags: [local, ollama, deepseek-r1, reasoning]

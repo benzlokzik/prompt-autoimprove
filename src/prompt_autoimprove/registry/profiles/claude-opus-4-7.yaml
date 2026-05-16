@@ -1,5 +1,5 @@
 name: claude-opus-4-7
-family: other
+family: claude
 format: api
 context_window: 200000
 max_output_tokens: 8192

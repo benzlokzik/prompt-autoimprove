@@ -12,7 +12,14 @@ class ProfileItem(TypedDict):
     family: str
     format: str
     context_window: int
+    max_output_tokens: int
     supports_vision: bool
+    reasoning_mode: str
+    cost_per_1k_input: float
+    cost_per_1k_output: float
+    p50_latency_ms: int
+    supports_tools: bool
+    family_default: bool
 
 
 class StageItem(TypedDict):
@@ -44,7 +51,7 @@ class HistoryItem(TypedDict):
 
 class PipelineState(rx.State):
     prompt: str = ""
-    profile: str = "qwen3-7b"
+    profile: str = "qwen"
     session_ref: str = ""
     language: str = "en"
     profiles: list[ProfileItem] = []
@@ -57,6 +64,9 @@ class PipelineState(rx.State):
     integrated_score: float = 0.0
     explanation: str = ""
     probation_text: str = ""
+    complexity_label: str = ""
+    complexity_score: float = 0.0
+    llm_rewrite_text: str = ""
     is_running: bool = False
     error: str = ""
 
@@ -64,6 +74,18 @@ class PipelineState(rx.State):
     def example_prompts(self) -> list[str]:
         prompts = EXAMPLE_PROMPTS_RU if self.language == "ru" else EXAMPLE_PROMPTS_EN
         return list(prompts)
+
+    @rx.var
+    def unique_families(self) -> list[str]:
+        seen: list[str] = []
+        for p in self.profiles:
+            if p["family"] not in seen:
+                seen.append(p["family"])
+        return seen
+
+    @rx.var
+    def selected_family_profiles(self) -> list[ProfileItem]:
+        return [p for p in self.profiles if p["family"] == self.profile]
 
     @rx.event
     def toggle_language(self) -> None:
@@ -79,7 +101,14 @@ class PipelineState(rx.State):
                     family=p["family"],
                     format=p["format"],
                     context_window=int(p["context_window"]),
+                    max_output_tokens=int(p.get("max_output_tokens", 0)),
                     supports_vision=bool(p["supports_vision"]),
+                    reasoning_mode=str(p.get("reasoning_mode", "none")),
+                    cost_per_1k_input=float(p.get("cost_per_1k_input", 0.0)),
+                    cost_per_1k_output=float(p.get("cost_per_1k_output", 0.0)),
+                    p50_latency_ms=int(p.get("p50_latency_ms", 0)),
+                    supports_tools=bool(p.get("supports_tools", False)),
+                    family_default=bool(p.get("family_default", False)),
                 )
                 for p in data
             ]
@@ -143,7 +172,31 @@ class PipelineState(rx.State):
         self.integrated_score = 0.0
         self.explanation = ""
         self.probation_text = ""
+        self.complexity_label = ""
+        self.complexity_score = 0.0
+        self.llm_rewrite_text = ""
         self.error = ""
+
+    def _apply_stage(self, stage: str, payload: dict) -> None:
+        import json as _json
+
+        self.stages = [*self.stages, StageItem(stage=stage, payload=_json.dumps(payload))]
+        if stage == "candidate":
+            self.candidate_text = payload.get("text", "")
+            self.candidate_rationale = payload.get("rationale", "")
+        elif stage == "strategy_selected":
+            self.candidate_strategy = payload.get("strategy", "")
+        elif stage == "evaluated":
+            self.integrated_score = float(payload.get("score", 0.0))
+        elif stage == "probation":
+            self.probation_text = payload.get("output", "")
+        elif stage == "final_decision":
+            self.explanation = payload.get("explanation", "")
+        elif stage == "complexity_checked":
+            self.complexity_label = payload.get("label", "")
+            self.complexity_score = round(float(payload.get("score", 0.0)), 3)
+        elif stage == "llm_rewrite_candidate":
+            self.llm_rewrite_text = payload.get("text", "")
 
     @rx.event(background=True)
     async def submit(self) -> None:
@@ -159,24 +212,8 @@ class PipelineState(rx.State):
             async for stage, payload in client.stream_improve(
                 prompt=self.prompt, profile=self.profile
             ):
-                import json as _json
-
                 async with self:
-                    self.stages = [
-                        *self.stages,
-                        StageItem(stage=stage, payload=_json.dumps(payload)),
-                    ]
-                    if stage == "candidate":
-                        self.candidate_text = payload.get("text", "")
-                        self.candidate_rationale = payload.get("rationale", "")
-                    elif stage == "strategy_selected":
-                        self.candidate_strategy = payload.get("strategy", "")
-                    elif stage == "evaluated":
-                        self.integrated_score = float(payload.get("score", 0.0))
-                    elif stage == "probation":
-                        self.probation_text = payload.get("output", "")
-                    elif stage == "final_decision":
-                        self.explanation = payload.get("explanation", "")
+                    self._apply_stage(stage, payload)
             full = await client.improve(
                 prompt=self.prompt,
                 profile=self.profile,

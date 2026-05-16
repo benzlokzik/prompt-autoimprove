@@ -3,6 +3,7 @@ from dataclasses import dataclass
 
 import httpx
 
+from prompt_autoimprove.adapters._attachments import to_openai_blocks
 from prompt_autoimprove.adapters.base import (
     AdapterError,
     AdapterUnavailable,
@@ -33,10 +34,18 @@ class OpenAICompatAdapter:
             base = f"{base}/v1"
         return f"{base}/chat/completions"
 
+    def _content(self, request: GenerationRequest) -> str | list[dict[str, object]]:
+        if not request.attachments or not self.profile.supports_vision:
+            return request.prompt
+        image_blocks = to_openai_blocks(request.attachments)
+        if not image_blocks:
+            return request.prompt
+        return [{"type": "text", "text": request.prompt}, *image_blocks]
+
     def _payload(self, request: GenerationRequest, *, stream: bool) -> dict[str, object]:
         return {
             "model": self.model,
-            "messages": [{"role": "user", "content": request.prompt}],
+            "messages": [{"role": "user", "content": self._content(request)}],
             "max_tokens": request.max_tokens,
             "temperature": request.temperature,
             "top_p": request.top_p,

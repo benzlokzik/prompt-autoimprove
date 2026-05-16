@@ -11,9 +11,15 @@ from prompt_autoimprove.adapters.base import (
     ModelAdapter,
 )
 from prompt_autoimprove.core import explainer
+from prompt_autoimprove.core.complexity import (
+    ComplexityClassifier,
+    ComplexityVerdict,
+    HeuristicClassifier,
+)
 from prompt_autoimprove.core.evaluator import IntegratedScorer
 from prompt_autoimprove.core.normalizer import normalize
 from prompt_autoimprove.core.strategies.base import CandidatePrompt
+from prompt_autoimprove.core.strategies.llm_rewrite import LLMRewriter
 from prompt_autoimprove.core.strategy_selector import select
 from prompt_autoimprove.core.validator import validate
 from prompt_autoimprove.domain.evaluation import EvaluationRun, Score
@@ -22,6 +28,7 @@ from prompt_autoimprove.domain.prompt import NormalizedPrompt, Prompt
 from prompt_autoimprove.domain.routing import RoutingDecision
 from prompt_autoimprove.domain.strategy import StrategyConfig
 from prompt_autoimprove.persistence.repositories import EvaluationRepository, PromptRepository
+from prompt_autoimprove.registry.loader import resolve_profile
 from prompt_autoimprove.routing.router import Router
 from prompt_autoimprove.services.kafka_producer import EventPublisher, PipelineEvent
 
@@ -36,6 +43,7 @@ class PipelineResult:
     run: EvaluationRun
     session_id: UUID
     probation: GenerationResult | None = None
+    complexity: ComplexityVerdict | None = None
 
 
 @dataclass(slots=True)
@@ -47,6 +55,8 @@ class AutoImproveOrchestrator:
     events: EventPublisher
     config: StrategyConfig = field(default_factory=StrategyConfig)
     session_factory: async_sessionmaker | None = None
+    rewriter: LLMRewriter | None = None
+    classifier: ComplexityClassifier = field(default_factory=HeuristicClassifier)
 
     async def run(
         self,
@@ -58,11 +68,9 @@ class AutoImproveOrchestrator:
         probation: bool = True,
     ) -> PipelineResult:
         sid_str = session_id or str(uuid4())
-        profile = self.profiles[profile_name]
+        profile = resolve_profile(self.profiles, profile_name)
 
-        await self.events.publish(
-            PipelineEvent.now("received", sid_str, {"profile": profile_name})
-        )
+        await self.events.publish(PipelineEvent.now("received", sid_str, {"profile": profile_name}))
 
         normalized = normalize(prompt)
         await self.events.publish(
@@ -77,6 +85,32 @@ class AutoImproveOrchestrator:
         candidates = [s.apply(normalized, profile, self.config) for s in strategies]
         if not candidates:
             raise RuntimeError("no strategy produced a candidate")
+
+        verdict = self.classifier.classify(normalized)
+        if self._should_escalate(verdict, normalized, sensitive=sensitive):
+            assert self.rewriter is not None  # narrowed by _should_escalate
+            rewritten = await self.rewriter.rewrite(normalized, profile, self.config)
+            if rewritten is not None:
+                candidates.append(rewritten)
+                await self.events.publish(
+                    PipelineEvent.now(
+                        "llm_rewrite",
+                        sid_str,
+                        {
+                            "complexity": verdict.label,
+                            "score": verdict.score,
+                            "reasons": list(verdict.reasons),
+                        },
+                    )
+                )
+            else:
+                await self.events.publish(
+                    PipelineEvent.now(
+                        "llm_rewrite_failed",
+                        sid_str,
+                        {"complexity": verdict.label, "score": verdict.score},
+                    )
+                )
 
         scored: list[tuple[CandidatePrompt, Score]] = []
         for cand in candidates:
@@ -106,11 +140,18 @@ class AutoImproveOrchestrator:
         )
 
         probation_result: GenerationResult | None = None
-        adapter = self.adapters.get(profile.name)
+        adapter = self.adapters.get(profile.name) or self._adapter_by_family(profile)
         if probation and adapter is not None:
+            attachments = (
+                tuple(prompt.attachments) if profile.supports_vision and prompt.attachments else ()
+            )
             try:
                 probation_result = await adapter.generate(
-                    GenerationRequest(prompt=chosen.text, max_tokens=profile.max_output_tokens)
+                    GenerationRequest(
+                        prompt=chosen.text,
+                        max_tokens=profile.max_output_tokens,
+                        attachments=attachments,
+                    )
                 )
             except AdapterError as exc:
                 probation_result = None
@@ -126,9 +167,7 @@ class AutoImproveOrchestrator:
             )
         )
 
-        sid_uuid = await self._persist(
-            sid_str, prompt, chosen, routing, run, best
-        )
+        sid_uuid = await self._persist(sid_str, prompt, chosen, routing, run, best)
 
         return PipelineResult(
             normalized=normalized,
@@ -139,7 +178,29 @@ class AutoImproveOrchestrator:
             run=run,
             session_id=sid_uuid,
             probation=probation_result,
+            complexity=verdict,
         )
+
+    def _adapter_by_family(self, profile: ModelProfile) -> ModelAdapter | None:
+        for adapter in self.adapters.values():
+            if adapter.profile.family is profile.family:
+                return adapter
+        return None
+
+    def _should_escalate(
+        self,
+        verdict: ComplexityVerdict,
+        normalized: NormalizedPrompt,
+        *,
+        sensitive: bool,
+    ) -> bool:
+        if self.rewriter is None:
+            return False
+        if sensitive:
+            return False
+        if any(flag.startswith("pii:") for flag in normalized.safety_flags):
+            return False
+        return verdict.label == "hard"
 
     async def _persist(
         self,
@@ -174,23 +235,33 @@ class AutoImproveOrchestrator:
                 profile_name=run.profile_name,
                 integrated_score=score.integrated,
                 explanation=run.explanation,
-                metrics=[
-                    (m.name.value, m.value, m.raw_value, m.weight) for m in score.metrics
-                ],
+                metrics=[(m.name.value, m.value, m.raw_value, m.weight) for m in score.metrics],
                 routing=(routing.adapter_name, routing.profile.name, routing.reason),
             )
             await db.commit()
             return session_row.id
 
-    async def stream(
-        self, prompt: Prompt, profile_name: str
-    ) -> AsyncIterator[tuple[str, dict]]:
+    async def stream(self, prompt: Prompt, profile_name: str) -> AsyncIterator[tuple[str, dict]]:
         result = await self.run(prompt, profile_name)
-        yield "normalized", {
-            "language": result.normalized.detected_language,
-            "task": result.normalized.detected_task,
-        }
+        yield (
+            "normalized",
+            {
+                "language": result.normalized.detected_language,
+                "task": result.normalized.detected_task,
+            },
+        )
+        if result.complexity is not None:
+            yield (
+                "complexity_checked",
+                {
+                    "label": result.complexity.label,
+                    "score": round(result.complexity.score, 3),
+                },
+            )
         yield "strategy_selected", {"strategy": result.chosen.strategy.value}
+        llm_cand = next((c for c in result.candidates if c.strategy.value == "llm_rewrite"), None)
+        if llm_cand is not None and llm_cand is not result.chosen:
+            yield "llm_rewrite_candidate", {"text": llm_cand.text}
         yield "candidate", {"text": result.chosen.text, "rationale": result.chosen.rationale}
         yield "evaluated", {"score": result.score.integrated}
         if result.probation is not None:
