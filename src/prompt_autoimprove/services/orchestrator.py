@@ -137,9 +137,16 @@ class AutoImproveOrchestrator:
         probation_result: GenerationResult | None = None
         adapter = self.adapters.get(profile.name) or self._adapter_by_family(profile)
         if probation and adapter is not None:
+            attachments = (
+                tuple(prompt.attachments) if profile.supports_vision and prompt.attachments else ()
+            )
             try:
                 probation_result = await adapter.generate(
-                    GenerationRequest(prompt=chosen.text, max_tokens=profile.max_output_tokens)
+                    GenerationRequest(
+                        prompt=chosen.text,
+                        max_tokens=profile.max_output_tokens,
+                        attachments=attachments,
+                    )
                 )
             except AdapterError as exc:
                 probation_result = None

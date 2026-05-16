@@ -1,8 +1,9 @@
 from collections.abc import AsyncIterator
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Protocol, runtime_checkable
 
 from prompt_autoimprove.domain.model_profile import ModelProfile
+from prompt_autoimprove.domain.prompt import PromptAttachment
 
 
 @dataclass(slots=True, frozen=True)
@@ -12,6 +13,7 @@ class GenerationRequest:
     temperature: float = 0.2
     top_p: float = 0.95
     stop: tuple[str, ...] = ()
+    attachments: tuple[PromptAttachment, ...] = field(default_factory=tuple)
 
 
 @dataclass(slots=True, frozen=True)
