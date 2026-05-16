@@ -22,6 +22,7 @@ _HARD_TASKS: frozenset[str] = frozenset(
 )
 
 _LONG_CHAR_THRESHOLD = 600
+_VERY_LONG_CHAR_THRESHOLD = 1000
 _LONG_LINE_THRESHOLD = 6
 _MANY_PARAMS_THRESHOLD = 2
 
@@ -42,6 +43,9 @@ def classify(normalized: NormalizedPrompt) -> ComplexityVerdict:
     if char_len >= _LONG_CHAR_THRESHOLD:
         score += 0.35
         reasons.append(f"long_text({char_len}c)")
+    if char_len >= _VERY_LONG_CHAR_THRESHOLD:
+        score += 0.20
+        reasons.append("very_long_text")
 
     line_count = normalized.cleaned_text.count("\n") + 1
     if line_count >= _LONG_LINE_THRESHOLD:
@@ -49,7 +53,7 @@ def classify(normalized: NormalizedPrompt) -> ComplexityVerdict:
         reasons.append(f"many_lines({line_count})")
 
     if normalized.detected_task in _HARD_TASKS:
-        score += 0.30
+        score += 0.40
         reasons.append(f"hard_task({normalized.detected_task})")
 
     if len(normalized.missing_parameters) >= _MANY_PARAMS_THRESHOLD:
@@ -65,5 +69,5 @@ def classify(normalized: NormalizedPrompt) -> ComplexityVerdict:
         score += 0.05
         reasons.append("multi_step_marker")
 
-    label: Complexity = "hard" if score >= 0.5 else "simple"
+    label: Complexity = "hard" if score >= 0.45 else "simple"
     return ComplexityVerdict(label=label, score=round(score, 3), reasons=tuple(reasons))
