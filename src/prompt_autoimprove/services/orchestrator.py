@@ -24,6 +24,7 @@ from prompt_autoimprove.domain.prompt import NormalizedPrompt, Prompt
 from prompt_autoimprove.domain.routing import RoutingDecision
 from prompt_autoimprove.domain.strategy import StrategyConfig
 from prompt_autoimprove.persistence.repositories import EvaluationRepository, PromptRepository
+from prompt_autoimprove.registry.loader import resolve_profile
 from prompt_autoimprove.routing.router import Router
 from prompt_autoimprove.services.kafka_producer import EventPublisher, PipelineEvent
 
@@ -62,7 +63,7 @@ class AutoImproveOrchestrator:
         probation: bool = True,
     ) -> PipelineResult:
         sid_str = session_id or str(uuid4())
-        profile = self.profiles[profile_name]
+        profile = resolve_profile(self.profiles, profile_name)
 
         await self.events.publish(PipelineEvent.now("received", sid_str, {"profile": profile_name}))
 
@@ -134,7 +135,7 @@ class AutoImproveOrchestrator:
         )
 
         probation_result: GenerationResult | None = None
-        adapter = self.adapters.get(profile.name)
+        adapter = self.adapters.get(profile.name) or self._adapter_by_family(profile)
         if probation and adapter is not None:
             try:
                 probation_result = await adapter.generate(
@@ -167,6 +168,12 @@ class AutoImproveOrchestrator:
             probation=probation_result,
             complexity=verdict,
         )
+
+    def _adapter_by_family(self, profile: ModelProfile) -> ModelAdapter | None:
+        for adapter in self.adapters.values():
+            if adapter.profile.family is profile.family:
+                return adapter
+        return None
 
     def _should_escalate(
         self,

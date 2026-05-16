@@ -28,6 +28,7 @@ def _coerce(raw: dict[str, object]) -> ModelProfile:
         cost_per_1k_output=float(raw.get("cost_per_1k_output", 0.0)),  # type: ignore[arg-type]
         p50_latency_ms=int(raw.get("p50_latency_ms", 0)),  # type: ignore[arg-type]
         tags=tuple(raw.get("tags", []) or ()),  # type: ignore[arg-type]
+        family_default=bool(raw.get("family_default", False)),
     )
 
 
@@ -45,3 +46,26 @@ def get_profile(profiles: dict[str, ModelProfile], name: str) -> ModelProfile:
     if name not in profiles:
         raise ProfileNotFoundError(name)
     return profiles[name]
+
+
+def resolve_profile(profiles: dict[str, ModelProfile], ref: str) -> ModelProfile:
+    if ref in profiles:
+        return profiles[ref]
+    try:
+        family = ModelFamily(ref)
+    except ValueError as exc:
+        raise ProfileNotFoundError(ref) from exc
+    in_family = [p for p in profiles.values() if p.family is family]
+    if not in_family:
+        raise ProfileNotFoundError(ref)
+    for p in in_family:
+        if p.family_default:
+            return p
+    return in_family[0]
+
+
+def list_families(profiles: dict[str, ModelProfile]) -> dict[ModelFamily, list[ModelProfile]]:
+    grouped: dict[ModelFamily, list[ModelProfile]] = {}
+    for p in profiles.values():
+        grouped.setdefault(p.family, []).append(p)
+    return grouped

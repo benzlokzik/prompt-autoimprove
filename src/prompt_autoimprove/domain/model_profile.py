@@ -7,6 +7,9 @@ class ModelFamily(StrEnum):
     LLAMA = "llama"
     GEMMA = "gemma"
     MISTRAL = "mistral"
+    CLAUDE = "claude"
+    GPT = "gpt"
+    GPT_OSS = "gpt-oss"
     OTHER = "other"
 
 
@@ -38,6 +41,7 @@ class ModelProfile:
     cost_per_1k_output: float = 0.0
     p50_latency_ms: int = 0
     tags: tuple[str, ...] = field(default_factory=tuple)
+    family_default: bool = False
 
     @property
     def is_local(self) -> bool:

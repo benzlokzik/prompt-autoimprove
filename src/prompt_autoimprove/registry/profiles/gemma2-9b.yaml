@@ -10,3 +10,4 @@ cost_per_1k_input: 0.0
 cost_per_1k_output: 0.0
 p50_latency_ms: 950
 tags: [hf, instruct]
+family_default: true

@@ -10,3 +10,4 @@ cost_per_1k_input: 0.0
 cost_per_1k_output: 0.0
 p50_latency_ms: 1200
 tags: [local, quantized, q4_k_m]
+family_default: true

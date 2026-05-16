@@ -37,7 +37,11 @@ def _build_orchestrator() -> AutoImproveOrchestrator:
 @app.command()
 def improve(
     prompt: str = typer.Option(..., "--prompt", "-p", help="The prompt to improve"),
-    profile: str = typer.Option("qwen3-7b", "--profile", help="Target model profile"),
+    profile: str = typer.Option(
+        "qwen",
+        "--profile",
+        help="Target model family (e.g. claude, gpt, qwen, llama, gemma) or specific model name",
+    ),
     locale: str | None = typer.Option(None, "--locale", help="Locale hint, e.g. en, ru"),
     sensitive: bool = typer.Option(False, "--sensitive", help="Force local-only routing"),
 ) -> None:
