@@ -1,8 +1,11 @@
 import os
+from pathlib import Path
 
 from prompt_autoimprove.adapters.anthropic_api import AnthropicAdapter
 from prompt_autoimprove.adapters.base import ModelAdapter
+from prompt_autoimprove.adapters.gguf_local import GGUFAdapter
 from prompt_autoimprove.adapters.openai_compat import OpenAICompatAdapter
+from prompt_autoimprove.adapters.safetensors_hf import SafetensorsHFAdapter
 from prompt_autoimprove.domain.model_profile import ModelFormat, ModelProfile
 
 _CLAUDE_MODEL_BY_PROFILE = {
@@ -31,6 +34,30 @@ def build_adapters_from_env(profiles: dict[str, ModelProfile]) -> dict[str, Mode
         if profile is not None and profile.format is ModelFormat.API:
             out[openai_target] = OpenAICompatAdapter(
                 profile=profile, base_url=openai_base, model=openai_model, api_key=openai_key
+            )
+
+    gguf_path = os.environ.get("PAI_GGUF_MODEL_PATH")
+    gguf_target = os.environ.get("PAI_GGUF_TARGET_PROFILE")
+    if gguf_path and gguf_target:
+        profile = profiles.get(gguf_target)
+        if profile is not None:
+            out[gguf_target] = GGUFAdapter(
+                profile=profile,
+                model_path=Path(gguf_path),
+                n_ctx=int(os.environ.get("PAI_GGUF_N_CTX", "4096")),
+                n_gpu_layers=int(os.environ.get("PAI_GGUF_N_GPU_LAYERS", "0")),
+            )
+
+    hf_id = os.environ.get("PAI_HF_MODEL_ID")
+    hf_target = os.environ.get("PAI_HF_TARGET_PROFILE")
+    if hf_id and hf_target:
+        profile = profiles.get(hf_target)
+        if profile is not None:
+            out[hf_target] = SafetensorsHFAdapter(
+                profile=profile,
+                model_id=hf_id,
+                device=os.environ.get("PAI_HF_DEVICE", "auto"),
+                dtype=os.environ.get("PAI_HF_DTYPE", "auto"),
             )
 
     return out

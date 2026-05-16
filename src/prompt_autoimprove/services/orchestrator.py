@@ -11,7 +11,11 @@ from prompt_autoimprove.adapters.base import (
     ModelAdapter,
 )
 from prompt_autoimprove.core import explainer
-from prompt_autoimprove.core.complexity import ComplexityVerdict, classify
+from prompt_autoimprove.core.complexity import (
+    ComplexityClassifier,
+    ComplexityVerdict,
+    HeuristicClassifier,
+)
 from prompt_autoimprove.core.evaluator import IntegratedScorer
 from prompt_autoimprove.core.normalizer import normalize
 from prompt_autoimprove.core.strategies.base import CandidatePrompt
@@ -52,6 +56,7 @@ class AutoImproveOrchestrator:
     config: StrategyConfig = field(default_factory=StrategyConfig)
     session_factory: async_sessionmaker | None = None
     rewriter: LLMRewriter | None = None
+    classifier: ComplexityClassifier = field(default_factory=HeuristicClassifier)
 
     async def run(
         self,
@@ -81,7 +86,7 @@ class AutoImproveOrchestrator:
         if not candidates:
             raise RuntimeError("no strategy produced a candidate")
 
-        verdict = classify(normalized)
+        verdict = self.classifier.classify(normalized)
         if self._should_escalate(verdict, normalized, sensitive=sensitive):
             assert self.rewriter is not None  # narrowed by _should_escalate
             rewritten = await self.rewriter.rewrite(normalized, profile, self.config)
