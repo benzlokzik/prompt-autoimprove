@@ -2,6 +2,7 @@ import reflex as rx
 
 from prompt_autoimprove_ui.components.candidate_view import candidate_view
 from prompt_autoimprove_ui.components.explanation_card import explanation_card
+from prompt_autoimprove_ui.components.family_profiles_panel import family_profiles_panel
 from prompt_autoimprove_ui.components.header import header
 from prompt_autoimprove_ui.components.history_panel import history_panel
 from prompt_autoimprove_ui.components.metric_breakdown import metric_breakdown
@@ -31,6 +32,7 @@ def home() -> rx.Component:
         rx.vstack(
             _error_banner(),
             profile_picker(),
+            family_profiles_panel(),
             rx.grid(
                 prompt_card(),
                 candidate_view(),

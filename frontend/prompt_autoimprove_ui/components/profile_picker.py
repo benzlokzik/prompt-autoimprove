@@ -9,15 +9,15 @@ def _family_chip(family: str) -> rx.Component:
     return rx.box(
         rx.text(
             family,
-            size="2",
+            size="3",
             weight="medium",
             color=rx.cond(is_active, "white", rx.color("gray", 12)),
             line_height="1",
             white_space="nowrap",
         ),
-        padding_x="4",
+        padding_x="5",
         padding_y="0",
-        height="36px",
+        height="40px",
         display="flex",
         align_items="center",
         border_radius="999px",
@@ -75,9 +75,9 @@ def profile_picker() -> rx.Component:
             rx.scroll_area(
                 rx.hstack(
                     rx.foreach(PipelineState.unique_families, _family_chip),
-                    spacing="3",
-                    padding_y="2",
-                    padding_right="2",
+                    spacing="4",
+                    padding_y="3",
+                    padding_right="3",
                 ),
                 scrollbars="horizontal",
                 type="hover",

@@ -12,7 +12,13 @@ class ProfileItem(TypedDict):
     family: str
     format: str
     context_window: int
+    max_output_tokens: int
     supports_vision: bool
+    reasoning_mode: str
+    cost_per_1k_input: float
+    cost_per_1k_output: float
+    p50_latency_ms: int
+    supports_tools: bool
     family_default: bool
 
 
@@ -77,6 +83,10 @@ class PipelineState(rx.State):
                 seen.append(p["family"])
         return seen
 
+    @rx.var
+    def selected_family_profiles(self) -> list[ProfileItem]:
+        return [p for p in self.profiles if p["family"] == self.profile]
+
     @rx.event
     def toggle_language(self) -> None:
         self.language = "ru" if self.language == "en" else "en"
@@ -91,7 +101,13 @@ class PipelineState(rx.State):
                     family=p["family"],
                     format=p["format"],
                     context_window=int(p["context_window"]),
+                    max_output_tokens=int(p.get("max_output_tokens", 0)),
                     supports_vision=bool(p["supports_vision"]),
+                    reasoning_mode=str(p.get("reasoning_mode", "none")),
+                    cost_per_1k_input=float(p.get("cost_per_1k_input", 0.0)),
+                    cost_per_1k_output=float(p.get("cost_per_1k_output", 0.0)),
+                    p50_latency_ms=int(p.get("p50_latency_ms", 0)),
+                    supports_tools=bool(p.get("supports_tools", False)),
                     family_default=bool(p.get("family_default", False)),
                 )
                 for p in data
