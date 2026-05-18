@@ -1,6 +1,6 @@
 # prompt-autoimprove
 
-[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.20214350.svg)](https://doi.org/10.5281/zenodo.20214350)
+[![DOI](https://zenodo.org/badge/1240262549.svg)](https://doi.org/10.5281/zenodo.20263523)
 
 `prompt-autoimprove` is a Python service for improving prompts before they are
 sent to large language or multimodal models. It normalizes a raw request,
