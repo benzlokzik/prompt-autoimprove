@@ -5,11 +5,192 @@
   --pai-card-bg: rgba(255, 255, 255, 0.72);
 }
 
+/* Dark scheme: punch up bg/fg contrast Material's slate ships with.
+   Material's default slate uses ~rgba(255,255,255,.75) text on #2e303e —
+   below WCAG AA for small mono text. We deepen the bg and brighten fg. */
 [data-md-color-scheme="slate"] {
-  --pai-accent-soft: rgba(124, 143, 255, 0.16);
-  --pai-border: rgba(226, 232, 240, 0.16);
-  --pai-muted: #b3bdcc;
-  --pai-card-bg: rgba(22, 27, 34, 0.72);
+  --md-default-bg-color:        hsl(225, 14%, 11%);
+  --md-default-bg-color--light:  hsl(225, 14%, 13%);
+  --md-default-bg-color--lighter: hsl(225, 14%, 16%);
+  --md-default-bg-color--lightest: hsl(225, 14%, 22%);
+  --md-default-fg-color:         hsla(0, 0%, 100%, 0.92);
+  --md-default-fg-color--light:  hsla(0, 0%, 100%, 0.78);
+  --md-default-fg-color--lighter: hsla(0, 0%, 100%, 0.50);
+  --md-default-fg-color--lightest: hsla(0, 0%, 100%, 0.16);
+  --md-typeset-color:            hsla(0, 0%, 100%, 0.92);
+  --md-typeset-a-color:          hsl(231, 89%, 78%);
+  --md-code-bg-color:            hsl(225, 16%, 8%);
+  --md-code-fg-color:            hsl(220, 16%, 88%);
+  --md-primary-fg-color:         hsl(231, 75%, 70%);
+
+  --pai-accent-soft: rgba(140, 158, 255, 0.18);
+  --pai-border:      rgba(226, 232, 240, 0.14);
+  --pai-muted:       hsla(0, 0%, 100%, 0.62);
+  --pai-card-bg:     hsl(225, 14%, 14%);
+  --pai-code-border: rgba(140, 158, 255, 0.22);
+  --pai-code-glow:   0 1px 0 rgba(255, 255, 255, 0.03) inset,
+                     0 18px 40px -22px rgba(0, 0, 0, 0.7);
+}
+
+/* Header keeps a solid dark backdrop instead of slate's washed-out tint */
+[data-md-color-scheme="slate"] .md-header,
+[data-md-color-scheme="slate"] .md-tabs {
+  background-color: hsl(225, 16%, 9%);
+}
+
+/* ============================================================
+   Runtime palettes — controlled by `data-pai-palette` on <html>.
+   Each palette overrides `--md-primary-fg-color`, accent, link
+   color, and our `--pai-accent-soft` for code chrome.
+   Default fallback: hybrid (teal primary + terracotta accent).
+   ============================================================ */
+
+/* ---- Teal (deep teal #0E7C7B) ---- */
+:root[data-pai-palette="teal"] {
+  --md-primary-fg-color:        #0E7C7B;
+  --md-primary-fg-color--light: #14B8A6;
+  --md-primary-fg-color--dark:  #0F766E;
+  --md-accent-fg-color:         #14B8A6;
+  --md-typeset-a-color:         #0F766E;
+  --pai-accent-soft:            rgba(14, 124, 123, 0.12);
+  --pai-code-border:            rgba(20, 184, 166, 0.22);
+}
+[data-md-color-scheme="slate"][data-pai-palette="teal"] {
+  --md-primary-fg-color:        #2DD4BF;
+  --md-typeset-a-color:         #5EEAD4;
+  --pai-accent-soft:            rgba(45, 212, 191, 0.18);
+  --pai-code-border:            rgba(94, 234, 212, 0.22);
+}
+[data-md-color-scheme="slate"][data-pai-palette="teal"] .md-header,
+[data-md-color-scheme="slate"][data-pai-palette="teal"] .md-tabs {
+  background-color: hsl(186, 28%, 9%);
+}
+[data-pai-palette="teal"] .md-header,
+[data-pai-palette="teal"] .md-tabs {
+  background-color: #0E7C7B;
+}
+
+/* ---- Terracotta (#C2410C) ---- */
+:root[data-pai-palette="terracotta"] {
+  --md-primary-fg-color:        #C2410C;
+  --md-primary-fg-color--light: #F97316;
+  --md-primary-fg-color--dark:  #9A3412;
+  --md-accent-fg-color:         #F97316;
+  --md-typeset-a-color:         #9A3412;
+  --pai-accent-soft:            rgba(194, 65, 12, 0.12);
+  --pai-code-border:            rgba(249, 115, 22, 0.22);
+}
+[data-md-color-scheme="slate"][data-pai-palette="terracotta"] {
+  --md-primary-fg-color:        #FB923C;
+  --md-typeset-a-color:         #FDBA74;
+  --pai-accent-soft:            rgba(251, 146, 60, 0.18);
+  --pai-code-border:            rgba(253, 186, 116, 0.22);
+}
+[data-md-color-scheme="slate"][data-pai-palette="terracotta"] .md-header,
+[data-md-color-scheme="slate"][data-pai-palette="terracotta"] .md-tabs {
+  background-color: hsl(20, 18%, 9%);
+}
+[data-pai-palette="terracotta"] .md-header,
+[data-pai-palette="terracotta"] .md-tabs {
+  background-color: #C2410C;
+}
+
+/* ---- Hybrid (teal primary + terracotta accent) — default ---- */
+:root[data-pai-palette="hybrid"],
+:root:not([data-pai-palette]) {
+  --md-primary-fg-color:        #0E7C7B;
+  --md-primary-fg-color--light: #14B8A6;
+  --md-primary-fg-color--dark:  #0F766E;
+  --md-accent-fg-color:         #C2410C;
+  --md-typeset-a-color:         #0F766E;
+  --pai-accent-soft:            rgba(194, 65, 12, 0.10);
+  --pai-code-border:            rgba(194, 65, 12, 0.22);
+}
+[data-md-color-scheme="slate"][data-pai-palette="hybrid"],
+[data-md-color-scheme="slate"]:not([data-pai-palette]) {
+  --md-primary-fg-color:        #2DD4BF;
+  --md-accent-fg-color:         #FB923C;
+  --md-typeset-a-color:         #5EEAD4;
+  --pai-accent-soft:            rgba(251, 146, 60, 0.16);
+  --pai-code-border:            rgba(253, 186, 116, 0.24);
+}
+[data-md-color-scheme="slate"][data-pai-palette="hybrid"] .md-header,
+[data-md-color-scheme="slate"]:not([data-pai-palette]) .md-header,
+[data-md-color-scheme="slate"][data-pai-palette="hybrid"] .md-tabs,
+[data-md-color-scheme="slate"]:not([data-pai-palette]) .md-tabs {
+  background-color: hsl(186, 28%, 9%);
+}
+[data-pai-palette="hybrid"] .md-header,
+:root:not([data-pai-palette]) .md-header,
+[data-pai-palette="hybrid"] .md-tabs,
+:root:not([data-pai-palette]) .md-tabs {
+  background-color: #0E7C7B;
+}
+
+/* ---- Purple (#7C3AED) ---- */
+:root[data-pai-palette="purple"] {
+  --md-primary-fg-color:        #7C3AED;
+  --md-primary-fg-color--light: #A78BFA;
+  --md-primary-fg-color--dark:  #6D28D9;
+  --md-accent-fg-color:         #A78BFA;
+  --md-typeset-a-color:         #6D28D9;
+  --pai-accent-soft:            rgba(124, 58, 237, 0.12);
+  --pai-code-border:            rgba(167, 139, 250, 0.22);
+}
+[data-md-color-scheme="slate"][data-pai-palette="purple"] {
+  --md-primary-fg-color:        #A78BFA;
+  --md-typeset-a-color:         #C4B5FD;
+  --pai-accent-soft:            rgba(167, 139, 250, 0.18);
+  --pai-code-border:            rgba(196, 181, 253, 0.24);
+}
+[data-md-color-scheme="slate"][data-pai-palette="purple"] .md-header,
+[data-md-color-scheme="slate"][data-pai-palette="purple"] .md-tabs {
+  background-color: hsl(263, 35%, 9%);
+}
+[data-pai-palette="purple"] .md-header,
+[data-pai-palette="purple"] .md-tabs {
+  background-color: #7C3AED;
+}
+
+/* ---- Palette picker widget ---- */
+.pai-palette {
+  position: fixed;
+  right: 1rem;
+  bottom: 1rem;
+  z-index: 999;
+  display: flex;
+  gap: 0.35rem;
+  padding: 0.35rem;
+  border: 1px solid var(--pai-border);
+  border-radius: 999px;
+  background: var(--md-default-bg-color);
+  box-shadow: 0 8px 24px -10px rgba(0, 0, 0, 0.35);
+  backdrop-filter: blur(8px);
+}
+
+.pai-palette__btn {
+  width: 1.15rem;
+  height: 1.15rem;
+  padding: 0;
+  border: 2px solid transparent;
+  border-radius: 999px;
+  background-color: transparent;
+  background-size: cover;
+  cursor: pointer;
+  transition: transform 0.12s ease, border-color 0.12s ease;
+}
+
+.pai-palette__btn:hover {
+  transform: scale(1.1);
+}
+
+.pai-palette__btn[aria-pressed="true"] {
+  border-color: var(--md-default-fg-color);
+  transform: scale(1.05);
+}
+
+@media (max-width: 44.984rem) {
+  .pai-palette { bottom: 0.5rem; right: 0.5rem; }
 }
 
 .md-grid {
@@ -183,4 +364,177 @@
   .pai-lede {
     font-size: 0.84rem;
   }
+}
+
+/* ---------- JetBrains Mono typography polish ---------- */
+:root {
+  --pai-mono-tracking: -0.005em;
+  --pai-code-radius: 0.55rem;
+  --pai-code-border: rgba(124, 143, 255, 0.22);
+  --pai-code-glow: 0 1px 0 rgba(255, 255, 255, 0.04) inset,
+                   0 12px 30px -18px rgba(15, 23, 42, 0.45);
+}
+
+.md-typeset,
+.md-typeset p,
+.md-typeset li {
+  letter-spacing: var(--pai-mono-tracking);
+  font-feature-settings: "calt" 1, "liga" 1, "ss01" 1, "ss02" 1, "zero" 1;
+}
+
+.md-typeset h1,
+.md-typeset h2,
+.md-typeset h3,
+.md-typeset h4 {
+  letter-spacing: -0.012em;
+  font-feature-settings: "ss01" 1, "ss02" 1, "zero" 1;
+}
+
+/* Inline code: tinted, monospace, just enough weight to pop */
+.md-typeset code {
+  padding: 0.06rem 0.32rem;
+  border: 1px solid var(--pai-code-border);
+  border-radius: 0.3rem;
+  background: var(--pai-accent-soft);
+  font-size: 0.82em;
+}
+
+.md-typeset a code {
+  border-color: transparent;
+}
+
+/* ---------- Cool code blocks ---------- */
+.md-typeset .highlight,
+.md-typeset pre > code,
+.md-typeset .highlighttable {
+  position: relative;
+  border-radius: var(--pai-code-radius);
+}
+
+.md-typeset div.highlight {
+  margin: 1.1rem 0;
+  border: 1px solid var(--pai-code-border);
+  border-radius: var(--pai-code-radius);
+  background: var(--md-code-bg-color);
+  box-shadow: var(--pai-code-glow);
+  overflow: hidden;
+}
+
+[data-md-color-scheme="default"] .md-typeset div.highlight {
+  background: linear-gradient(
+    180deg,
+    var(--md-code-bg-color) 0%,
+    color-mix(in oklab, var(--md-code-bg-color) 94%, var(--md-primary-fg-color) 6%) 100%
+  );
+}
+
+/* Filename header for fenced blocks that use `title="..."` */
+.md-typeset .highlight > .filename,
+.md-typeset .highlighttable .filename {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin: 0;
+  padding: 0.42rem 0.85rem;
+  border-bottom: 1px solid var(--pai-code-border);
+  background: color-mix(in oklab, var(--md-code-bg-color) 80%, var(--md-primary-fg-color) 20%);
+  color: var(--md-default-fg-color);
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: lowercase;
+}
+
+.md-typeset .highlight > .filename::before {
+  content: "";
+  display: inline-block;
+  width: 0.85rem;
+  height: 0.5rem;
+  background:
+    radial-gradient(circle at 0.125rem 0.25rem, #ff5f57 0.125rem, transparent 0.135rem),
+    radial-gradient(circle at 0.425rem 0.25rem, #febc2e 0.125rem, transparent 0.135rem),
+    radial-gradient(circle at 0.725rem 0.25rem, #28c840 0.125rem, transparent 0.135rem);
+}
+
+/* Terminal-flavored variant: add `.pai-term` to a code block wrapper */
+.md-typeset .pai-term.highlight,
+.md-typeset div.highlight.pai-term {
+  padding-top: 1.4rem;
+}
+
+.md-typeset .pai-term.highlight::before,
+.md-typeset div.highlight.pai-term::before {
+  content: "";
+  position: absolute;
+  top: 0.5rem;
+  left: 0.7rem;
+  width: 2.4rem;
+  height: 0.55rem;
+  background:
+    radial-gradient(circle at 0.15rem 0.275rem, #ff5f57 0.18rem, transparent 0.19rem),
+    radial-gradient(circle at 0.85rem 0.275rem, #febc2e 0.18rem, transparent 0.19rem),
+    radial-gradient(circle at 1.55rem 0.275rem, #28c840 0.18rem, transparent 0.19rem);
+  pointer-events: none;
+}
+
+.md-typeset .highlight pre,
+.md-typeset .highlighttable pre {
+  margin: 0;
+  padding: 0.85rem 1rem;
+}
+
+.md-typeset .highlight code {
+  font-feature-settings: "calt" 1, "liga" 1, "ss01" 1, "ss02" 1, "zero" 1;
+  font-size: 0.74rem;
+  line-height: 1.62;
+}
+
+/* Line numbers: subtle column on the left */
+.md-typeset .highlighttable .linenos {
+  background: color-mix(in oklab, var(--md-code-bg-color) 88%, var(--md-primary-fg-color) 12%);
+  border-right: 1px solid var(--pai-code-border);
+  color: var(--pai-muted);
+  user-select: none;
+}
+
+.md-typeset .highlighttable .linenodiv pre {
+  padding: 0.85rem 0.65rem 0.85rem 0.85rem;
+  font-size: 0.7rem;
+}
+
+/* Active-line highlight for selected lines (content.code.select) */
+.md-typeset .highlight .hll {
+  background: color-mix(in oklab, var(--md-primary-fg-color) 16%, transparent);
+  box-shadow: inset 2px 0 0 var(--md-primary-fg-color);
+}
+
+/* Copy button: align colors with the chrome */
+.md-typeset .md-clipboard {
+  color: var(--pai-muted);
+  transition: color 0.15s ease, transform 0.15s ease;
+}
+
+.md-typeset .md-clipboard:hover {
+  color: var(--md-primary-fg-color);
+  transform: translateY(-1px);
+}
+
+/* "View source" / edit action buttons in page header */
+.md-content__button {
+  border-radius: 0.4rem;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.md-content__button:hover {
+  background: var(--pai-accent-soft);
+  color: var(--md-primary-fg-color);
+}
+
+/* Revision-date footer line */
+.md-source-date,
+.md-source-file__fact {
+  color: var(--pai-muted);
+  font-size: 0.7rem;
+  letter-spacing: 0.01em;
 }
