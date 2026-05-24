@@ -1,5 +1,6 @@
 import reflex as rx
 
+from prompt_autoimprove_ui.components.code_view import code_view
 from prompt_autoimprove_ui.i18n import t
 from prompt_autoimprove_ui.state import PipelineState
 
@@ -15,14 +16,7 @@ def explanation_card() -> rx.Component:
                     spacing="2",
                     align="center",
                 ),
-                rx.code_block(
-                    PipelineState.explanation,
-                    can_copy=False,
-                    wrap_long_lines=True,
-                    language="log",
-                    theme=rx.code_block.themes.atom_dark,
-                    width="100%",
-                ),
+                code_view(PipelineState.explanation, "log", can_copy=False),
                 spacing="4",
                 align="stretch",
                 width="100%",

@@ -1,5 +1,6 @@
 import reflex as rx
 
+from prompt_autoimprove_ui.components.code_view import code_view
 from prompt_autoimprove_ui.i18n import t
 from prompt_autoimprove_ui.state import PipelineState
 
@@ -71,14 +72,7 @@ def _llm_rewrite_section() -> rx.Component:
                 align="center",
                 width="100%",
             ),
-            rx.code_block(
-                PipelineState.llm_rewrite_text,
-                can_copy=True,
-                wrap_long_lines=True,
-                language="markdown",
-                theme=rx.code_block.themes.atom_dark,
-                width="100%",
-            ),
+            code_view(PipelineState.llm_rewrite_text, "markdown"),
             spacing="2",
             align="stretch",
             width="100%",
@@ -121,14 +115,7 @@ def candidate_view() -> rx.Component:
             rx.cond(
                 PipelineState.candidate_text != "",
                 rx.vstack(
-                    rx.code_block(
-                        PipelineState.candidate_text,
-                        can_copy=True,
-                        wrap_long_lines=True,
-                        language="markdown",
-                        theme=rx.code_block.themes.atom_dark,
-                        width="100%",
-                    ),
+                    code_view(PipelineState.candidate_text, "markdown"),
                     rx.button(
                         rx.icon("clipboard-paste", size=14),
                         rx.text(t("use_this_prompt", PipelineState.language)),
@@ -159,14 +146,7 @@ def candidate_view() -> rx.Component:
                         spacing="2",
                         align="center",
                     ),
-                    rx.code_block(
-                        PipelineState.probation_text,
-                        can_copy=True,
-                        wrap_long_lines=True,
-                        language="log",
-                        theme=rx.code_block.themes.atom_dark,
-                        width="100%",
-                    ),
+                    code_view(PipelineState.probation_text, "log"),
                     spacing="2",
                     align="stretch",
                     width="100%",
