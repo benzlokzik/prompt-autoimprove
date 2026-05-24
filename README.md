@@ -1,4 +1,9 @@
-# prompt-autoimprove
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="docs/assets/wordmark-dark.svg">
+    <img alt="prompt-autoimprove" src="docs/assets/wordmark.svg" height="72">
+  </picture>
+</p>
 
 [![DOI](https://zenodo.org/badge/1240262549.svg)](https://doi.org/10.5281/zenodo.20263523)
 
