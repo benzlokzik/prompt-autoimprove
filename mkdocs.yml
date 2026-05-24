@@ -71,6 +71,7 @@ nav:
   - Strategies: strategies.md
   - Scoring: scoring.md
   - CLI: cli.md
+  - gRPC: grpc.md
   - Frontend: frontend.md
   - Local models: local-models.md
 
