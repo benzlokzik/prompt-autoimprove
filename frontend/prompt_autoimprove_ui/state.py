@@ -35,8 +35,29 @@ class StageItem(TypedDict):
 
 class MetricItem(TypedDict):
     name: str
+    label: str
     value: float
-    weight: float
+    value_str: str
+    weight_str: str
+
+
+# Friendly labels for the q_* metric names (the frontend does not render LaTeX).
+METRIC_LABELS: dict[str, dict[str, str]] = {
+    "en": {
+        "q_c": "Clarity",
+        "q_p": "Compliance",
+        "q_s": "Safety",
+        "q_t": "Token cost",
+        "q_l": "Latency",
+    },
+    "ru": {
+        "q_c": "Ясность",
+        "q_p": "Соответствие",
+        "q_s": "Безопасность",
+        "q_t": "Стоимость токенов",
+        "q_l": "Задержка",
+    },
+}
 
 
 class RevisionItem(TypedDict):
@@ -79,6 +100,7 @@ class PipelineState(rx.State):
     candidate_strategy: str = ""
     candidate_rationale: str = ""
     integrated_score: float = 0.0
+    score_display: str = ""
     explanation: str = ""
     probation_text: str = ""
     complexity_label: str = ""
@@ -296,6 +318,7 @@ class PipelineState(rx.State):
         self.candidate_strategy = ""
         self.candidate_rationale = ""
         self.integrated_score = 0.0
+        self.score_display = ""
         self.explanation = ""
         self.probation_text = ""
         self.complexity_label = ""
@@ -313,7 +336,9 @@ class PipelineState(rx.State):
         elif stage == "strategy_selected":
             self.candidate_strategy = payload.get("strategy", "")
         elif stage == "evaluated":
-            self.integrated_score = round(float(payload.get("score", 0.0)), 3)
+            score = float(payload.get("score", 0.0))
+            self.integrated_score = score
+            self.score_display = f"{score:.8f}"
         elif stage == "probation":
             self.probation_text = payload.get("output", "")
         elif stage == "final_decision":
@@ -362,12 +387,15 @@ class PipelineState(rx.State):
                 locale_hint=self.language,
                 attachments=attachments,
             )
+            metric_lang = "ru" if self.language == "ru" else "en"
             async with self:
                 self.metrics = [
                     MetricItem(
                         name=m["name"],
-                        value=round(float(m["value"]), 3),
-                        weight=round(float(m["weight"]), 3),
+                        label=METRIC_LABELS[metric_lang].get(m["name"], m["name"]),
+                        value=float(m["value"]),
+                        value_str=f"{float(m['value']):.8f}",
+                        weight_str=f"{float(m['weight']):.8f}",
                     )
                     for m in full.get("metrics", [])
                 ]
