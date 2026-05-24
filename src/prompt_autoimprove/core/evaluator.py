@@ -4,6 +4,7 @@ from prompt_autoimprove.core.strategies.base import CandidatePrompt
 from prompt_autoimprove.core.validator import ValidationReport
 from prompt_autoimprove.domain.evaluation import EvaluationMetric, MetricName, Score
 from prompt_autoimprove.domain.model_profile import ModelProfile
+from prompt_autoimprove.domain.task_type import REASONING_HEAVY
 
 DEFAULT_WEIGHTS: dict[MetricName, float] = {
     MetricName.CLARITY: 0.30,
@@ -12,6 +13,12 @@ DEFAULT_WEIGHTS: dict[MetricName, float] = {
     MetricName.TOKEN_COST: 0.15,
     MetricName.LATENCY: 0.10,
 }
+
+# Local models are cheap to run but slow and context-bound, so weight cost and
+# latency higher; reasoning-heavy tasks reward a clear, faithful prompt more.
+_LOCAL_EMPHASIS = 1.5
+_REASONING_EMPHASIS = 1.3
+_REASONING_TASKS: frozenset[str] = frozenset(t.value for t in REASONING_HEAVY)
 
 
 def _clip(x: float) -> float:
@@ -22,9 +29,26 @@ def _clip(x: float) -> float:
     return x
 
 
+def resolve_weights(
+    base: dict[MetricName, float],
+    profile: ModelProfile,
+    task: str | None,
+) -> dict[MetricName, float]:
+    """Adjust the base weight vector for a profile/task; not yet normalized."""
+    w = dict(base)
+    if profile.is_local:
+        w[MetricName.TOKEN_COST] *= _LOCAL_EMPHASIS
+        w[MetricName.LATENCY] *= _LOCAL_EMPHASIS
+    if task is not None and task in _REASONING_TASKS:
+        w[MetricName.CLARITY] *= _REASONING_EMPHASIS
+        w[MetricName.PROMPT_COMPLIANCE] *= _REASONING_EMPHASIS
+    return w
+
+
 @dataclass(slots=True)
 class IntegratedScorer:
     weights: dict[MetricName, float] = None  # type: ignore[assignment]
+    profile_aware: bool = True
 
     def __post_init__(self) -> None:
         if self.weights is None:
@@ -34,12 +58,20 @@ class IntegratedScorer:
             raise ValueError("weights must sum to a positive number")
         self.weights = {k: v / total for k, v in self.weights.items()}
 
+    def _weights_for(self, profile: ModelProfile, task: str | None) -> dict[MetricName, float]:
+        if not self.profile_aware:
+            return self.weights
+        resolved = resolve_weights(self.weights, profile, task)
+        total = sum(resolved.values())
+        return {k: v / total for k, v in resolved.items()}
+
     def score(
         self,
         candidate: CandidatePrompt,
         profile: ModelProfile,
         report: ValidationReport,
         *,
+        task: str | None = None,
         target_latency_ms: int = 5000,
     ) -> Score:
         text = candidate.text
@@ -57,12 +89,13 @@ class IntegratedScorer:
             MetricName.LATENCY: latency_raw,
         }
 
+        weights = self._weights_for(profile, task)
         metrics = tuple(
             EvaluationMetric(
                 name=name,
                 value=_clip(raw),
                 raw_value=raw,
-                weight=self.weights[name],
+                weight=weights[name],
             )
             for name, raw in components.items()
         )

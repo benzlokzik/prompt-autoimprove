@@ -122,7 +122,7 @@ class AutoImproveOrchestrator:
             report = validate(cand, profile)
             if not report.ok:
                 continue
-            score = self.scorer.score(cand, profile, report)
+            score = self.scorer.score(cand, profile, report, task=normalized.detected_task)
             scored.append((cand, score))
 
         if not scored:
