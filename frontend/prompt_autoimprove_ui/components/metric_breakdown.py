@@ -89,7 +89,7 @@ def metric_breakdown() -> rx.Component:
                 spacing="3",
                 width="100%",
             ),
-            spacing="3",
+            spacing="4",
             align="stretch",
             width="100%",
         ),
