@@ -659,13 +659,8 @@ body {
 }
 
 /* ---------- Mermaid diagrams ---------- */
-/* The auto-generated theme can wash out in dark mode; pin text to the theme
-   foreground and give actors/notes a solid, scheme-aware background so the
-   diagram is legible under both color schemes. */
-
-.md-typeset .mermaid {
-  background: transparent;
-}
+/* Pin diagram text to the theme foreground so labels stay legible under both
+   color schemes (Material's auto-theme handles the shapes and lines). */
 
 .md-typeset .mermaid .messageText,
 .md-typeset .mermaid .labelText,
@@ -676,28 +671,6 @@ body {
 .md-typeset .mermaid text.actor,
 .md-typeset .mermaid text.actor tspan {
   fill: var(--md-default-fg-color) !important;
-  stroke: none !important;
-}
-
-.md-typeset .mermaid rect.actor,
-.md-typeset .mermaid .note {
-  fill: var(--pai-card-bg) !important;
-  stroke: var(--md-primary-fg-color) !important;
-}
-
-.md-typeset .mermaid .messageLine0,
-.md-typeset .mermaid .messageLine1,
-.md-typeset .mermaid .actor-line {
-  stroke: var(--pai-muted) !important;
-}
-
-.md-typeset .mermaid .loopLine {
-  stroke: var(--md-primary-fg-color) !important;
-}
-
-/* Keep the dark sequence-number text legible on its accent badge. */
-.md-typeset .mermaid .sequenceNumber {
-  fill: var(--md-default-bg-color) !important;
 }
 
 /* ---------- Content action buttons ---------- */
