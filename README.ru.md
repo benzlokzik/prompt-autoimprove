@@ -36,6 +36,8 @@ model probation probe и сохраняет объяснение решения.
 - Хранение через SQLAlchemy 2 и Alembic; события пайплайна через Kafka,
   совместимую с Redpanda в разработке.
 - Веб-фронтенд на Reflex с Radix Themes; см. [docs/frontend.ru.md](docs/frontend.ru.md).
+- Необязательный сигнал спама/злоупотреблений для русских промптов (по умолчанию
+  выключен); см. [docs/moderation.ru.md](docs/moderation.ru.md).
 - CLI-команда: `pai improve --prompt ... --profile qwen3-7b`.
 
 ## Быстрый старт

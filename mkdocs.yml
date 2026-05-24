@@ -74,6 +74,7 @@ nav:
   - gRPC: grpc.md
   - Frontend: frontend.md
   - Local models: local-models.md
+  - Moderation: moderation.md
 
 markdown_extensions:
   - abbr
@@ -144,6 +145,7 @@ plugins:
             CLI: CLI
             Frontend: Frontend
             Local models: Local models
+            Moderation: Moderation
         - locale: ru
           name: Русский
           build: true
@@ -157,6 +159,7 @@ plugins:
             CLI: CLI
             Frontend: Фронтенд
             Local models: Локальные модели
+            Moderation: Модерация
   - git-revision-date-localized:
       enable_creation_date: true
       type: date

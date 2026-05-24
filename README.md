@@ -36,6 +36,8 @@ and records an explanation for the decision.
 - Persistence with SQLAlchemy 2 and Alembic; pipeline events through Kafka
   compatible with Redpanda in development.
 - Reflex web frontend with Radix Themes; see [docs/frontend.md](docs/frontend.md).
+- Optional spam/abuse signal for Russian prompts (off by default); see
+  [docs/moderation.md](docs/moderation.md).
 - CLI entry point: `pai improve --prompt ... --profile qwen3-7b`.
 
 Russian documentation is available in [README.ru.md](README.ru.md) and in the
