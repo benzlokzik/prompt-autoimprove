@@ -574,18 +574,21 @@ body {
 
 /* ---------- Code block language labels ---------- */
 /* pymdownx.highlight (pygments_lang_class) puts `language-<lang>` on the
-   `.highlight` wrapper; render it as a chip left of the copy button. */
+   `.highlight` wrapper; render it as a top-left chip. It lives on the opposite
+   side from the copy/select buttons, and a reserved top strip keeps it off the
+   first line of code. */
 
 .md-typeset .highlight[class*="language-"]::before {
   position: absolute;
   top: 0;
-  right: 2.1rem;
+  left: 0;
   z-index: 1;
   display: none;
-  padding: 0.12rem 0.5rem;
+  padding: 0.1rem 0.55rem;
   border: 1px solid var(--pai-code-border);
   border-top: 0;
-  border-radius: 0 0 var(--pai-radius-xs) var(--pai-radius-xs);
+  border-left: 0;
+  border-radius: 0 0 var(--pai-radius-xs) 0;
   background: var(--pai-accent-soft);
   color: var(--pai-muted);
   font-family: var(--md-code-font-family, monospace);
@@ -594,6 +597,11 @@ body {
   letter-spacing: 0.09em;
   text-transform: uppercase;
   pointer-events: none;
+}
+
+/* Reserve room for the label so it never overlaps the first line. */
+.md-typeset .highlight[class*="language-"] pre {
+  padding-top: 1.5rem;
 }
 
 .md-typeset .highlight.language-bash::before {
@@ -648,6 +656,48 @@ body {
 .md-typeset .highlight.language-sql::before {
   display: block;
   content: "SQL";
+}
+
+/* ---------- Mermaid diagrams ---------- */
+/* The auto-generated theme can wash out in dark mode; pin text to the theme
+   foreground and give actors/notes a solid, scheme-aware background so the
+   diagram is legible under both color schemes. */
+
+.md-typeset .mermaid {
+  background: transparent;
+}
+
+.md-typeset .mermaid .messageText,
+.md-typeset .mermaid .labelText,
+.md-typeset .mermaid .labelText tspan,
+.md-typeset .mermaid .loopText,
+.md-typeset .mermaid .loopText tspan,
+.md-typeset .mermaid .noteText,
+.md-typeset .mermaid text.actor,
+.md-typeset .mermaid text.actor tspan {
+  fill: var(--md-default-fg-color) !important;
+  stroke: none !important;
+}
+
+.md-typeset .mermaid rect.actor,
+.md-typeset .mermaid .note {
+  fill: var(--pai-card-bg) !important;
+  stroke: var(--md-primary-fg-color) !important;
+}
+
+.md-typeset .mermaid .messageLine0,
+.md-typeset .mermaid .messageLine1,
+.md-typeset .mermaid .actor-line {
+  stroke: var(--pai-muted) !important;
+}
+
+.md-typeset .mermaid .loopLine {
+  stroke: var(--md-primary-fg-color) !important;
+}
+
+/* Keep the dark sequence-number text legible on its accent badge. */
+.md-typeset .mermaid .sequenceNumber {
+  fill: var(--md-default-bg-color) !important;
 }
 
 /* ---------- Content action buttons ---------- */
