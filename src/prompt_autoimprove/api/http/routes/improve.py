@@ -1,6 +1,6 @@
 import json
 
-from fastapi import APIRouter, Depends, HTTPException, Query, Request, status
+from fastapi import APIRouter, Depends, HTTPException, Request, status
 from slowapi.util import get_remote_address
 from sse_starlette.sse import EventSourceResponse
 
@@ -20,6 +20,24 @@ def _rate_key(request: Request) -> str:
     return request.headers.get("x-api-key") or get_remote_address(request)
 
 
+def _prompt_from(body: ImproveRequest) -> Prompt:
+    attachments = [
+        PromptAttachment(
+            modality=Modality(a.modality),
+            uri=a.uri,
+            mime_type=a.mime_type,
+            bytes_size=a.bytes_size,
+        )
+        for a in body.attachments
+    ]
+    return Prompt(
+        text=body.prompt,
+        locale_hint=body.locale_hint,
+        modality=Modality.MIXED if attachments else Modality.TEXT,
+        attachments=attachments,
+    )
+
+
 @router.post("/improve", response_model=ImproveResponse)
 @limiter.limit(lambda: f"{get_settings().api.rate_limit_per_minute}/minute", key_func=_rate_key)
 async def improve(
@@ -35,21 +53,7 @@ async def improve(
         raise HTTPException(
             status.HTTP_404_NOT_FOUND, detail=f"unknown profile {body.profile!r}"
         ) from exc
-    attachments = [
-        PromptAttachment(
-            modality=Modality(a.modality),
-            uri=a.uri,
-            mime_type=a.mime_type,
-            bytes_size=a.bytes_size,
-        )
-        for a in body.attachments
-    ]
-    prompt = Prompt(
-        text=body.prompt,
-        locale_hint=body.locale_hint,
-        modality=Modality.MIXED if attachments else Modality.TEXT,
-        attachments=attachments,
-    )
+    prompt = _prompt_from(body)
     try:
         result = await orchestrator.run(
             prompt, body.profile, sensitive=body.sensitive, session_id=body.session_ref
@@ -73,26 +77,28 @@ async def improve(
     )
 
 
-@router.get("/improve/stream")
+@router.post("/improve/stream")
 async def improve_stream(
     request: Request,
-    prompt: str = Query(..., min_length=1, max_length=20000),
-    profile: str = Query(...),
-    locale_hint: str | None = Query(None),
+    body: ImproveRequest,
     _: str = Depends(require_api_key),
 ) -> EventSourceResponse:
+    # POST (not GET) so long prompts ride in the body instead of the URL query.
     orchestrator = request.app.state.orchestrator
     profiles = request.app.state.profiles
     try:
-        resolve_profile(profiles, profile)
+        resolve_profile(profiles, body.profile)
     except ProfileNotFoundError as exc:
         raise HTTPException(
-            status.HTTP_404_NOT_FOUND, detail=f"unknown profile {profile!r}"
+            status.HTTP_404_NOT_FOUND, detail=f"unknown profile {body.profile!r}"
         ) from exc
 
+    prompt_obj = _prompt_from(body)
+
     async def event_gen():
-        prompt_obj = Prompt(text=prompt, locale_hint=locale_hint)
-        async for stage, payload in orchestrator.stream(prompt_obj, profile):
+        async for stage, payload in orchestrator.stream(
+            prompt_obj, body.profile, sensitive=body.sensitive
+        ):
             yield {"event": stage, "data": json.dumps(payload)}
 
     return EventSourceResponse(event_gen())

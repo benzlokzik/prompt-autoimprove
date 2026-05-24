@@ -9,32 +9,27 @@ def _metric_card(metric) -> rx.Component:
         rx.vstack(
             rx.hstack(
                 rx.text(
-                    metric["name"],
+                    metric["label"],
                     size="1",
                     color=rx.color("gray", 11),
                     weight="bold",
-                    letter_spacing="0.05em",
-                    text_transform="uppercase",
                 ),
                 rx.spacer(),
                 rx.text(
-                    "·",
-                    size="1",
-                    color=rx.color("gray", 9),
-                ),
-                rx.text(
                     "w ",
-                    metric["weight"],
+                    metric["weight_str"],
                     size="1",
                     color=rx.color("gray", 10),
+                    style={"font_variant_numeric": "tabular-nums"},
                 ),
                 width="100%",
                 align="center",
             ),
             rx.heading(
-                metric["value"],
-                size="6",
+                metric["value_str"],
+                size="5",
                 color=rx.color("iris", 11),
+                style={"font_variant_numeric": "tabular-nums"},
             ),
             rx.progress(
                 value=(metric["value"] * 100).to(int),
@@ -64,8 +59,8 @@ def metric_breakdown() -> rx.Component:
                 rx.spacer(),
                 rx.box(
                     rx.text(
-                        PipelineState.integrated_score,
-                        size="8",
+                        PipelineState.score_display,
+                        size="6",
                         weight="bold",
                         color=rx.color("iris", 11),
                         style={"font_variant_numeric": "tabular-nums"},
