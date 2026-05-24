@@ -50,6 +50,23 @@ gRPC separately with `pai serve-grpc`.
 
 ## Response stream
 
+```mermaid
+sequenceDiagram
+    autonumber
+    participant C as Client
+    participant S as AutoImprove server
+    C->>S: Improve(ImproveRequest)
+    activate S
+    S-->>C: normalized (Normalization)
+    S-->>C: strategy_selected (StrategySelected)
+    S-->>C: candidate (Candidate)
+    loop one per metric
+        S-->>C: partial_eval (PartialEval)
+    end
+    S-->>C: final_decision (FinalDecision)
+    deactivate S
+```
+
 Each `ImproveEvent` has a `stage` string and a `oneof body`. Stages arrive in
 order:
 

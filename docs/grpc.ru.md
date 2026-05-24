@@ -50,6 +50,23 @@ uv run python -m prompt_autoimprove.api.grpc.server
 
 ## Поток ответа
 
+```mermaid
+sequenceDiagram
+    autonumber
+    participant C as Клиент
+    participant S as Сервер AutoImprove
+    C->>S: Improve(ImproveRequest)
+    activate S
+    S-->>C: normalized (Normalization)
+    S-->>C: strategy_selected (StrategySelected)
+    S-->>C: candidate (Candidate)
+    loop по одному на метрику
+        S-->>C: partial_eval (PartialEval)
+    end
+    S-->>C: final_decision (FinalDecision)
+    deactivate S
+```
+
 У каждого `ImproveEvent` есть строка `stage` и `oneof body`. Стадии приходят по
 порядку:
 
