@@ -1,5 +1,6 @@
 from dataclasses import dataclass
 
+from prompt_autoimprove.core.semantic import SemanticSimilarity
 from prompt_autoimprove.core.strategies.base import CandidatePrompt
 from prompt_autoimprove.core.validator import ValidationReport
 from prompt_autoimprove.domain.evaluation import EvaluationMetric, MetricName, Score
@@ -49,6 +50,8 @@ def resolve_weights(
 class IntegratedScorer:
     weights: dict[MetricName, float] = None  # type: ignore[assignment]
     profile_aware: bool = True
+    semantic: SemanticSimilarity | None = None
+    semantic_blend: float = 0.5
 
     def __post_init__(self) -> None:
         if self.weights is None:
@@ -65,6 +68,16 @@ class IntegratedScorer:
         total = sum(resolved.values())
         return {k: v / total for k, v in resolved.items()}
 
+    def _compliance_with_intent(self, text: str, rationale: str, reference: str | None) -> float:
+        compliance = self._compliance(text, rationale)
+        if self.semantic is None or not reference:
+            return compliance
+        try:
+            sim = self.semantic.similarity(text, reference)
+        except Exception:
+            return compliance
+        return (1.0 - self.semantic_blend) * compliance + self.semantic_blend * _clip(sim)
+
     def score(
         self,
         candidate: CandidatePrompt,
@@ -72,11 +85,12 @@ class IntegratedScorer:
         report: ValidationReport,
         *,
         task: str | None = None,
+        reference: str | None = None,
         target_latency_ms: int = 5000,
     ) -> Score:
         text = candidate.text
         clarity_raw = self._clarity(text)
-        compliance_raw = self._compliance(text, candidate.rationale)
+        compliance_raw = self._compliance_with_intent(text, candidate.rationale, reference)
         safety_raw = self._safety(report)
         cost_raw = self._cost(candidate.estimated_tokens, profile)
         latency_raw = self._latency(profile, target_latency_ms)

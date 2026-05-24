@@ -7,6 +7,7 @@ from prompt_autoimprove.adapters.factory import build_adapters_from_env
 from prompt_autoimprove.config import Settings
 from prompt_autoimprove.core.complexity import build_classifier
 from prompt_autoimprove.core.evaluator import IntegratedScorer
+from prompt_autoimprove.core.semantic import EmbeddingSimilarity, SemanticSimilarity
 from prompt_autoimprove.core.strategies.llm_rewrite import LLMRewriter
 from prompt_autoimprove.logging import get_logger
 from prompt_autoimprove.persistence.models import Base
@@ -66,11 +67,19 @@ async def build_runtime(settings: Settings) -> RuntimeContext:
             )
 
     classifier = build_classifier(settings.classifier, improver=improver_adapter)
+
+    semantic: SemanticSimilarity | None = None
+    if settings.scorer.semantic:
+        semantic = EmbeddingSimilarity(
+            model_name=settings.scorer.embedding_model,
+            device=settings.scorer.device,
+        )
+
     orchestrator = AutoImproveOrchestrator(
         profiles=profiles,
         adapters=adapters,
         router=Router(policy=RoutingPolicy(), adapters=adapters),
-        scorer=IntegratedScorer(),
+        scorer=IntegratedScorer(semantic=semantic, semantic_blend=settings.scorer.semantic_blend),
         events=publisher,
         session_factory=session_factory,
         rewriter=rewriter,
