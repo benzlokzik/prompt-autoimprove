@@ -1,4 +1,13 @@
+from typing import Literal
+
 from pydantic import BaseModel, Field
+
+
+class AttachmentIn(BaseModel):
+    modality: Literal["text", "image", "audio", "mixed"] = "image"
+    uri: str = Field(..., max_length=15_000_000)
+    mime_type: str = "application/octet-stream"
+    bytes_size: int = 0
 
 
 class ImproveRequest(BaseModel):
@@ -7,6 +16,7 @@ class ImproveRequest(BaseModel):
     locale_hint: str | None = None
     sensitive: bool = False
     session_ref: str | None = None
+    attachments: list[AttachmentIn] = Field(default_factory=list, max_length=8)
 
 
 class MetricOut(BaseModel):

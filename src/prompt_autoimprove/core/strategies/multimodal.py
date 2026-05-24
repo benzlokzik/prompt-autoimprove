@@ -5,8 +5,16 @@ from prompt_autoimprove.core.strategies.base import (
     estimate_tokens,
 )
 from prompt_autoimprove.domain.model_profile import ModelProfile
-from prompt_autoimprove.domain.prompt import Modality, NormalizedPrompt
+from prompt_autoimprove.domain.prompt import Modality, NormalizedPrompt, PromptAttachment
 from prompt_autoimprove.domain.strategy import StrategyConfig, StrategyName
+
+
+def _describe(att: PromptAttachment) -> str:
+    # Inline data URIs (base64) would bloat the prompt, so reference them by type.
+    if att.uri.startswith("data:") or len(att.uri) > 80:
+        size = f", {att.bytes_size} bytes" if att.bytes_size else ""
+        return f"- [{att.modality.value}] inline {att.mime_type}{size}"
+    return f"- [{att.modality.value}] {att.uri} ({att.mime_type})"
 
 
 @dataclass(slots=True)
@@ -26,9 +34,7 @@ class MultimodalStrategy:
         config: StrategyConfig,  # noqa: ARG002
     ) -> CandidatePrompt:
         prompt = normalized.source
-        attachment_lines = [
-            f"- [{att.modality.value}] {att.uri} ({att.mime_type})" for att in prompt.attachments
-        ]
+        attachment_lines = [_describe(att) for att in prompt.attachments]
         if not attachment_lines:
             attachment_lines = [f"- [{prompt.modality.value}] inline content"]
         attachments_block = "\n".join(attachment_lines)

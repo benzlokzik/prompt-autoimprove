@@ -49,6 +49,32 @@ async def test_unknown_profile_returns_404(client: httpx.AsyncClient) -> None:
 
 
 @pytest.mark.asyncio
+async def test_improve_accepts_image_attachment(client: httpx.AsyncClient) -> None:
+    headers = {"x-api-key": "test-key"}
+    data_uri = (
+        "data:image/png;base64,"
+        "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk"
+        "YPhfDwAChwGA60e6kgAAAABJRU5ErkJggg=="
+    )
+    resp = await client.post(
+        "/v1/improve",
+        headers=headers,
+        json={
+            "prompt": "Describe what is in this image.",
+            "profile": "gemma-4-e2b",
+            "attachments": [
+                {"modality": "image", "uri": data_uri, "mime_type": "image/png", "bytes_size": 68}
+            ],
+        },
+    )
+    assert resp.status_code == 200, resp.text
+    body = resp.json()
+    assert body["strategy"]
+    # The base64 blob must not leak into the candidate prompt text.
+    assert "base64," not in body["candidate"]
+
+
+@pytest.mark.asyncio
 async def test_rate_limit_kicks_in(client: httpx.AsyncClient) -> None:
     headers = {"x-api-key": "test-key"}
     body = {"prompt": "Summarize", "profile": "qwen3-7b"}
