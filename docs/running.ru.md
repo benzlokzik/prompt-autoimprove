@@ -47,6 +47,21 @@ curl http://localhost:8000/healthz
 docker compose down -v
 ```
 
+## Опубликованные образы
+
+Публикация GitHub-релиза собирает и пушит оба образа в GitHub Container
+Registry (через workflow `Publish images`) с тегами версии релиза
+(`X.Y.Z`, `X.Y`) и `latest`:
+
+```bash
+docker pull ghcr.io/benzlokzik-university/prompt-autoimprove:latest
+docker pull ghcr.io/benzlokzik-university/prompt-autoimprove-frontend:latest
+```
+
+Чтобы использовать опубликованный образ вместо локальной сборки, переопределите
+`image:` (убрав `build:`) в compose или запустите `docker run` напрямую с теми
+же переменными `PAI_*`, что и у сервиса `app`.
+
 ## Локально (без Docker)
 
 ```bash

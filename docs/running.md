@@ -47,6 +47,21 @@ Tear down (drop volumes to reset the database):
 docker compose down -v
 ```
 
+## Published images
+
+Publishing a GitHub release builds and pushes both images to the GitHub
+Container Registry (via the `Publish images` workflow), tagged with the release
+version (`X.Y.Z`, `X.Y`) and `latest`:
+
+```bash
+docker pull ghcr.io/benzlokzik-university/prompt-autoimprove:latest
+docker pull ghcr.io/benzlokzik-university/prompt-autoimprove-frontend:latest
+```
+
+Point compose at a published image instead of building locally by overriding
+`image:` (and dropping `build:`), or `docker run` it directly with the same
+`PAI_*` environment as the `app` service.
+
 ## Locally (no Docker)
 
 ```bash
