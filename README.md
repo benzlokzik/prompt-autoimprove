@@ -107,7 +107,7 @@ reports orchestrator and persistence readiness for container probes.
 
 ## License
 
-GNU AGPL-3.0-or-later; see [LICENSE](LICENSE). AGPL-3.0 is a strong copyleft
+GNU AGPL-3.0-only; see [LICENSE](LICENSE). AGPL-3.0 is a strong copyleft
 license with a network-use clause: if you run a modified version of this service
 and let users interact with it over a network, you must offer them the
 corresponding source code.
