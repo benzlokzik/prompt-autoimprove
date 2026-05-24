@@ -40,6 +40,22 @@ Weights are configurable per deployment mode: `production`, `research`, and
 $\mathbf{w}'$ so that $\sum w'_i = 1$ before applying the formula. Raw metric
 components outside $[0, 1]$ are clipped before scoring.
 
+## Profile- and task-aware weights
+
+When `IntegratedScorer.profile_aware` is enabled (the default),
+`core.evaluator.resolve_weights` adjusts the base vector for each evaluation
+before re-normalizing:
+
+- **Local profiles** (`gguf`/`safetensors`) raise the token-cost and latency
+  weights by $1.5\times$, since on-device models are context-bound and slower.
+- **Reasoning-heavy tasks** (`reasoning`, `code_generate`, `extract`) raise the
+  clarity and prompt-compliance weights by $1.3\times$.
+
+The adjustments compose and the result is re-normalized to $\sum w_i = 1$, so
+the score stays in $[0, 1]$. Pass `profile_aware=False` to score with a fixed
+vector. `scripts/benchmark.py` prints the per-task score delta between the two
+modes.
+
 ## Reproducibility
 
 Every evaluation persists:

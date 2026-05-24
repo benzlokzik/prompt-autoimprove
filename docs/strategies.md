@@ -43,6 +43,9 @@ describe observations before answering.
 ## Selection
 
 `core.strategy_selector.select` filters strategies through `applies()` and
-orders them by static priority. The orchestrator validates each selected
-candidate, computes the integrated `S` score, and returns the highest-scoring
-revision.
+orders them by priority. The priority table is task-conditioned: for
+reasoning-heavy tasks (`reasoning`, `code_generate`, `extract`) chain
+decomposition and self-verification float ahead of the generic role and format
+strategies; every other task keeps the default order. Ordering stays
+deterministic. The orchestrator validates each selected candidate, computes the
+integrated `S` score, and returns the highest-scoring revision.
