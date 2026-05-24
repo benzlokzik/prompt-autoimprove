@@ -7,6 +7,8 @@ from autoimprove.v1 import autoimprove_pb2 as pb  # isort: skip
 from autoimprove.v1 import autoimprove_pb2_grpc as pb_grpc  # isort: skip
 
 from prompt_autoimprove.api.grpc.service import AutoImproveService
+from prompt_autoimprove.api.http.app import create_app
+from prompt_autoimprove.config import get_settings
 from prompt_autoimprove.services.orchestrator import AutoImproveOrchestrator
 
 
@@ -32,3 +34,48 @@ async def test_grpc_stream_end_to_end(orchestrator: AutoImproveOrchestrator) -> 
         assert "final_decision" in stages
     finally:
         await server.stop(grace=None)
+
+
+@pytest.mark.asyncio
+async def test_grpc_unknown_profile_returns_not_found(
+    orchestrator: AutoImproveOrchestrator,
+) -> None:
+    server = grpc.aio.server()
+    pb_grpc.add_AutoImproveServicer_to_server(AutoImproveService(orchestrator), server)
+    port = server.add_insecure_port("127.0.0.1:0")
+    await server.start()
+    try:
+        async with grpc.aio.insecure_channel(f"127.0.0.1:{port}") as channel:
+            stub = pb_grpc.AutoImproveStub(channel)
+            request = pb.ImproveRequest(prompt="hello", profile="does-not-exist")
+            with pytest.raises(grpc.aio.AioRpcError) as excinfo:
+                async for _ in stub.Improve(request):
+                    pass
+        assert excinfo.value.code() == grpc.StatusCode.NOT_FOUND
+    finally:
+        await server.stop(grace=None)
+
+
+@pytest.mark.asyncio
+async def test_grpc_enabled_starts_listener_in_lifespan(monkeypatch) -> None:
+    monkeypatch.setenv("PAI_API__GRPC_ENABLED", "true")
+    monkeypatch.setenv("PAI_API__GRPC_PORT", "0")
+    get_settings.cache_clear()
+    app = create_app()
+    try:
+        async with app.router.lifespan_context(app):
+            assert app.state.grpc_server is not None
+    finally:
+        get_settings.cache_clear()
+
+
+@pytest.mark.asyncio
+async def test_grpc_disabled_starts_no_listener(monkeypatch) -> None:
+    monkeypatch.setenv("PAI_API__GRPC_ENABLED", "false")
+    get_settings.cache_clear()
+    app = create_app()
+    try:
+        async with app.router.lifespan_context(app):
+            assert app.state.grpc_server is None
+    finally:
+        get_settings.cache_clear()

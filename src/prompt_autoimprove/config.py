@@ -13,6 +13,7 @@ class DatabaseSettings(BaseSettings):
     dsn: str = "postgresql+asyncpg://pai:pai@localhost:5432/pai"
     echo: bool = False
     pool_size: int = 10
+    auto_create: bool = False
 
 
 class KafkaSettings(BaseSettings):
@@ -46,6 +47,7 @@ class APISettings(BaseSettings):
     api_key: str = ""
     allow_dev_key: bool = False
     rate_limit_per_minute: int = 60
+    grpc_enabled: bool = True
     grpc_port: int = 50051
     http_port: int = 8000
     cors_origins: str = "http://localhost:3000,http://127.0.0.1:3000"

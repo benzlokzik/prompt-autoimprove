@@ -96,6 +96,14 @@ def improve(
     asyncio.run(_run())
 
 
+@app.command(name="serve-grpc")
+def serve_grpc() -> None:
+    """Run the gRPC server (uses the same runtime as the HTTP app)."""
+    from prompt_autoimprove.api.grpc.server import serve
+
+    asyncio.run(serve())
+
+
 @app.command()
 def profiles() -> None:
     settings = get_settings()
