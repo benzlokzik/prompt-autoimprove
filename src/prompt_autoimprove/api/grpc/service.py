@@ -1,20 +1,24 @@
 from collections.abc import AsyncIterator
 from typing import Any
 
+import grpc
+
 import prompt_autoimprove.api.grpc.generated  # noqa: F401
 
 from autoimprove.v1 import autoimprove_pb2 as pb  # isort: skip
 from autoimprove.v1 import autoimprove_pb2_grpc as pb_grpc  # isort: skip
 
 from prompt_autoimprove.domain.prompt import Modality, Prompt, PromptAttachment
-from prompt_autoimprove.services.orchestrator import AutoImproveOrchestrator
+from prompt_autoimprove.registry.loader import ProfileNotFoundError
+from prompt_autoimprove.routing.router import NoRouteError
+from prompt_autoimprove.services.orchestrator import AutoImproveOrchestrator, PipelineError
 
 
 class AutoImproveService(pb_grpc.AutoImproveServicer):
     def __init__(self, orchestrator: AutoImproveOrchestrator) -> None:
         self.orchestrator = orchestrator
 
-    async def Improve(self, request: Any, context: Any) -> AsyncIterator[Any]:  # noqa: ARG002
+    async def Improve(self, request: Any, context: Any) -> AsyncIterator[Any]:
         prompt = Prompt(
             text=request.prompt,
             locale_hint=request.locale_hint or None,
@@ -29,7 +33,16 @@ class AutoImproveService(pb_grpc.AutoImproveServicer):
                 for att in request.attachments
             ],
         )
-        result = await self.orchestrator.run(prompt, request.profile, sensitive=request.sensitive)
+        try:
+            result = await self.orchestrator.run(
+                prompt, request.profile, sensitive=request.sensitive
+            )
+        except ProfileNotFoundError as exc:
+            await context.abort(grpc.StatusCode.NOT_FOUND, str(exc))
+        except PipelineError as exc:
+            await context.abort(grpc.StatusCode.FAILED_PRECONDITION, str(exc))
+        except NoRouteError as exc:
+            await context.abort(grpc.StatusCode.UNAVAILABLE, str(exc))
 
         yield pb.ImproveEvent(
             stage="normalized",

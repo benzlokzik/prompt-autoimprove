@@ -138,6 +138,21 @@ erDiagram
     }
 ```
 
+## Runtime bootstrap
+
+`prompt_autoimprove.bootstrap.build_runtime` builds the shared pipeline runtime
+(profiles, adapters, classifier, rewriter, persistence session factory, event
+publisher) once, and both the HTTP app lifespan and the gRPC server consume it,
+so the two transports expose identical capabilities. The HTTP process starts the
+gRPC `AutoImproveService` as an asyncio task in the same event loop when
+`PAI_API__GRPC_ENABLED` is true (the default); this assumes a single worker. For
+multi-worker deployments run gRPC as its own process (`pai serve-grpc` or
+`python -m prompt_autoimprove.api.grpc.server`).
+
+Schema ownership belongs to Alembic. Under docker compose a one-shot `migrate`
+service runs `alembic upgrade head` before the app starts; the app no longer
+creates tables on boot unless `PAI_DB__AUTO_CREATE` is set.
+
 ## Deployment topologies
 
 1. **All-in-one**: one Python process for local experiments, CI, and small demos.

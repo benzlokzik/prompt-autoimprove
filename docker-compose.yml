@@ -28,6 +28,12 @@ services:
       - --advertise-kafka-addr=INTERNAL://redpanda:9092,EXTERNAL://localhost:19092
     ports:
       - "19092:19092"
+    healthcheck:
+      test: ["CMD-SHELL", "rpk cluster health | grep -q 'Healthy:.*true'"]
+      interval: 10s
+      timeout: 5s
+      retries: 6
+      start_period: 10s
 
   minio:
     image: minio/minio:RELEASE.2025-01-20T14-49-07Z
@@ -40,6 +46,23 @@ services:
       - "9001:9001"
     volumes:
       - minio_data:/data
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:9000/minio/health/live || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+  migrate:
+    build: .
+    image: prompt-autoimprove:dev
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      PAI_DB__DSN: postgresql+asyncpg://pai:pai@postgres:5432/pai
+    command: ["alembic", "upgrade", "head"]
+    restart: "no"
 
   app:
     build: .
@@ -48,7 +71,9 @@ services:
       postgres:
         condition: service_healthy
       redpanda:
-        condition: service_started
+        condition: service_healthy
+      migrate:
+        condition: service_completed_successfully
     environment:
       PAI_DB__DSN: postgresql+asyncpg://pai:pai@postgres:5432/pai
       PAI_KAFKA__BOOTSTRAP_SERVERS: redpanda:9092

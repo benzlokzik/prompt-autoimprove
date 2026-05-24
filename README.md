@@ -49,13 +49,20 @@ uv run ruff check .                                                      # lint
 uv run ruff format .                                                     # format
 uv run ty check src                                                      # typecheck
 uv run pytest -q                                                         # tests
-uv run uvicorn prompt_autoimprove.api.http.app:app --reload --port 8000  # HTTP API
-uv run python -m prompt_autoimprove.api.grpc.server                      # gRPC server
+uv run uvicorn prompt_autoimprove.api.http.app:app --reload --port 8000  # HTTP API + embedded gRPC
+uv run pai serve-grpc                                                    # gRPC server only
 ./scripts/gen_proto.sh                                                   # regenerate gRPC stubs
-uv run alembic upgrade head                                              # apply migrations
+uv run alembic upgrade head                                              # apply migrations (local)
 docker compose up -d                                                     # postgres + redpanda + minio
 docker compose --profile app up --build                                  # app + frontend stack
 ```
+
+The HTTP app launches the gRPC `AutoImproveService` (port 50051) in the same
+process by default; set `PAI_API__GRPC_ENABLED=false` to disable it, or run a
+standalone gRPC process with `uv run pai serve-grpc`. Under docker compose the
+`migrate` service runs `alembic upgrade head` before the app starts, and the
+frontend depends on a healthy backend, so starting the web client brings up the
+HTTP and gRPC interfaces with it.
 
 ## Web client
 
@@ -86,6 +93,10 @@ Environment variables use the `PAI_*` prefix where the service owns the setting.
 Adapter-specific variables such as `OPENAI_BASE_URL` and `ANTHROPIC_API_KEY`
 are documented in the model guides. Alembic reads its configuration from
 `[tool.alembic]` in [pyproject.toml](pyproject.toml).
+
+Migrations own the schema: set `PAI_DB__AUTO_CREATE=1` only to let the app
+create tables directly for a quick local run without Alembic. `GET /healthz`
+reports orchestrator and persistence readiness for container probes.
 
 ## License
 

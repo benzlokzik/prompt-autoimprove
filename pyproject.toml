@@ -103,8 +103,6 @@ exclude = [
     "src/prompt_autoimprove/adapters/gguf_local.py",
     "src/prompt_autoimprove/adapters/safetensors_hf.py",
     "src/prompt_autoimprove/core/ml_complexity.py",
-    "src/prompt_autoimprove/api/grpc/service.py",
-    "src/prompt_autoimprove/api/grpc/server.py",
 ]
 
 [tool.ty.rules]
