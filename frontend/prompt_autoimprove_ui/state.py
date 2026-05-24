@@ -145,8 +145,9 @@ class PipelineState(rx.State):
                 429: "err_rate_limit",
             }.get(code, "err_server" if code >= 500 else "err_generic")
             base = STRINGS[key][lang]
-            # Surface the backend's specific reason for actionable client errors.
-            detail = self._response_detail(exc) if 400 <= code < 500 and code != 429 else ""
+            # Surface the backend's specific reason for actionable client errors
+            # (HTTPStatusError implies code >= 400; skip 5xx internals and 429).
+            detail = self._response_detail(exc) if code < 500 and code != 429 else ""
             return f"{base} — {detail}" if detail else base
         if isinstance(exc, httpx.RequestError):
             key = "err_network"
