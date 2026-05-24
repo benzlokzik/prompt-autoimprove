@@ -41,6 +41,15 @@ class ClassifierSettings(BaseSettings):
     composite_hi: float = 0.55
 
 
+class ScorerSettings(BaseSettings):
+    model_config = SettingsConfigDict(env_prefix="PAI_SCORER_")
+
+    semantic: bool = False
+    embedding_model: str = "sentence-transformers/all-MiniLM-L6-v2"
+    device: str = "cpu"
+    semantic_blend: float = 0.5
+
+
 class APISettings(BaseSettings):
     model_config = SettingsConfigDict(env_prefix="PAI_API_")
 
@@ -76,6 +85,7 @@ class Settings(BaseSettings):
     api: APISettings = Field(default_factory=APISettings)
     improver: ImproverSettings = Field(default_factory=ImproverSettings)
     classifier: ClassifierSettings = Field(default_factory=ClassifierSettings)
+    scorer: ScorerSettings = Field(default_factory=ScorerSettings)
 
     @model_validator(mode="after")
     def _resolve_api_key(self) -> "Settings":

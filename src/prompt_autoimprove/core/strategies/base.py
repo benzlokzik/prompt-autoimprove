@@ -35,5 +35,7 @@ class Strategy(Protocol):
 
 
 def estimate_tokens(text: str) -> int:
-    """A cheap token estimate: ~4 characters per token plus newlines."""
-    return max(1, (len(text) + 3) // 4)
+    """Estimate token count, using a real tokenizer when the ml group is installed."""
+    from prompt_autoimprove.core.tokenizer import count_tokens
+
+    return count_tokens(text)

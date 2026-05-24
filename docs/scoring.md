@@ -56,6 +56,29 @@ the score stays in $[0, 1]$. Pass `profile_aware=False` to score with a fixed
 vector. `scripts/benchmark.py` prints the per-task score delta between the two
 modes.
 
+## Token accounting
+
+`core.tokenizer.count_tokens` backs the token-cost term. With the `ml` group
+installed it uses a real BPE tokenizer (tiktoken, `cl100k_base`); otherwise it
+falls back to a `~4 characters per token` heuristic. Any tokenizer error also
+falls back, so zero-dependency runs stay deterministic.
+
+## Semantic intent preservation
+
+When a `SemanticSimilarity` backend is configured (`PAI_SCORER__SEMANTIC=1`,
+which loads `EmbeddingSimilarity` from the `ml` group), the prompt-compliance
+term is blended with the cosine similarity between the candidate and the
+original request:
+
+$$
+q_p = (1 - \beta)\, q_p^{\text{heuristic}} + \beta \cdot \mathrm{sim}(\text{candidate}, \text{original})
+$$
+
+with $\beta$ = `PAI_SCORER__SEMANTIC_BLEND` (default $0.5$). This stops a
+candidate from winning by stuffing marker words while dropping the user's actual
+ask. The signal is optional and fails closed: with no backend, no reference, or
+any embedding error, $q_p$ is the pure heuristic.
+
 ## Reproducibility
 
 Every evaluation persists:

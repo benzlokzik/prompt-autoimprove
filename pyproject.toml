@@ -55,6 +55,7 @@ ml = [
     "torch>=2.4",
     "transformers>=4.46",
     "sentence-transformers>=3.2",
+    "tiktoken>=0.8",
 ]
 local-models = [
     "llama-cpp-python>=0.3",
