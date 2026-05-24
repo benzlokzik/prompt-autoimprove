@@ -55,6 +55,7 @@ STRINGS: dict[str, dict[str, str]] = {
         "ru": "Покажем кандидат, выбранную стратегию и ответ модели.",
     },
     "probation": {"en": "Probation output", "ru": "Ответ модели"},
+    "spam_flag": {"en": "Possible spam", "ru": "Возможно спам"},
     "score": {"en": "Score", "ru": "Оценка"},
     "why_candidate": {"en": "Why this candidate", "ru": "Почему этот кандидат"},
     "history": {"en": "History", "ru": "История"},

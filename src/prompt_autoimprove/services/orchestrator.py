@@ -17,8 +17,9 @@ from prompt_autoimprove.core.complexity import (
     HeuristicClassifier,
     classify_async,
 )
-from prompt_autoimprove.core.evaluator import IntegratedScorer
+from prompt_autoimprove.core.evaluator import IntegratedScorer, _spam_score
 from prompt_autoimprove.core.normalizer import normalize
+from prompt_autoimprove.core.spam_signal import SpamSignal
 from prompt_autoimprove.core.strategies.base import CandidatePrompt
 from prompt_autoimprove.core.strategies.llm_rewrite import LLMRewriter
 from prompt_autoimprove.core.strategy_selector import select
@@ -62,6 +63,9 @@ class AutoImproveOrchestrator:
     session_factory: async_sessionmaker | None = None
     rewriter: LLMRewriter | None = None
     classifier: ComplexityClassifier = field(default_factory=HeuristicClassifier)
+    spam_scorer: SpamSignal | None = None
+    spam_threshold: float = 0.8
+    spam_block: bool = False
 
     async def run(
         self,
@@ -77,7 +81,7 @@ class AutoImproveOrchestrator:
 
         await self.events.publish(PipelineEvent.now("received", sid_str, {"profile": profile_name}))
 
-        normalized = normalize(prompt)
+        normalized = normalize(prompt, spam_scorer=self.spam_scorer)
         await self.events.publish(
             PipelineEvent.now(
                 "normalized",
@@ -85,6 +89,13 @@ class AutoImproveOrchestrator:
                 {"language": normalized.detected_language, "task": normalized.detected_task},
             )
         )
+
+        spam = _spam_score(normalized.safety_flags)
+        if self.spam_block and spam is not None and spam >= self.spam_threshold:
+            await self.events.publish(
+                PipelineEvent.now("rejected", sid_str, {"reason": "spam", "score": spam})
+            )
+            raise PipelineError("prompt rejected: spam/abuse score above threshold")
 
         strategies = select(normalized, profile)
         candidates = [s.apply(normalized, profile, self.config) for s in strategies]
@@ -128,6 +139,7 @@ class AutoImproveOrchestrator:
                 report,
                 task=normalized.detected_task,
                 reference=normalized.cleaned_text,
+                safety_flags=normalized.safety_flags,
             )
             scored.append((cand, score))
 

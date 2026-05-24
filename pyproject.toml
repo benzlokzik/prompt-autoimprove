@@ -60,6 +60,9 @@ ml = [
 local-models = [
     "llama-cpp-python>=0.3",
 ]
+moderation = [
+    "spam-detector[transformers] @ git+https://github.com/benzlokzik/spam-detector@v0.2.0",
+]
 
 [project.scripts]
 pai = "prompt_autoimprove.cli.main:app"
@@ -104,6 +107,7 @@ exclude = [
     "src/prompt_autoimprove/adapters/gguf_local.py",
     "src/prompt_autoimprove/adapters/safetensors_hf.py",
     "src/prompt_autoimprove/core/ml_complexity.py",
+    "src/prompt_autoimprove/core/spam_signal.py",
 ]
 
 [tool.ty.rules]

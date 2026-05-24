@@ -51,6 +51,23 @@ def _complexity_badge() -> rx.Component:
     )
 
 
+def _spam_badge() -> rx.Component:
+    return rx.cond(
+        PipelineState.spam_flagged,
+        rx.tooltip(
+            rx.badge(
+                rx.icon("shield-alert", size=12),
+                f"{t('spam_flag', PipelineState.language)} {PipelineState.spam_percent}",
+                color_scheme="red",
+                variant="soft",
+                size="1",
+            ),
+            content=t("spam_flag", PipelineState.language),
+        ),
+        rx.fragment(),
+    )
+
+
 def _llm_rewrite_section() -> rx.Component:
     return rx.cond(
         PipelineState.llm_rewrite_text != "",
@@ -96,6 +113,7 @@ def candidate_view() -> rx.Component:
                     align="center",
                 ),
                 rx.spacer(),
+                _spam_badge(),
                 _complexity_badge(),
                 rx.cond(
                     PipelineState.candidate_strategy != "",

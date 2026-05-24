@@ -8,6 +8,7 @@ from prompt_autoimprove.config import Settings
 from prompt_autoimprove.core.complexity import build_classifier
 from prompt_autoimprove.core.evaluator import IntegratedScorer
 from prompt_autoimprove.core.semantic import EmbeddingSimilarity, SemanticSimilarity
+from prompt_autoimprove.core.spam_signal import BertSpamSignal, SpamSignal
 from prompt_autoimprove.core.strategies.llm_rewrite import LLMRewriter
 from prompt_autoimprove.logging import get_logger
 from prompt_autoimprove.persistence.models import Base
@@ -75,15 +76,26 @@ async def build_runtime(settings: Settings) -> RuntimeContext:
             device=settings.scorer.device,
         )
 
+    spam_scorer: SpamSignal | None = None
+    if settings.moderation.enabled:
+        spam_scorer = BertSpamSignal(pretrained=settings.moderation.hf_model)
+
     orchestrator = AutoImproveOrchestrator(
         profiles=profiles,
         adapters=adapters,
         router=Router(policy=RoutingPolicy(), adapters=adapters),
-        scorer=IntegratedScorer(semantic=semantic, semantic_blend=settings.scorer.semantic_blend),
+        scorer=IntegratedScorer(
+            semantic=semantic,
+            semantic_blend=settings.scorer.semantic_blend,
+            moderation_weight=settings.moderation.weight,
+        ),
         events=publisher,
         session_factory=session_factory,
         rewriter=rewriter,
         classifier=classifier,
+        spam_scorer=spam_scorer,
+        spam_threshold=settings.moderation.threshold,
+        spam_block=settings.moderation.block,
     )
     return RuntimeContext(
         orchestrator=orchestrator,

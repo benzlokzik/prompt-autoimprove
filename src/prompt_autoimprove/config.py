@@ -50,6 +50,16 @@ class ScorerSettings(BaseSettings):
     semantic_blend: float = 0.5
 
 
+class ModerationSettings(BaseSettings):
+    model_config = SettingsConfigDict(env_prefix="PAI_MODERATION_")
+
+    enabled: bool = False
+    hf_model: str = "cointegrated/rubert-tiny2"
+    threshold: float = 0.8
+    weight: float = 0.5
+    block: bool = False
+
+
 class APISettings(BaseSettings):
     model_config = SettingsConfigDict(env_prefix="PAI_API_")
 
@@ -86,6 +96,7 @@ class Settings(BaseSettings):
     improver: ImproverSettings = Field(default_factory=ImproverSettings)
     classifier: ClassifierSettings = Field(default_factory=ClassifierSettings)
     scorer: ScorerSettings = Field(default_factory=ScorerSettings)
+    moderation: ModerationSettings = Field(default_factory=ModerationSettings)
 
     @model_validator(mode="after")
     def _resolve_api_key(self) -> "Settings":

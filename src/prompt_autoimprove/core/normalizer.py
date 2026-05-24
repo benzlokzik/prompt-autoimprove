@@ -2,6 +2,7 @@ import re
 import unicodedata
 from collections.abc import Iterable
 
+from prompt_autoimprove.core.spam_signal import SpamSignal
 from prompt_autoimprove.domain.prompt import NormalizedPrompt, Prompt
 from prompt_autoimprove.domain.task_type import TaskType
 
@@ -88,11 +89,20 @@ def _strip_control(text: str) -> str:
     return "".join(ch for ch in text if unicodedata.category(ch)[0] != "C" or ch in "\n\t")
 
 
+def _spam_flag(text: str, scorer: SpamSignal) -> str | None:
+    """Score Russian text for spam; return a `spam:<score>` flag or None on failure."""
+    try:
+        return f"spam:{scorer.score(text):.4f}"
+    except Exception:  # moderation must never break normalization; degrade to neutral
+        return None
+
+
 def normalize(
     prompt: Prompt,
     *,
     extra_safety: Iterable[str] = (),
     redact: bool = True,
+    spam_scorer: SpamSignal | None = None,
 ) -> NormalizedPrompt:
     """Run the full normalization pipeline on a prompt."""
     cleaned = _strip_control(prompt.text).strip()
@@ -111,6 +121,10 @@ def normalize(
         safety = (*safety, *(f"pii:{c}" for c in pii_categories))
     if extra_safety:
         safety = (*safety, *(s for s in extra_safety if s in cleaned.lower()))
+    if spam_scorer is not None and language == "ru":
+        flag = _spam_flag(cleaned, spam_scorer)
+        if flag is not None:
+            safety = (*safety, flag)
 
     return NormalizedPrompt(
         source=prompt,
