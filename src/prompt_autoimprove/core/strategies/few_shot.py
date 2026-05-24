@@ -38,7 +38,7 @@ class FewShotStrategy:
     def applies(self, normalized: NormalizedPrompt, profile: ModelProfile) -> bool:
         if normalized.detected_task not in self.examples:
             return False
-        budget = profile.context_window - estimate_tokens(normalized.cleaned_text)
+        budget = profile.context_window - estimate_tokens(normalized.cleaned_text, profile.name)
         return budget > 256
 
     def apply(
@@ -49,12 +49,14 @@ class FewShotStrategy:
     ) -> CandidatePrompt:
         pool = self.examples.get(normalized.detected_task, [])
         chosen = pool[: max(1, config.max_examples)]
-        budget = profile.context_window - estimate_tokens(normalized.cleaned_text) - 64
+        budget = (
+            profile.context_window - estimate_tokens(normalized.cleaned_text, profile.name) - 64
+        )
         rendered: list[str] = []
         used = 0
         for inp, out in chosen:
             block = f"Example input:\n{inp}\nExample output:\n{out}\n"
-            cost = estimate_tokens(block)
+            cost = estimate_tokens(block, profile.name)
             if used + cost > budget:
                 break
             rendered.append(block)
@@ -65,5 +67,5 @@ class FewShotStrategy:
             text=text,
             strategy=self.name,
             rationale=f"Added {len(rendered)} few-shot example(s) within budget.",
-            estimated_tokens=estimate_tokens(text),
+            estimated_tokens=estimate_tokens(text, profile.name),
         )

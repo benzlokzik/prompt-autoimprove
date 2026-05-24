@@ -34,8 +34,8 @@ class Strategy(Protocol):
     ) -> CandidatePrompt: ...
 
 
-def estimate_tokens(text: str) -> int:
-    """Estimate token count, using a real tokenizer when the ml group is installed."""
+def estimate_tokens(text: str, model: str | None = None) -> int:
+    """Estimate token count, using the model's tokenizer when the ml group is installed."""
     from prompt_autoimprove.core.tokenizer import count_tokens
 
-    return count_tokens(text)
+    return count_tokens(text, model)
