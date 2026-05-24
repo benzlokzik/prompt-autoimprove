@@ -1,6 +1,7 @@
 # prompt-autoimprove
 
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.20214350.svg)](https://doi.org/10.5281/zenodo.20214350)
+[![License: AGPL v3](https://img.shields.io/badge/License-AGPL_v3-blue.svg)](https://www.gnu.org/licenses/agpl-3.0)
 
 `prompt-autoimprove` — Python-сервис для улучшения промптов до отправки в
 большие языковые или мультимодальные модели. Он нормализует исходный запрос,
@@ -91,4 +92,7 @@ MkDocs собирает английскую версию в `/`, а русск�
 
 ## Лицензия
 
-MIT; см. [LICENSE](LICENSE).
+GNU AGPL-3.0-or-later; см. [LICENSE](LICENSE). AGPL-3.0 — строгая copyleft-лицензия
+с условием о сетевом использовании: если вы запускаете изменённую версию этого
+сервиса и даёте пользователям работать с ним по сети, вы обязаны предоставить им
+соответствующий исходный код.

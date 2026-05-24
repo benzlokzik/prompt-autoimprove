@@ -4,7 +4,7 @@ version = "0.1.0"
 description = "Microservices system for automatic improvement of LLM prompts"
 readme = "README.md"
 requires-python = ">=3.13"
-license = { text = "MIT" }
+license = { text = "AGPL-3.0-or-later" }
 authors = [{ name = "benzlokzik" }]
 dependencies = [
     "pydantic>=2.7",
