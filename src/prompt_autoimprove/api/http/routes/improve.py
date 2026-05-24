@@ -1,6 +1,6 @@
 import json
 
-from fastapi import APIRouter, Depends, HTTPException, Query, Request, status
+from fastapi import APIRouter, Depends, HTTPException, Request, status
 from slowapi.util import get_remote_address
 from sse_starlette.sse import EventSourceResponse
 
@@ -73,26 +73,25 @@ async def improve(
     )
 
 
-@router.get("/improve/stream")
+@router.post("/improve/stream")
 async def improve_stream(
     request: Request,
-    prompt: str = Query(..., min_length=1, max_length=20000),
-    profile: str = Query(...),
-    locale_hint: str | None = Query(None),
+    body: ImproveRequest,
     _: str = Depends(require_api_key),
 ) -> EventSourceResponse:
+    # POST (not GET) so long prompts ride in the body instead of the URL query.
     orchestrator = request.app.state.orchestrator
     profiles = request.app.state.profiles
     try:
-        resolve_profile(profiles, profile)
+        resolve_profile(profiles, body.profile)
     except ProfileNotFoundError as exc:
         raise HTTPException(
-            status.HTTP_404_NOT_FOUND, detail=f"unknown profile {profile!r}"
+            status.HTTP_404_NOT_FOUND, detail=f"unknown profile {body.profile!r}"
         ) from exc
 
     async def event_gen():
-        prompt_obj = Prompt(text=prompt, locale_hint=locale_hint)
-        async for stage, payload in orchestrator.stream(prompt_obj, profile):
+        prompt_obj = Prompt(text=body.prompt, locale_hint=body.locale_hint)
+        async for stage, payload in orchestrator.stream(prompt_obj, body.profile):
             yield {"event": stage, "data": json.dumps(payload)}
 
     return EventSourceResponse(event_gen())

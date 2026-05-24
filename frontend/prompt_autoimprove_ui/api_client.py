@@ -46,17 +46,21 @@ class BackendClient:
         *,
         locale_hint: str | None = None,
     ) -> AsyncIterator[tuple[str, dict[str, Any]]]:
-        params: dict[str, str] = {"prompt": prompt, "profile": profile}
+        body: dict[str, Any] = {"prompt": prompt, "profile": profile}
         if locale_hint:
-            params["locale_hint"] = locale_hint
-        headers = {"x-api-key": self.api_key, "accept": "text/event-stream"}
+            body["locale_hint"] = locale_hint
+        headers = {
+            "x-api-key": self.api_key,
+            "accept": "text/event-stream",
+            "content-type": "application/json",
+        }
         async with (
             httpx.AsyncClient(timeout=self.timeout) as client,
             client.stream(
-                "GET",
+                "POST",
                 f"{self.base_url}/v1/improve/stream",
                 headers=headers,
-                params=params,
+                json=body,
             ) as resp,
         ):
             resp.raise_for_status()
