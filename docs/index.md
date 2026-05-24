@@ -27,42 +27,57 @@ repeatable evaluation workflows where every prompt revision should be traceable.
 ## Start here
 
 <div class="pai-links" markdown>
+
 [Architecture](architecture.md){ .md-button }
 [CLI](cli.md){ .md-button }
 [Scoring](scoring.md){ .md-button }
 [Local models](local-models.md){ .md-button }
+
 </div>
 
 ## Capabilities
 
 <div class="pai-grid" markdown>
 <div class="pai-card" markdown>
+
 ### CLI
+
 Run `pai improve` for local prompt improvement and inspect the selected
 strategy, score, and explanation.
+
 </div>
 
 <div class="pai-card" markdown>
+
 ### API
-Use the FastAPI HTTP backend, SSE pipeline stream at `/v1/improve/stream`, or
-gRPC `AutoImproveService`.
+
+Use the FastAPI HTTP backend, SSE pipeline stream at `/v1/improve/stream`, or gRPC `AutoImproveService`.
+
 </div>
 
 <div class="pai-card" markdown>
+
 ### Frontend
-Operate the pipeline from a Reflex web client with profile selection, live
-stage updates, scoring details, and history.
+
+Operate the pipeline from a Reflex web client with profile selection, live stage updates, scoring details, and history.
+
 </div>
 
 <div class="pai-card" markdown>
+
 ### Scoring
-Compare revisions with `S = 0.30·q_c + 0.25·q_p + 0.20·q_s + 0.15·q_t + 0.10·q_l`.
+
+Compare revisions with the weighted sum $S = \sum_i w_i\,q_i$. See
+[Scoring](scoring.md) for the full formula and weights.
+
 </div>
 
 <div class="pai-card" markdown>
+
 ### Local models
-Route to Ollama, LM Studio, local GGUF, Hugging Face safetensors, or
-OpenAI-compatible endpoints.
+
+Route to Ollama, LM Studio, local GGUF, Hugging Face safetensors, or OpenAI-compatible endpoints.
+
 </div>
 </div>
 

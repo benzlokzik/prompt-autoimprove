@@ -28,42 +28,60 @@
 ## С чего начать
 
 <div class="pai-links" markdown>
+
 [Архитектура](architecture.md){ .md-button }
 [CLI](cli.md){ .md-button }
 [Оценка](scoring.md){ .md-button }
 [Локальные модели](local-models.md){ .md-button }
+
 </div>
 
 ## Возможности
 
 <div class="pai-grid" markdown>
 <div class="pai-card" markdown>
+
 ### CLI
+
 Запускайте `pai improve` локально и смотрите выбранную стратегию, оценку и
 объяснение.
+
 </div>
 
 <div class="pai-card" markdown>
+
 ### API
+
 Используйте FastAPI HTTP backend, SSE-поток `/v1/improve/stream` или gRPC
 `AutoImproveService`.
+
 </div>
 
 <div class="pai-card" markdown>
+
 ### Фронтенд
+
 Управляйте пайплайном из Reflex web client: выбор профиля, live-стадии,
 метрики и история.
+
 </div>
 
 <div class="pai-card" markdown>
+
 ### Оценка
-Сравнивайте редакции через `S = 0.30·q_c + 0.25·q_p + 0.20·q_s + 0.15·q_t + 0.10·q_l`.
+
+Сравнивайте редакции через взвешенную сумму $S = \sum_i w_i\,q_i$. Полная
+формула и веса — в разделе [Оценка](scoring.md).
+
 </div>
 
 <div class="pai-card" markdown>
+
 ### Локальные модели
+
 Маршрутизируйте запросы в Ollama, LM Studio, local GGUF, Hugging Face
 safetensors или OpenAI-compatible endpoints.
+
 </div>
 </div>
 

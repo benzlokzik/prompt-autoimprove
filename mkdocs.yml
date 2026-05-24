@@ -10,6 +10,16 @@ edit_uri: edit/main/docs/
 hooks:
   - scripts/mkdocs_hooks.py
 
+# theme:
+#   name: dracula
+
+# theme:
+  # name: mkdocs
+  # plugins:
+  # - search
+  # - excalidraw
+
+
 theme:
   name: material
   language: en
@@ -25,15 +35,15 @@ theme:
   palette:
     - media: "(prefers-color-scheme: light)"
       scheme: default
-      primary: blue grey
-      accent: indigo
+      primary: custom
+      accent: custom
       toggle:
         icon: material/weather-night
         name: Switch to dark mode
     - media: "(prefers-color-scheme: dark)"
       scheme: slate
-      primary: blue grey
-      accent: indigo
+      primary: custom
+      accent: custom
       toggle:
         icon: material/weather-sunny
         name: Switch to light mode
@@ -96,6 +106,7 @@ markdown_extensions:
       line_spans: __codeline
       line_anchors: __codelineno
       linenums_style: pymdownx-inline
+      pygments_lang_class: true
   - pymdownx.inlinehilite
   - pymdownx.snippets
   - pymdownx.superfences:
@@ -178,4 +189,5 @@ extra_css:
   - assets/stylesheets/extra.css
 
 extra_javascript:
+  - assets/javascripts/mathjax.js
   - https://unpkg.com/mathjax@3/es5/tex-mml-chtml.js
