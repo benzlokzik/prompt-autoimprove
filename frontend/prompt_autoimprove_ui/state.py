@@ -313,7 +313,7 @@ class PipelineState(rx.State):
         elif stage == "strategy_selected":
             self.candidate_strategy = payload.get("strategy", "")
         elif stage == "evaluated":
-            self.integrated_score = float(payload.get("score", 0.0))
+            self.integrated_score = round(float(payload.get("score", 0.0)), 3)
         elif stage == "probation":
             self.probation_text = payload.get("output", "")
         elif stage == "final_decision":
@@ -366,8 +366,8 @@ class PipelineState(rx.State):
                 self.metrics = [
                     MetricItem(
                         name=m["name"],
-                        value=float(m["value"]),
-                        weight=float(m["weight"]),
+                        value=round(float(m["value"]), 3),
+                        weight=round(float(m["weight"]), 3),
                     )
                     for m in full.get("metrics", [])
                 ]
