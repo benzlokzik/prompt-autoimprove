@@ -52,6 +52,7 @@ uv run python -m prompt_autoimprove.api.grpc.server
 
 ```mermaid
 sequenceDiagram
+    autonumber
     participant C as Клиент
     participant S as Сервер AutoImprove
     C->>S: Improve(ImproveRequest)

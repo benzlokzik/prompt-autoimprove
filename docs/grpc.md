@@ -52,6 +52,7 @@ gRPC separately with `pai serve-grpc`.
 
 ```mermaid
 sequenceDiagram
+    autonumber
     participant C as Client
     participant S as AutoImprove server
     C->>S: Improve(ImproveRequest)
