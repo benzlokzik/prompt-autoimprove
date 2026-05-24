@@ -156,9 +156,9 @@ def history_panel() -> rx.Component:
                     color=rx.color("gray", 10),
                 ),
             ),
-            spacing="3",
+            spacing="4",
             align="stretch",
         ),
-        size="2",
+        size="3",
         width="100%",
     )

@@ -7,14 +7,11 @@ from prompt_autoimprove_ui.state import PipelineState
 def header() -> rx.Component:
     return rx.hstack(
         rx.hstack(
-            rx.box(
-                rx.icon("sparkles", color="white", size=18),
-                background=(
-                    "linear-gradient(135deg, "
-                    "var(--iris-9) 0%, var(--violet-9) 50%, var(--purple-9) 100%)"
-                ),
-                padding="2",
-                border_radius="10px",
+            rx.image(
+                src="/logo.svg",
+                width="40px",
+                height="40px",
+                border_radius="11px",
                 box_shadow="0 6px 20px -8px var(--iris-9)",
             ),
             rx.vstack(
@@ -67,7 +64,7 @@ def header() -> rx.Component:
             align="center",
         ),
         width="100%",
-        padding_y="3",
+        padding_y="5",
         padding_x="6",
         align="center",
         border_bottom=f"1px solid {rx.color('gray', 4)}",

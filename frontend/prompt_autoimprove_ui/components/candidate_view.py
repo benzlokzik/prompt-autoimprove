@@ -173,7 +173,7 @@ def candidate_view() -> rx.Component:
                 ),
                 rx.fragment(),
             ),
-            spacing="3",
+            spacing="4",
             align="stretch",
             width="100%",
         ),

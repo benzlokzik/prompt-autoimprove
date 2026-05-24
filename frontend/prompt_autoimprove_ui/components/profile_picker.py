@@ -98,7 +98,7 @@ def profile_picker() -> rx.Component:
                 align="center",
             ),
         ),
-        spacing="3",
+        spacing="5",
         align="stretch",
         width="100%",
     )

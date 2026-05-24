@@ -94,9 +94,9 @@ def pipeline_timeline() -> rx.Component:
                 ),
                 _empty_state(),
             ),
-            spacing="3",
+            spacing="4",
             align="stretch",
         ),
-        size="2",
+        size="3",
         width="100%",
     )
