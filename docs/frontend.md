@@ -47,6 +47,23 @@ card update when scoring completes. If the backend has `ANTHROPIC_API_KEY` or
 the `OPENAI_*` variables configured, the selected candidate can also run through
 a real-model probation probe and show the result in the improved prompt panel.
 
+## Workspace features
+
+- **Sensitive toggle** on the prompt card sets `sensitive`, keeping routing on
+  local models and skipping the LLM rewrite; the active UI language is sent as
+  `locale_hint`.
+- **Image input (experimental).** Drop or pick images on the prompt card. They
+  are inlined as base64 data URIs and sent as `attachments` to `POST
+  /v1/improve` for vision-capable profiles. Support is unstable and varies by
+  model and image format; max 4 images, 8 MB each.
+- **Use this prompt** copies the improved candidate back into the editor.
+- **History drill-down.** History rows expand to list past revisions; each
+  revision can be loaded back into the editor.
+- **Differentiated errors.** Network, validation (422), rate-limit (429),
+  not-found (404), and server (5xx) failures show distinct messages.
+- The metric grid derives its column count from the returned metrics and adapts
+  on small screens.
+
 ## Environment
 
 | Variable | Default | Purpose |
