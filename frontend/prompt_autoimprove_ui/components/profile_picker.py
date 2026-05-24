@@ -83,10 +83,19 @@ def profile_picker() -> rx.Component:
                 type="hover",
                 width="100%",
             ),
-            rx.text(
-                "Loading…",
-                size="1",
-                color=rx.color("gray", 10),
+            rx.hstack(
+                rx.cond(
+                    PipelineState.is_loading_profiles,
+                    rx.spinner(size="1"),
+                    rx.fragment(),
+                ),
+                rx.text(
+                    t("loading", PipelineState.language),
+                    size="1",
+                    color=rx.color("gray", 10),
+                ),
+                spacing="2",
+                align="center",
             ),
         ),
         spacing="3",

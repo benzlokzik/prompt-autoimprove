@@ -77,6 +77,7 @@ class BackendClient:
         session_ref: str | None = None,
         sensitive: bool = False,
         locale_hint: str | None = None,
+        attachments: list[dict[str, Any]] | None = None,
     ) -> dict[str, Any]:
         body: dict[str, Any] = {
             "prompt": prompt,
@@ -87,6 +88,8 @@ class BackendClient:
             body["session_ref"] = session_ref
         if locale_hint:
             body["locale_hint"] = locale_hint
+        if attachments:
+            body["attachments"] = attachments
         async with httpx.AsyncClient(timeout=self.timeout) as client:
             resp = await client.post(
                 f"{self.base_url}/v1/improve", headers=self._headers(), json=body

@@ -81,7 +81,11 @@ def metric_breakdown() -> rx.Component:
             ),
             rx.grid(
                 rx.foreach(PipelineState.metrics, _metric_card),
-                columns="5",
+                columns=rx.breakpoints(
+                    initial="2",
+                    sm="3",
+                    md=PipelineState.metric_columns,
+                ),
                 spacing="3",
                 width="100%",
             ),

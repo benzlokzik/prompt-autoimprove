@@ -80,6 +80,52 @@ STRINGS: dict[str, dict[str, str]] = {
         "en": "The LLM produced this rewrite but the deterministic strategy scored higher.",
         "ru": "LLM переписал промпт, но детерминированная стратегия набрала больше баллов.",
     },
+    "sensitive": {"en": "Sensitive", "ru": "Чувствительный"},
+    "sensitive_note": {
+        "en": "Keep routing on local models and skip the LLM rewrite for private content.",
+        "ru": "Маршрутизировать только на локальные модели и пропустить LLM-переписывание.",
+    },
+    "use_this_prompt": {"en": "Use this prompt", "ru": "Использовать этот промпт"},
+    "revisions": {"en": "Revisions", "ru": "Редакции"},
+    "load_into_editor": {"en": "Load into editor", "ru": "Загрузить в редактор"},
+    "loading": {"en": "Loading…", "ru": "Загрузка…"},
+    "err_network": {
+        "en": "Cannot reach the backend. Check that the API is running.",
+        "ru": "Бэкенд недоступен. Проверьте, запущен ли API.",
+    },
+    "err_validation": {
+        "en": "The request was rejected as invalid (422). Check the prompt and profile.",
+        "ru": "Запрос отклонён как некорректный (422). Проверьте промпт и профиль.",
+    },
+    "err_rate_limit": {
+        "en": "Rate limit reached (429). Wait a moment and try again.",
+        "ru": "Превышен лимит запросов (429). Подождите и попробуйте снова.",
+    },
+    "err_unknown_profile": {
+        "en": "The selected profile was not found (404).",
+        "ru": "Выбранный профиль не найден (404).",
+    },
+    "err_server": {
+        "en": "The backend hit an internal error (5xx). Try again later.",
+        "ru": "Внутренняя ошибка бэкенда (5xx). Попробуйте позже.",
+    },
+    "err_generic": {
+        "en": "Something went wrong. Please try again.",
+        "ru": "Что-то пошло не так. Попробуйте снова.",
+    },
+    "add_image": {
+        "en": "Drop an image or click to add",
+        "ru": "Перетащите изображение или нажмите",
+    },
+    "image_experimental": {"en": "experimental", "ru": "экспериментально"},
+    "image_note": {
+        "en": "Image input is unstable — support varies by model and image format.",
+        "ru": "Ввод изображений нестабилен — поддержка зависит от модели и формата.",
+    },
+    "image_too_large": {
+        "en": "Image is too large (max 8 MB).",
+        "ru": "Изображение слишком большое (макс. 8 МБ).",
+    },
 }
 
 
