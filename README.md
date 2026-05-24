@@ -6,6 +6,7 @@
 </p>
 
 [![DOI](https://zenodo.org/badge/1240262549.svg)](https://doi.org/10.5281/zenodo.20263523)
+[![License: AGPL v3](https://img.shields.io/badge/License-AGPL_v3-blue.svg)](https://www.gnu.org/licenses/agpl-3.0)
 
 `prompt-autoimprove` is a Python service for improving prompts before they are
 sent to large language or multimodal models. It normalizes a raw request,
@@ -100,4 +101,7 @@ reports orchestrator and persistence readiness for container probes.
 
 ## License
 
-MIT; see [LICENSE](LICENSE).
+GNU AGPL-3.0-or-later; see [LICENSE](LICENSE). AGPL-3.0 is a strong copyleft
+license with a network-use clause: if you run a modified version of this service
+and let users interact with it over a network, you must offer them the
+corresponding source code.
