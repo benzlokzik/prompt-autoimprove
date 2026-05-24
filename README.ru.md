@@ -41,13 +41,20 @@ uv run ruff check .                                                      # lint
 uv run ruff format .                                                     # format
 uv run ty check src                                                      # typecheck
 uv run pytest -q                                                         # tests
-uv run uvicorn prompt_autoimprove.api.http.app:app --reload --port 8000  # HTTP API
-uv run python -m prompt_autoimprove.api.grpc.server                      # gRPC server
+uv run uvicorn prompt_autoimprove.api.http.app:app --reload --port 8000  # HTTP API + встроенный gRPC
+uv run pai serve-grpc                                                    # только gRPC-сервер
 ./scripts/gen_proto.sh                                                   # regenerate gRPC stubs
-uv run alembic upgrade head                                              # apply migrations
+uv run alembic upgrade head                                              # применить миграции (локально)
 docker compose up -d                                                     # postgres + redpanda + minio
 docker compose --profile app up --build                                  # app + frontend stack
 ```
+
+HTTP-приложение по умолчанию запускает gRPC-сервис `AutoImproveService`
+(порт 50051) в том же процессе; чтобы отключить, задайте
+`PAI_API__GRPC_ENABLED=false`, либо запустите отдельный процесс через
+`uv run pai serve-grpc`. В docker compose сервис `migrate` выполняет
+`alembic upgrade head` до старта приложения, а фронтенд ждёт здоровый бэкенд —
+поэтому запуск веб-клиента поднимает вместе с ним HTTP- и gRPC-интерфейсы.
 
 ## Веб-клиент
 
@@ -76,6 +83,11 @@ MkDocs собирает английскую версию в `/`, а русск�
 Переменные окружения сервиса используют префикс `PAI_*`. Переменные адаптеров,
 например `OPENAI_BASE_URL` и `ANTHROPIC_API_KEY`, описаны в руководствах по
 моделям. Alembic читает настройки из `[tool.alembic]` в [pyproject.toml](pyproject.toml).
+
+Схемой владеют миграции: задавайте `PAI_DB__AUTO_CREATE=1`, только чтобы
+приложение само создавало таблицы для быстрого локального запуска без Alembic.
+`GET /healthz` сообщает готовность оркестратора и хранилища для проверок
+контейнера.
 
 ## Лицензия
 

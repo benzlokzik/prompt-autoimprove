@@ -20,6 +20,20 @@ uv run pai improve --prompt "Extract emails from this text" --profile claude-son
 The command prints the selected strategy, candidate prompt, integrated score,
 and explanation.
 
+The `pai` CLI is the supported terminal interface and shares the pipeline with
+the HTTP and gRPC servers.
+
+## Serve gRPC
+
+```bash
+uv run pai serve-grpc
+```
+
+Runs the `AutoImproveService` gRPC server (port 50051) using the same runtime as
+the HTTP app. The HTTP app already starts gRPC in-process by default, so this is
+for gRPC-only or multi-worker deployments. Disable the embedded server with
+`PAI_API__GRPC_ENABLED=false`.
+
 ## Common flags
 
 | Flag | Default | Notes |
