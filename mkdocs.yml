@@ -5,22 +5,45 @@ site_author: benzlokzik
 
 repo_url: https://github.com/benzlokzik-university/prompt-autoimprove
 repo_name: benzlokzik-university/prompt-autoimprove
+edit_uri: edit/main/docs/
+
+hooks:
+  - scripts/mkdocs_hooks.py
+
+# theme:
+#   name: dracula
+
+# theme:
+  # name: mkdocs
+  # plugins:
+  # - search
+  # - excalidraw
+
 
 theme:
   name: material
   language: en
+  logo: assets/logo.svg
+  favicon: assets/favicon.svg
+  font:
+    text: Inter
+    code: JetBrains Mono
+  icon:
+    repo: fontawesome/brands/github
+    edit: material/pencil
+    view: material/eye
   palette:
     - media: "(prefers-color-scheme: light)"
       scheme: default
-      primary: blue grey
-      accent: indigo
+      primary: custom
+      accent: custom
       toggle:
         icon: material/weather-night
         name: Switch to dark mode
     - media: "(prefers-color-scheme: dark)"
       scheme: slate
-      primary: blue grey
-      accent: indigo
+      primary: custom
+      accent: custom
       toggle:
         icon: material/weather-sunny
         name: Switch to light mode
@@ -30,10 +53,15 @@ theme:
     - navigation.indexes
     - navigation.tracking
     - navigation.footer
+    - navigation.top
     - toc.follow
     - content.code.copy
     - content.code.annotate
+    - content.code.select
     - content.tabs.link
+    - content.action.view
+    - content.action.edit
+    - content.tooltips
 
 nav:
   - Home: index.md
@@ -78,6 +106,7 @@ markdown_extensions:
       line_spans: __codeline
       line_anchors: __codelineno
       linenums_style: pymdownx-inline
+      pygments_lang_class: true
   - pymdownx.inlinehilite
   - pymdownx.snippets
   - pymdownx.superfences:
@@ -125,9 +154,40 @@ plugins:
             CLI: CLI
             Frontend: Фронтенд
             Local models: Локальные модели
+  - git-revision-date-localized:
+      enable_creation_date: true
+      type: date
+      fallback_to_build_date: true
+  - minify:
+      minify_html: true
+      minify_js: true
+      minify_css: true
+      htmlmin_opts:
+        remove_comments: true
+      cache_safe: true
+
+extra:
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/benzlokzik
+      name: GitHub
+    - icon: fontawesome/brands/linkedin
+      link: https://www.linkedin.com/in/anrie-abrahamyan
+      name: LinkedIn
+    - icon: simple/huggingface
+      link: https://huggingface.co/benzlokzik
+      name: Hugging Face
+    - icon: fontawesome/brands/orcid
+      link: https://orcid.org/0009-0003-1848-1674
+      name: ORCID
+    - icon: fontawesome/solid/globe
+      link: https://epops.space
+      name: Website
+  generator: false
 
 extra_css:
   - assets/stylesheets/extra.css
 
 extra_javascript:
+  - assets/javascripts/mathjax.js
   - https://unpkg.com/mathjax@3/es5/tex-mml-chtml.js
