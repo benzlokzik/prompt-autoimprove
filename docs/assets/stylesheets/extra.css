@@ -174,8 +174,17 @@ body {
 }
 
 [data-md-color-scheme="default"] .md-search__form {
-  background: rgba(23, 21, 31, 0.04);
-  border: 1px solid rgba(23, 21, 31, 0.14);
+  background: rgba(23, 21, 31, 0.05);
+  border: 1px solid rgba(23, 21, 31, 0.28);
+  box-shadow: inset 0 1px 2px rgba(23, 21, 31, 0.05);
+}
+
+[data-md-color-scheme="default"] .md-search__input::placeholder {
+  color: rgba(23, 21, 31, 0.5);
+}
+
+[data-md-color-scheme="default"] .md-search__icon {
+  color: rgba(23, 21, 31, 0.6);
 }
 
 [data-md-color-scheme="slate"] .md-search__form {
