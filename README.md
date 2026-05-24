@@ -6,7 +6,13 @@
 </p>
 
 [![DOI](https://zenodo.org/badge/1240262549.svg)](https://zenodo.org/badge/latestdoi/1240262549)
+[![CI](https://github.com/benzlokzik-university/prompt-autoimprove/actions/workflows/ci.yml/badge.svg)](https://github.com/benzlokzik-university/prompt-autoimprove/actions/workflows/ci.yml)
+[![Docs](https://github.com/benzlokzik-university/prompt-autoimprove/actions/workflows/docs-pages.yml/badge.svg)](https://benzlokzik-university.github.io/prompt-autoimprove/)
 [![License: AGPL v3](https://img.shields.io/badge/License-AGPL_v3-blue.svg)](https://www.gnu.org/licenses/agpl-3.0)
+[![Python](https://img.shields.io/badge/python-3.13%2B-blue.svg)](https://www.python.org/)
+[![uv](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/uv/main/assets/badge/v0.json)](https://github.com/astral-sh/uv)
+[![Ruff](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json)](https://github.com/astral-sh/ruff)
+[![ty](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ty/main/assets/badge/v0.json)](https://github.com/astral-sh/ty)
 
 `prompt-autoimprove` is a Python service for improving prompts before they are
 sent to large language or multimodal models. It normalizes a raw request,
