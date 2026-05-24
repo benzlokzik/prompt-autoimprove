@@ -1,5 +1,6 @@
 import base64
 import contextlib
+import logging
 import mimetypes
 from typing import TypedDict
 
@@ -8,6 +9,8 @@ import reflex as rx
 
 from prompt_autoimprove_ui.api_client import BackendClient
 from prompt_autoimprove_ui.i18n import EXAMPLE_PROMPTS_EN, EXAMPLE_PROMPTS_RU, STRINGS
+
+logger = logging.getLogger("prompt_autoimprove_ui")
 
 
 class ProfileItem(TypedDict):
@@ -89,6 +92,7 @@ class PipelineState(rx.State):
     error: str = ""
 
     def _humanize_error(self, exc: Exception) -> str:
+        logger.error("frontend request failed: %s", type(exc).__name__, exc_info=exc)
         if isinstance(exc, httpx.HTTPStatusError):
             code = exc.response.status_code
             key = {
