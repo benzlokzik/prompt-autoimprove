@@ -1,5 +1,6 @@
 import asyncio
 from logging.config import fileConfig
+from pathlib import Path
 
 from alembic import context
 from sqlalchemy.ext.asyncio import async_engine_from_config
@@ -9,7 +10,9 @@ from prompt_autoimprove.config import get_settings
 from prompt_autoimprove.persistence.models import Base
 
 config = context.config
-if config.config_file_name is not None:
+# Config lives in pyproject.toml [tool.alembic]; only load ini-based logging
+# config when an actual ini file is present (none ships with this project).
+if config.config_file_name is not None and Path(config.config_file_name).exists():
     fileConfig(config.config_file_name)
 
 settings = get_settings()
