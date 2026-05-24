@@ -15,6 +15,7 @@ from prompt_autoimprove.core.complexity import (
     ComplexityClassifier,
     ComplexityVerdict,
     HeuristicClassifier,
+    classify_async,
 )
 from prompt_autoimprove.core.evaluator import IntegratedScorer
 from prompt_autoimprove.core.normalizer import normalize
@@ -31,6 +32,10 @@ from prompt_autoimprove.persistence.repositories import EvaluationRepository, Pr
 from prompt_autoimprove.registry.loader import resolve_profile
 from prompt_autoimprove.routing.router import Router
 from prompt_autoimprove.services.kafka_producer import EventPublisher, PipelineEvent
+
+
+class PipelineError(RuntimeError):
+    """Raised when the pipeline cannot produce a routable candidate."""
 
 
 @dataclass(slots=True)
@@ -84,9 +89,9 @@ class AutoImproveOrchestrator:
         strategies = select(normalized, profile)
         candidates = [s.apply(normalized, profile, self.config) for s in strategies]
         if not candidates:
-            raise RuntimeError("no strategy produced a candidate")
+            raise PipelineError("no strategy produced a candidate")
 
-        verdict = self.classifier.classify(normalized)
+        verdict = await classify_async(self.classifier, normalized)
         if self._should_escalate(verdict, normalized, sensitive=sensitive):
             assert self.rewriter is not None  # narrowed by _should_escalate
             rewritten = await self.rewriter.rewrite(normalized, profile, self.config)
@@ -115,8 +120,13 @@ class AutoImproveOrchestrator:
         scored: list[tuple[CandidatePrompt, Score]] = []
         for cand in candidates:
             report = validate(cand, profile)
+            if not report.ok:
+                continue
             score = self.scorer.score(cand, profile, report)
             scored.append((cand, score))
+
+        if not scored:
+            raise PipelineError("no candidate passed validation")
 
         chosen, best = max(scored, key=lambda pair: pair[1].integrated)
         runner_ups = [s for c, s in scored if c is not chosen]

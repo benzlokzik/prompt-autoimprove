@@ -41,6 +41,9 @@ Detected language: {language}
 """
 
 
+_MAX_CACHE_ENTRIES = 512
+
+
 def _cache_key(text: str, profile_name: str) -> str:
     digest = hashlib.sha256(f"{profile_name}|{text}".encode()).hexdigest()
     return digest[:32]
@@ -90,5 +93,7 @@ class LLMRewriter:
             ),
             estimated_tokens=estimate_tokens(rewritten),
         )
+        if len(self._cache) >= _MAX_CACHE_ENTRIES:
+            self._cache.pop(next(iter(self._cache)))
         self._cache[key] = candidate
         return candidate

@@ -29,11 +29,11 @@ HARD_PROMPT = (
     "and produce a structured migration plan with rollback criteria."
 )
 
+_PROFILES_DIR = Path(__file__).resolve().parents[1] / "src/prompt_autoimprove/registry/profiles"
+
 
 async def main(profile_name: str, ollama_tag: str) -> None:
-    profiles = load_profiles(
-        Path(__file__).resolve().parents[1] / "src/prompt_autoimprove/registry/profiles"
-    )
+    profiles = load_profiles(_PROFILES_DIR)
     if profile_name not in profiles:
         print(f"profile '{profile_name}' not in registry; create the YAML first")
         sys.exit(2)

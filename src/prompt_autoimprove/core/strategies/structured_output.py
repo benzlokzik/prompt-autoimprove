@@ -39,7 +39,7 @@ class StructuredOutputStrategy:
     name: StrategyName = StrategyName.STRUCTURED_OUTPUT
 
     def applies(self, normalized: NormalizedPrompt, profile: ModelProfile) -> bool:  # noqa: ARG002
-        return normalized.detected_task in _FORMAT_BY_TASK or True
+        return normalized.detected_task in _FORMAT_BY_TASK
 
     def apply(
         self,

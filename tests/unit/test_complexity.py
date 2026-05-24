@@ -29,7 +29,7 @@ def test_reasoning_task_escalates() -> None:
 
 def test_unfilled_params_contribute() -> None:
     verdict = _classify(
-        "Write code that does {thing} for {user} when {condition} holds. " "Step by step please."
+        "Write code that does {thing} for {user} when {condition} holds. Step by step please."
     )
     assert verdict.label == "hard"
     assert any(r.startswith("unfilled_params") for r in verdict.reasons)

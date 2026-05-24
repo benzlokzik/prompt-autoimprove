@@ -80,7 +80,10 @@ async def lifespan(app: FastAPI):
     try:
         yield
     finally:
-        await publisher.stop()
+        try:
+            await publisher.stop()
+        except Exception as exc:
+            logger.warning("publisher.stop_failed", error=str(exc))
 
 
 def _rate_limit_handler(request: Request, exc: RateLimitExceeded) -> JSONResponse:  # noqa: ARG001
@@ -96,10 +99,7 @@ def create_app() -> FastAPI:
     app.add_middleware(SlowAPIMiddleware)
     app.add_middleware(
         CORSMiddleware,
-        allow_origins=[
-            "http://localhost:3000",
-            "http://127.0.0.1:3000",
-        ],
+        allow_origins=get_settings().api.cors_origin_list,
         allow_credentials=True,
         allow_methods=["*"],
         allow_headers=["*"],

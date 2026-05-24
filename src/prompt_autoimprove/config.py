@@ -1,7 +1,7 @@
 from functools import lru_cache
 from typing import Literal
 
-from pydantic import Field
+from pydantic import Field, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 ClassifierBackend = Literal["heuristic", "embeddings", "judge", "composite"]
@@ -43,10 +43,16 @@ class ClassifierSettings(BaseSettings):
 class APISettings(BaseSettings):
     model_config = SettingsConfigDict(env_prefix="PAI_API_")
 
-    api_key: str = "dev-key"
+    api_key: str = ""
+    allow_dev_key: bool = False
     rate_limit_per_minute: int = 60
     grpc_port: int = 50051
     http_port: int = 8000
+    cors_origins: str = "http://localhost:3000,http://127.0.0.1:3000"
+
+    @property
+    def cors_origin_list(self) -> list[str]:
+        return [origin.strip() for origin in self.cors_origins.split(",") if origin.strip()]
 
 
 class Settings(BaseSettings):
@@ -68,6 +74,18 @@ class Settings(BaseSettings):
     api: APISettings = Field(default_factory=APISettings)
     improver: ImproverSettings = Field(default_factory=ImproverSettings)
     classifier: ClassifierSettings = Field(default_factory=ClassifierSettings)
+
+    @model_validator(mode="after")
+    def _resolve_api_key(self) -> "Settings":
+        if self.api.api_key:
+            return self
+        if self.environment == "dev" or self.api.allow_dev_key:
+            self.api.api_key = "dev-key"
+            return self
+        raise ValueError(
+            "API key is required outside dev: set PAI_API__API_KEY "
+            "or PAI_API__ALLOW_DEV_KEY=1 for local use"
+        )
 
 
 @lru_cache(maxsize=1)

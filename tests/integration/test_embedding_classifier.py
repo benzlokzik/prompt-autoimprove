@@ -5,7 +5,7 @@ from prompt_autoimprove.domain.prompt import Prompt
 
 pytest.importorskip("sentence_transformers")
 
-from prompt_autoimprove.core.ml_complexity import EmbeddingClassifier  # noqa: E402
+from prompt_autoimprove.core.ml_complexity import EmbeddingClassifier
 
 
 @pytest.fixture(scope="module")
@@ -29,6 +29,6 @@ def test_embedding_classifier_matches_expectation(
     classifier: EmbeddingClassifier, text: str, expected: str
 ) -> None:
     verdict = classifier.classify(normalize(Prompt(text=text)))
-    assert (
-        verdict.label == expected
-    ), f"got={verdict.label} score={verdict.score:.3f} reasons={verdict.reasons}"
+    assert verdict.label == expected, (
+        f"got={verdict.label} score={verdict.score:.3f} reasons={verdict.reasons}"
+    )

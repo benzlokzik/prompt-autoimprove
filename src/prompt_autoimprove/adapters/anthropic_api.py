@@ -67,12 +67,15 @@ class AnthropicAdapter:
             raise AdapterUnavailable(f"upstream {resp.status_code}: {resp.text}")
         if resp.status_code >= 400:
             raise AdapterError(f"upstream {resp.status_code}: {resp.text}")
-        data = resp.json()
-        content_blocks = data.get("content", [])
-        text = "".join(
-            block.get("text", "") for block in content_blocks if block.get("type") == "text"
-        )
-        usage = data.get("usage", {})
+        try:
+            data = resp.json()
+            content_blocks = data.get("content", [])
+            text = "".join(
+                block.get("text", "") for block in content_blocks if block.get("type") == "text"
+            )
+            usage = data.get("usage", {})
+        except (ValueError, AttributeError, TypeError) as exc:
+            raise AdapterError(f"malformed response: {resp.text[:200]}") from exc
         return GenerationResult(
             text=text,
             input_tokens=int(usage.get("input_tokens", 0)),

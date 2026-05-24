@@ -67,11 +67,15 @@ class OpenAICompatAdapter:
             raise AdapterUnavailable(f"upstream {resp.status_code}: {resp.text}")
         if resp.status_code >= 400:
             raise AdapterError(f"upstream {resp.status_code}: {resp.text}")
-        data = resp.json()
-        choice = data["choices"][0]
-        usage = data.get("usage", {})
+        try:
+            data = resp.json()
+            choice = data["choices"][0]
+            content = choice["message"]["content"]
+            usage = data.get("usage", {})
+        except (ValueError, KeyError, IndexError, TypeError) as exc:
+            raise AdapterError(f"malformed response: {resp.text[:200]}") from exc
         return GenerationResult(
-            text=choice["message"]["content"],
+            text=content,
             input_tokens=int(usage.get("prompt_tokens", 0)),
             output_tokens=int(usage.get("completion_tokens", 0)),
             finish_reason=str(choice.get("finish_reason", "stop")),
