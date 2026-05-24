@@ -91,8 +91,30 @@ class PipelineState(rx.State):
     attachments: list[AttachmentItem] = []
     error: str = ""
 
+    @staticmethod
+    def _response_detail(exc: httpx.HTTPStatusError) -> str:
+        """Extract the human-readable reason the backend returned, if any."""
+        try:
+            detail = exc.response.json().get("detail")
+        except Exception:
+            return ""
+        if isinstance(detail, str):
+            text = detail
+        elif isinstance(detail, list):
+            parts = []
+            for item in detail:
+                loc = ".".join(str(x) for x in item.get("loc", []) if x != "body")
+                msg = item.get("msg", "")
+                parts.append(f"{loc}: {msg}" if loc else msg)
+            text = "; ".join(p for p in parts if p)
+        else:
+            return ""
+        text = text.strip()
+        return text if len(text) <= 200 else text[:197] + "…"
+
     def _humanize_error(self, exc: Exception) -> str:
         logger.error("frontend request failed: %r", exc, exc_info=exc)
+        lang = "ru" if self.language == "ru" else "en"
         if isinstance(exc, httpx.HTTPStatusError):
             code = exc.response.status_code
             key = {
@@ -100,13 +122,17 @@ class PipelineState(rx.State):
                 422: "err_validation",
                 429: "err_rate_limit",
             }.get(code, "err_server" if code >= 500 else "err_generic")
-        elif isinstance(exc, httpx.RequestError):
+            base = STRINGS[key][lang]
+            # Surface the backend's specific reason for actionable client errors.
+            detail = self._response_detail(exc) if 400 <= code < 500 and code != 429 else ""
+            return f"{base} — {detail}" if detail else base
+        if isinstance(exc, httpx.RequestError):
             key = "err_network"
         elif isinstance(exc, (KeyError, ValueError)):
             key = "err_bad_response"
         else:
             key = "err_generic"
-        return STRINGS[key]["ru" if self.language == "ru" else "en"]
+        return STRINGS[key][lang]
 
     @rx.var
     def metric_columns(self) -> str:
