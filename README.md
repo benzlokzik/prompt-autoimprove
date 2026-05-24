@@ -5,7 +5,7 @@
   </picture>
 </p>
 
-[![DOI](https://zenodo.org/badge/1240262549.svg)](https://doi.org/10.5281/zenodo.20263523)
+[![DOI](https://zenodo.org/badge/1240262549.svg)](https://zenodo.org/badge/latestdoi/1240262549)
 [![License: AGPL v3](https://img.shields.io/badge/License-AGPL_v3-blue.svg)](https://www.gnu.org/licenses/agpl-3.0)
 
 `prompt-autoimprove` is a Python service for improving prompts before they are

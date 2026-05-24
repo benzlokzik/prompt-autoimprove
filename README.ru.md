@@ -1,6 +1,6 @@
 # prompt-autoimprove
 
-[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.20214350.svg)](https://doi.org/10.5281/zenodo.20214350)
+[![DOI](https://zenodo.org/badge/1240262549.svg)](https://zenodo.org/badge/latestdoi/1240262549)
 [![License: AGPL v3](https://img.shields.io/badge/License-AGPL_v3-blue.svg)](https://www.gnu.org/licenses/agpl-3.0)
 
 `prompt-autoimprove` — Python-сервис для улучшения промптов до отправки в
