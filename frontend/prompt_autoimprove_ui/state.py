@@ -387,12 +387,12 @@ class PipelineState(rx.State):
                 locale_hint=self.language,
                 attachments=attachments,
             )
-            metric_lang = "ru" if self.language == "ru" else "en"
+            labels = METRIC_LABELS["ru" if self.language == "ru" else "en"]
             async with self:
                 self.metrics = [
                     MetricItem(
                         name=m["name"],
-                        label=METRIC_LABELS[metric_lang].get(m["name"], m["name"]),
+                        label=f"{labels.get(m['name'], m['name'])} ({m['name']})",
                         value=float(m["value"]),
                         value_str=f"{float(m['value']):.8f}",
                         weight_str=f"{float(m['weight']):.8f}",
