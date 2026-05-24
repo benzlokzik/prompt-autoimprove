@@ -10,7 +10,7 @@ from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
 
 from prompt_autoimprove.adapters.factory import build_adapters_from_env
 from prompt_autoimprove.api.http.rate_limit import limiter
-from prompt_autoimprove.api.http.routes import history, improve, profiles
+from prompt_autoimprove.api.http.routes import health, history, improve, profiles
 from prompt_autoimprove.config import get_settings
 from prompt_autoimprove.core.complexity import build_classifier
 from prompt_autoimprove.core.evaluator import IntegratedScorer
@@ -105,6 +105,7 @@ def create_app() -> FastAPI:
         allow_headers=["*"],
     )
     app.add_exception_handler(RateLimitExceeded, _rate_limit_handler)
+    app.include_router(health.router)
     app.include_router(improve.router)
     app.include_router(profiles.router)
     app.include_router(history.router)
