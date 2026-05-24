@@ -15,6 +15,9 @@ RUN --mount=type=cache,target=/root/.cache/uv \
     uv sync --frozen --no-install-project --group frontend --no-dev
 
 COPY frontend ./frontend
+# Brand assets live in docs/assets and are symlinked from frontend/assets;
+# copy them so the symlinks resolve when Reflex bundles static files.
+COPY docs/assets ./docs/assets
 
 ENV PATH="/app/.venv/bin:$PATH" \
     PYTHONUNBUFFERED=1
