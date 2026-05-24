@@ -1,10 +1,13 @@
+import base64
 import contextlib
+import mimetypes
 from typing import TypedDict
 
+import httpx
 import reflex as rx
 
 from prompt_autoimprove_ui.api_client import BackendClient
-from prompt_autoimprove_ui.i18n import EXAMPLE_PROMPTS_EN, EXAMPLE_PROMPTS_RU
+from prompt_autoimprove_ui.i18n import EXAMPLE_PROMPTS_EN, EXAMPLE_PROMPTS_RU, STRINGS
 
 
 class ProfileItem(TypedDict):
@@ -49,6 +52,17 @@ class HistoryItem(TypedDict):
     revisions: list[RevisionItem]
 
 
+class AttachmentItem(TypedDict):
+    name: str
+    uri: str
+    mime_type: str
+    bytes_size: int
+
+
+_MAX_ATTACHMENTS = 4
+_MAX_ATTACHMENT_BYTES = 8 * 1024 * 1024
+
+
 class PipelineState(rx.State):
     prompt: str = ""
     profile: str = "qwen"
@@ -68,7 +82,30 @@ class PipelineState(rx.State):
     complexity_score: float = 0.0
     llm_rewrite_text: str = ""
     is_running: bool = False
+    is_loading_profiles: bool = False
+    sensitive: bool = False
+    expanded_prompt_id: str = ""
+    attachments: list[AttachmentItem] = []
     error: str = ""
+
+    def _humanize_error(self, exc: Exception) -> str:
+        if isinstance(exc, httpx.HTTPStatusError):
+            code = exc.response.status_code
+            key = {
+                404: "err_unknown_profile",
+                422: "err_validation",
+                429: "err_rate_limit",
+            }.get(code, "err_server" if code >= 500 else "err_generic")
+        elif isinstance(exc, httpx.RequestError):
+            key = "err_network"
+        else:
+            key = "err_generic"
+        return STRINGS[key]["ru" if self.language == "ru" else "en"]
+
+    @rx.var
+    def metric_columns(self) -> str:
+        n = len(self.metrics)
+        return str(n) if n > 0 else "1"
 
     @rx.var
     def example_prompts(self) -> list[str]:
@@ -91,8 +128,17 @@ class PipelineState(rx.State):
     def toggle_language(self) -> None:
         self.language = "ru" if self.language == "en" else "en"
 
+    def _ensure_valid_profile(self) -> None:
+        families: list[str] = []
+        for p in self.profiles:
+            if p["family"] not in families:
+                families.append(p["family"])
+        if families and self.profile not in families:
+            self.profile = families[0]
+
     @rx.event
     async def load_profiles(self) -> None:
+        self.is_loading_profiles = True
         try:
             data = await BackendClient.from_env().list_profiles()
             self.profiles = [
@@ -112,8 +158,11 @@ class PipelineState(rx.State):
                 )
                 for p in data
             ]
+            self._ensure_valid_profile()
         except Exception as exc:
-            self.error = f"Failed to load profiles: {exc}"
+            self.error = self._humanize_error(exc)
+        finally:
+            self.is_loading_profiles = False
 
     @rx.event
     async def load_history(self) -> None:
@@ -142,11 +191,56 @@ class PipelineState(rx.State):
                 for item in data
             ]
         except Exception as exc:
-            self.error = f"Failed to load history: {exc}"
+            self.error = self._humanize_error(exc)
 
     @rx.event
     def set_prompt(self, value: str) -> None:
         self.prompt = value
+
+    @rx.event
+    def set_sensitive(self, value: bool) -> None:
+        self.sensitive = value
+
+    @rx.event
+    def use_candidate(self) -> None:
+        if self.candidate_text:
+            self.prompt = self.candidate_text
+
+    @rx.event
+    def load_revision(self, text: str) -> None:
+        self.prompt = text
+
+    @rx.event
+    def toggle_history_item(self, prompt_id: str) -> None:
+        self.expanded_prompt_id = "" if self.expanded_prompt_id == prompt_id else prompt_id
+
+    @rx.event
+    async def handle_image_upload(self, files: list[rx.UploadFile]) -> None:
+        for file in files:
+            if len(self.attachments) >= _MAX_ATTACHMENTS:
+                break
+            data = await file.read()
+            if len(data) > _MAX_ATTACHMENT_BYTES:
+                self.error = STRINGS["image_too_large"]["ru" if self.language == "ru" else "en"]
+                continue
+            name = file.name or "image"
+            mime = (
+                getattr(file, "content_type", None) or mimetypes.guess_type(name)[0] or "image/png"
+            )
+            encoded = base64.b64encode(data).decode("ascii")
+            self.attachments.append(
+                AttachmentItem(
+                    name=name,
+                    uri=f"data:{mime};base64,{encoded}",
+                    mime_type=mime,
+                    bytes_size=len(data),
+                )
+            )
+
+    @rx.event
+    def remove_attachment(self, idx: int) -> None:
+        if 0 <= idx < len(self.attachments):
+            self.attachments.pop(idx)
 
     @rx.event
     def set_profile(self, value: str) -> None:
@@ -203,14 +297,15 @@ class PipelineState(rx.State):
         async with self:
             self.reset_run()
             if not self.prompt.strip():
-                self.error = "Prompt is empty" if self.language == "en" else "Промпт пустой"
+                lang = "ru" if self.language == "ru" else "en"
+                self.error = STRINGS["prompt_empty_error"][lang]
                 return
             self.is_running = True
 
         try:
             client = BackendClient.from_env()
             async for stage, payload in client.stream_improve(
-                prompt=self.prompt, profile=self.profile
+                prompt=self.prompt, profile=self.profile, locale_hint=self.language
             ):
                 async with self:
                     self._apply_stage(stage, payload)
@@ -218,6 +313,17 @@ class PipelineState(rx.State):
                 prompt=self.prompt,
                 profile=self.profile,
                 session_ref=self.session_ref or None,
+                sensitive=self.sensitive,
+                locale_hint=self.language,
+                attachments=[
+                    {
+                        "modality": "image",
+                        "uri": a["uri"],
+                        "mime_type": a["mime_type"],
+                        "bytes_size": a["bytes_size"],
+                    }
+                    for a in self.attachments
+                ],
             )
             async with self:
                 self.metrics = [
@@ -232,7 +338,7 @@ class PipelineState(rx.State):
                     self.session_ref = full.get("session_id", "")
         except Exception as exc:
             async with self:
-                self.error = str(exc)
+                self.error = self._humanize_error(exc)
         finally:
             async with self:
                 self.is_running = False

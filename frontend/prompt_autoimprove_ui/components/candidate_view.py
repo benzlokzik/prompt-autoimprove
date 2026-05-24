@@ -120,7 +120,7 @@ def candidate_view() -> rx.Component:
             ),
             rx.cond(
                 PipelineState.candidate_text != "",
-                rx.box(
+                rx.vstack(
                     rx.code_block(
                         PipelineState.candidate_text,
                         can_copy=True,
@@ -129,6 +129,17 @@ def candidate_view() -> rx.Component:
                         theme=rx.code_block.themes.atom_dark,
                         width="100%",
                     ),
+                    rx.button(
+                        rx.icon("clipboard-paste", size=14),
+                        rx.text(t("use_this_prompt", PipelineState.language)),
+                        on_click=PipelineState.use_candidate,
+                        size="2",
+                        variant="soft",
+                        color_scheme="iris",
+                        cursor="pointer",
+                    ),
+                    spacing="2",
+                    align="start",
                     width="100%",
                 ),
                 _empty(),

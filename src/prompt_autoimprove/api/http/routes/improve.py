@@ -8,7 +8,7 @@ from prompt_autoimprove.api.http.auth import require_api_key
 from prompt_autoimprove.api.http.rate_limit import limiter
 from prompt_autoimprove.api.http.schemas import ImproveRequest, ImproveResponse, MetricOut
 from prompt_autoimprove.config import get_settings
-from prompt_autoimprove.domain.prompt import Prompt
+from prompt_autoimprove.domain.prompt import Modality, Prompt, PromptAttachment
 from prompt_autoimprove.registry.loader import ProfileNotFoundError, resolve_profile
 from prompt_autoimprove.routing.router import NoRouteError
 from prompt_autoimprove.services.orchestrator import PipelineError
@@ -35,7 +35,21 @@ async def improve(
         raise HTTPException(
             status.HTTP_404_NOT_FOUND, detail=f"unknown profile {body.profile!r}"
         ) from exc
-    prompt = Prompt(text=body.prompt, locale_hint=body.locale_hint)
+    attachments = [
+        PromptAttachment(
+            modality=Modality(a.modality),
+            uri=a.uri,
+            mime_type=a.mime_type,
+            bytes_size=a.bytes_size,
+        )
+        for a in body.attachments
+    ]
+    prompt = Prompt(
+        text=body.prompt,
+        locale_hint=body.locale_hint,
+        modality=Modality.MIXED if attachments else Modality.TEXT,
+        attachments=attachments,
+    )
     try:
         result = await orchestrator.run(
             prompt, body.profile, sensitive=body.sensitive, session_id=body.session_ref

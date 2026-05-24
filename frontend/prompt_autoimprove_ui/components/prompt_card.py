@@ -21,6 +21,95 @@ def _example_chip(idx: int) -> rx.Component:
     )
 
 
+def _attachment_thumb(item, idx) -> rx.Component:
+    return rx.box(
+        rx.image(
+            src=item["uri"],
+            width="52px",
+            height="52px",
+            object_fit="cover",
+            border_radius="8px",
+            border=f"1px solid {rx.color('gray', 5)}",
+        ),
+        rx.icon_button(
+            rx.icon("x", size=12),
+            on_click=PipelineState.remove_attachment(idx),
+            size="1",
+            color_scheme="red",
+            variant="solid",
+            radius="full",
+            position="absolute",
+            top="-6px",
+            right="-6px",
+            cursor="pointer",
+        ),
+        position="relative",
+    )
+
+
+def _image_section() -> rx.Component:
+    return rx.vstack(
+        rx.hstack(
+            rx.icon("image", size=14, color=rx.color("gray", 10)),
+            rx.text(
+                t("add_image", PipelineState.language),
+                size="1",
+                color=rx.color("gray", 11),
+                weight="medium",
+            ),
+            rx.badge(
+                t("image_experimental", PipelineState.language),
+                color_scheme="amber",
+                variant="soft",
+                size="1",
+            ),
+            rx.tooltip(
+                rx.icon("info", size=12, color=rx.color("gray", 9)),
+                content=t("image_note", PipelineState.language),
+            ),
+            spacing="2",
+            align="center",
+        ),
+        rx.upload(
+            rx.text(
+                t("add_image", PipelineState.language),
+                size="1",
+                color=rx.color("gray", 10),
+            ),
+            id="pai_image_upload",
+            accept={
+                "image/png": [".png"],
+                "image/jpeg": [".jpg", ".jpeg"],
+                "image/webp": [".webp"],
+                "image/gif": [".gif"],
+            },
+            multiple=True,
+            max_files=4,
+            on_drop=PipelineState.handle_image_upload(
+                rx.upload_files(upload_id="pai_image_upload")
+            ),
+            border=f"1px dashed {rx.color('gray', 6)}",
+            border_radius="8px",
+            padding="3",
+            width="100%",
+            cursor="pointer",
+        ),
+        rx.cond(
+            PipelineState.attachments.length() > 0,
+            rx.flex(
+                rx.foreach(PipelineState.attachments, _attachment_thumb),
+                wrap="wrap",
+                gap="2",
+                width="100%",
+            ),
+            rx.fragment(),
+        ),
+        spacing="2",
+        align="stretch",
+        width="100%",
+    )
+
+
 def prompt_card() -> rx.Component:
     return rx.card(
         rx.vstack(
@@ -74,6 +163,7 @@ def prompt_card() -> rx.Component:
                 align="center",
                 width="100%",
             ),
+            _image_section(),
             rx.hstack(
                 rx.hstack(
                     rx.icon("cpu", size=14, color=rx.color("gray", 10)),
@@ -87,6 +177,24 @@ def prompt_card() -> rx.Component:
                     align="center",
                 ),
                 rx.spacer(),
+                rx.tooltip(
+                    rx.hstack(
+                        rx.switch(
+                            checked=PipelineState.sensitive,
+                            on_change=PipelineState.set_sensitive,
+                            color_scheme="iris",
+                            size="1",
+                        ),
+                        rx.text(
+                            t("sensitive", PipelineState.language),
+                            size="2",
+                            color=rx.color("gray", 11),
+                        ),
+                        spacing="2",
+                        align="center",
+                    ),
+                    content=t("sensitive_note", PipelineState.language),
+                ),
                 rx.button(
                     rx.cond(
                         PipelineState.is_running,
