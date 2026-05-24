@@ -3,6 +3,7 @@ from __future__ import annotations
 import asyncio
 import hashlib
 import math
+import threading
 from dataclasses import dataclass, field
 from typing import TYPE_CHECKING, Any, Literal
 
@@ -11,7 +12,35 @@ from prompt_autoimprove.core._complexity_exemplars import HARD_EXEMPLARS, SIMPLE
 from prompt_autoimprove.core.complexity import ComplexityVerdict
 
 if TYPE_CHECKING:
+    from collections.abc import Coroutine
+
     from prompt_autoimprove.domain.prompt import NormalizedPrompt
+
+_MAX_CACHE_ENTRIES = 512
+
+
+def _run_coroutine_blocking[T](coro: Coroutine[Any, Any, T]) -> T:
+    try:
+        asyncio.get_running_loop()
+    except RuntimeError:
+        return asyncio.run(coro)
+    # Already inside a loop: run the coroutine to completion on a private loop in a
+    # worker thread so the synchronous caller still gets a value without nesting loops.
+    result: list[T] = []
+    error: list[BaseException] = []
+
+    def _worker() -> None:
+        try:
+            result.append(asyncio.run(coro))
+        except BaseException as exc:
+            error.append(exc)
+
+    thread = threading.Thread(target=_worker)
+    thread.start()
+    thread.join()
+    if error:
+        raise error[0]
+    return result[0]
 
 
 class ClassifierUnavailable(Exception):
@@ -103,17 +132,33 @@ class JudgeClassifier:
     name: str = "judge-classifier"
     _cache: dict[str, ComplexityVerdict] = field(init=False, default_factory=dict, repr=False)
 
-    def classify(self, normalized: NormalizedPrompt) -> ComplexityVerdict:
-        cache_key = hashlib.sha256(
-            f"{normalized.cleaned_text}{self.judge.name}".encode()
-        ).hexdigest()[:32]
-        cached = self._cache.get(cache_key)
+    async def classify_async(self, normalized: NormalizedPrompt) -> ComplexityVerdict:
+        key = self._key(normalized)
+        cached = self._cache.get(key)
         if cached is not None:
             return cached
-        # asyncio.run() cannot be called from an already running event loop.
-        verdict = asyncio.run(self._classify_async(normalized))
-        self._cache[cache_key] = verdict
+        verdict = await self._classify_async(normalized)
+        self._store(key, verdict)
         return verdict
+
+    def classify(self, normalized: NormalizedPrompt) -> ComplexityVerdict:
+        key = self._key(normalized)
+        cached = self._cache.get(key)
+        if cached is not None:
+            return cached
+        verdict = _run_coroutine_blocking(self._classify_async(normalized))
+        self._store(key, verdict)
+        return verdict
+
+    def _key(self, normalized: NormalizedPrompt) -> str:
+        return hashlib.sha256(f"{normalized.cleaned_text}{self.judge.name}".encode()).hexdigest()[
+            :32
+        ]
+
+    def _store(self, key: str, verdict: ComplexityVerdict) -> None:
+        if len(self._cache) >= _MAX_CACHE_ENTRIES:
+            self._cache.pop(next(iter(self._cache)))
+        self._cache[key] = verdict
 
     async def _classify_async(self, normalized: NormalizedPrompt) -> ComplexityVerdict:
         request = GenerationRequest(

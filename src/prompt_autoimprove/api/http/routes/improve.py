@@ -10,6 +10,8 @@ from prompt_autoimprove.api.http.schemas import ImproveRequest, ImproveResponse,
 from prompt_autoimprove.config import get_settings
 from prompt_autoimprove.domain.prompt import Prompt
 from prompt_autoimprove.registry.loader import ProfileNotFoundError, resolve_profile
+from prompt_autoimprove.routing.router import NoRouteError
+from prompt_autoimprove.services.orchestrator import PipelineError
 
 router = APIRouter(prefix="/v1", tags=["improve"])
 
@@ -34,9 +36,14 @@ async def improve(
             status.HTTP_404_NOT_FOUND, detail=f"unknown profile {body.profile!r}"
         ) from exc
     prompt = Prompt(text=body.prompt, locale_hint=body.locale_hint)
-    result = await orchestrator.run(
-        prompt, body.profile, sensitive=body.sensitive, session_id=body.session_ref
-    )
+    try:
+        result = await orchestrator.run(
+            prompt, body.profile, sensitive=body.sensitive, session_id=body.session_ref
+        )
+    except PipelineError as exc:
+        raise HTTPException(status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(exc)) from exc
+    except NoRouteError as exc:
+        raise HTTPException(status.HTTP_503_SERVICE_UNAVAILABLE, detail=str(exc)) from exc
     return ImproveResponse(
         session_id=str(result.session_id),
         strategy=result.chosen.strategy.value,

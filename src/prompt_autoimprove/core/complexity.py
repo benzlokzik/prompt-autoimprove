@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import asyncio
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, Literal, Protocol, runtime_checkable
 
@@ -102,12 +103,31 @@ class CompositeClassifier:
         if h.score < self.lo or h.score > self.hi:
             return h
         ml = self.ml.classify(normalized)
+        return self._merge(h, ml)
+
+    async def classify_async(self, normalized: NormalizedPrompt) -> ComplexityVerdict:
+        h = self.heuristic.classify(normalized)
+        if h.score < self.lo or h.score > self.hi:
+            return h
+        ml = await classify_async(self.ml, normalized)
+        return self._merge(h, ml)
+
+    def _merge(self, h: ComplexityVerdict, ml: ComplexityVerdict) -> ComplexityVerdict:
         merged_reasons = (*h.reasons, f"composite_band({h.score})", *ml.reasons)
         return ComplexityVerdict(label=ml.label, score=ml.score, reasons=merged_reasons)
 
 
 def classify(normalized: NormalizedPrompt) -> ComplexityVerdict:
     return HeuristicClassifier().classify(normalized)
+
+
+async def classify_async(
+    classifier: ComplexityClassifier, normalized: NormalizedPrompt
+) -> ComplexityVerdict:
+    runner = getattr(classifier, "classify_async", None)
+    if runner is not None:
+        return await runner(normalized)
+    return await asyncio.to_thread(classifier.classify, normalized)
 
 
 def build_classifier(

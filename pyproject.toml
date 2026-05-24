@@ -123,6 +123,15 @@ addopts = "-ra --strict-markers --strict-config"
 testpaths = ["tests"]
 asyncio_mode = "auto"
 
+[tool.coverage.run]
+branch = true
+source = ["src/prompt_autoimprove"]
+omit = ["src/prompt_autoimprove/api/grpc/generated/*"]
+
+[tool.coverage.report]
+show_missing = true
+fail_under = 70
+
 [tool.alembic]
 script_location = "src/prompt_autoimprove/persistence/migrations"
 prepend_sys_path = ["."]
