@@ -3,6 +3,7 @@ import os
 from collections.abc import AsyncIterator
 from dataclasses import dataclass
 from typing import Any
+from urllib.parse import quote
 
 import httpx
 
@@ -32,7 +33,8 @@ class BackendClient:
     async def history(self, session_ref: str) -> list[dict[str, Any]]:
         async with httpx.AsyncClient(timeout=self.timeout) as client:
             resp = await client.get(
-                f"{self.base_url}/v1/history/{session_ref}", headers=self._headers()
+                f"{self.base_url}/v1/history/{quote(session_ref, safe='')}",
+                headers=self._headers(),
             )
             if resp.status_code == 404:
                 return []
@@ -45,17 +47,26 @@ class BackendClient:
         profile: str,
         *,
         locale_hint: str | None = None,
+        sensitive: bool = False,
+        attachments: list[dict[str, Any]] | None = None,
     ) -> AsyncIterator[tuple[str, dict[str, Any]]]:
-        body: dict[str, Any] = {"prompt": prompt, "profile": profile}
+        # Mirror the inputs of the follow-up improve() call so the streamed
+        # preview matches the final result (and sensitive content stays local).
+        body: dict[str, Any] = {"prompt": prompt, "profile": profile, "sensitive": sensitive}
         if locale_hint:
             body["locale_hint"] = locale_hint
+        if attachments:
+            body["attachments"] = attachments
         headers = {
             "x-api-key": self.api_key,
             "accept": "text/event-stream",
             "content-type": "application/json",
         }
+        # No read timeout: gaps between SSE events (e.g. a slow probation run)
+        # must not abort the stream.
+        timeout = httpx.Timeout(connect=10.0, read=None, write=10.0, pool=10.0)
         async with (
-            httpx.AsyncClient(timeout=self.timeout) as client,
+            httpx.AsyncClient(timeout=timeout) as client,
             client.stream(
                 "POST",
                 f"{self.base_url}/v1/improve/stream",
@@ -65,13 +76,20 @@ class BackendClient:
         ):
             resp.raise_for_status()
             event: str | None = None
+            data_lines: list[str] = []
             async for line in resp.aiter_lines():
                 if line.startswith("event:"):
                     event = line.removeprefix("event:").strip()
-                elif line.startswith("data:") and event:
-                    payload = json.loads(line.removeprefix("data:").strip())
-                    yield event, payload
-                    event = None
+                elif line.startswith("data:"):
+                    data_lines.append(line.removeprefix("data:").strip())
+                elif line == "" and event and data_lines:
+                    try:
+                        payload = json.loads("\n".join(data_lines))
+                    except json.JSONDecodeError:
+                        payload = None
+                    if payload is not None:
+                        yield event, payload
+                    event, data_lines = None, []
 
     async def improve(
         self,
@@ -94,7 +112,9 @@ class BackendClient:
             body["locale_hint"] = locale_hint
         if attachments:
             body["attachments"] = attachments
-        async with httpx.AsyncClient(timeout=self.timeout) as client:
+        # The full pipeline (incl. a model probation run) can take a while.
+        timeout = httpx.Timeout(self.timeout, read=300.0)
+        async with httpx.AsyncClient(timeout=timeout) as client:
             resp = await client.post(
                 f"{self.base_url}/v1/improve", headers=self._headers(), json=body
             )

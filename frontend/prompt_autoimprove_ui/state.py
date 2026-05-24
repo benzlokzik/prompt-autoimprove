@@ -92,7 +92,7 @@ class PipelineState(rx.State):
     error: str = ""
 
     def _humanize_error(self, exc: Exception) -> str:
-        logger.error("frontend request failed: %s", type(exc).__name__, exc_info=exc)
+        logger.error("frontend request failed: %r", exc, exc_info=exc)
         if isinstance(exc, httpx.HTTPStatusError):
             code = exc.response.status_code
             key = {
@@ -102,6 +102,8 @@ class PipelineState(rx.State):
             }.get(code, "err_server" if code >= 500 else "err_generic")
         elif isinstance(exc, httpx.RequestError):
             key = "err_network"
+        elif isinstance(exc, (KeyError, ValueError)):
+            key = "err_bad_response"
         else:
             key = "err_generic"
         return STRINGS[key]["ru" if self.language == "ru" else "en"]
@@ -306,10 +308,23 @@ class PipelineState(rx.State):
                 return
             self.is_running = True
 
+        attachments = [
+            {
+                "modality": "image",
+                "uri": a["uri"],
+                "mime_type": a["mime_type"],
+                "bytes_size": a["bytes_size"],
+            }
+            for a in self.attachments
+        ]
         try:
             client = BackendClient.from_env()
             async for stage, payload in client.stream_improve(
-                prompt=self.prompt, profile=self.profile, locale_hint=self.language
+                prompt=self.prompt,
+                profile=self.profile,
+                locale_hint=self.language,
+                sensitive=self.sensitive,
+                attachments=attachments,
             ):
                 async with self:
                     self._apply_stage(stage, payload)
@@ -319,15 +334,7 @@ class PipelineState(rx.State):
                 session_ref=self.session_ref or None,
                 sensitive=self.sensitive,
                 locale_hint=self.language,
-                attachments=[
-                    {
-                        "modality": "image",
-                        "uri": a["uri"],
-                        "mime_type": a["mime_type"],
-                        "bytes_size": a["bytes_size"],
-                    }
-                    for a in self.attachments
-                ],
+                attachments=attachments,
             )
             async with self:
                 self.metrics = [

@@ -257,8 +257,10 @@ class AutoImproveOrchestrator:
             await db.commit()
             return session_row.id
 
-    async def stream(self, prompt: Prompt, profile_name: str) -> AsyncIterator[tuple[str, dict]]:
-        result = await self.run(prompt, profile_name)
+    async def stream(
+        self, prompt: Prompt, profile_name: str, *, sensitive: bool = False
+    ) -> AsyncIterator[tuple[str, dict]]:
+        result = await self.run(prompt, profile_name, sensitive=sensitive)
         yield (
             "normalized",
             {

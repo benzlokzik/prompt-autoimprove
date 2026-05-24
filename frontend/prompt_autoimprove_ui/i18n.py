@@ -113,6 +113,10 @@ STRINGS: dict[str, dict[str, str]] = {
         "en": "Something went wrong. Please try again.",
         "ru": "Что-то пошло не так. Попробуйте снова.",
     },
+    "err_bad_response": {
+        "en": "Unexpected response from the server. Please try again.",
+        "ru": "Неожиданный ответ сервера. Попробуйте снова.",
+    },
     "add_image": {
         "en": "Drop an image or click to add",
         "ru": "Перетащите изображение или нажмите",
