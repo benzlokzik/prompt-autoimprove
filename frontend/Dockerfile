@@ -23,4 +23,4 @@ WORKDIR /app/frontend
 
 EXPOSE 3000 8001
 
-CMD ["reflex", "run", "--env", "dev", "--frontend-port", "3000", "--backend-port", "8001"]
+CMD ["reflex", "run", "--env", "prod", "--frontend-port", "3000", "--backend-port", "8001"]
