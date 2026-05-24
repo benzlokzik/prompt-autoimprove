@@ -66,6 +66,7 @@ theme:
 
 nav:
   - Home: index.md
+  - Running: running.md
   - Architecture: architecture.md
   - Strategies: strategies.md
   - Scoring: scoring.md

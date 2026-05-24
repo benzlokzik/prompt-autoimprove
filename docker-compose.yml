@@ -99,11 +99,10 @@ services:
         condition: service_healthy
     environment:
       PAI_BACKEND_URL: http://app:8000
-      PAI_REFLEX_API_URL: http://localhost:8001
+      PAI_REFLEX_API_URL: http://localhost:3000
       PAI_API_KEY: dev-key
     ports:
       - "3000:3000"
-      - "8001:8001"
 
   ollama:
     image: ollama/ollama:latest

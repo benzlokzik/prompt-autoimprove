@@ -21,6 +21,6 @@ ENV PATH="/app/.venv/bin:$PATH" \
 
 WORKDIR /app/frontend
 
-EXPOSE 3000 8001
+EXPOSE 3000
 
-CMD ["reflex", "run", "--env", "prod", "--frontend-port", "3000", "--backend-port", "8001"]
+CMD ["reflex", "run", "--env", "prod", "--single-port", "--frontend-port", "3000", "--backend-port", "3000"]
