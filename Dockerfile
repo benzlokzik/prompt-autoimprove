@@ -1,4 +1,4 @@
-FROM ghcr.io/astral-sh/uv:python3.13-bookworm-slim AS builder
+FROM ghcr.io/astral-sh/uv:python3.13-alpine AS builder
 
 ARG INCLUDE_ML=0
 ARG INCLUDE_LOCAL_MODELS=0
@@ -8,6 +8,10 @@ ENV UV_COMPILE_BYTECODE=1 \
     UV_PROJECT_ENVIRONMENT=/app/.venv
 
 WORKDIR /app
+
+# Some deps (e.g. aiokafka) ship no musllinux wheel and compile from sdist;
+# its C extension needs a compiler and zlib headers.
+RUN apk add --no-cache build-base zlib-dev
 
 COPY pyproject.toml uv.lock README.md ./
 RUN --mount=type=cache,target=/root/.cache/uv \
@@ -27,7 +31,7 @@ RUN --mount=type=cache,target=/root/.cache/uv \
     uv sync --frozen --no-dev $EXTRA_GROUPS
 
 
-FROM python:3.13-slim-bookworm AS runtime
+FROM python:3.13-alpine AS runtime
 
 ENV PATH="/app/.venv/bin:$PATH" \
     PYTHONDONTWRITEBYTECODE=1 \
@@ -35,7 +39,7 @@ ENV PATH="/app/.venv/bin:$PATH" \
 
 WORKDIR /app
 
-RUN useradd --create-home --shell /usr/sbin/nologin pai
+RUN adduser -D -s /sbin/nologin pai
 
 COPY --from=builder --chown=pai:pai /app /app
 
