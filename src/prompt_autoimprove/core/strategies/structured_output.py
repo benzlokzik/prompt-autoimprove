@@ -44,7 +44,7 @@ class StructuredOutputStrategy:
     def apply(
         self,
         normalized: NormalizedPrompt,
-        profile: ModelProfile,  # noqa: ARG002
+        profile: ModelProfile,
         config: StrategyConfig,
     ) -> CandidatePrompt:
         fmt = _FORMAT_BY_TASK.get(normalized.detected_task, config.output_format)
@@ -54,5 +54,5 @@ class StructuredOutputStrategy:
             text=text,
             strategy=self.name,
             rationale=f"Enforced '{fmt}' output for task '{normalized.detected_task}'.",
-            estimated_tokens=estimate_tokens(text),
+            estimated_tokens=estimate_tokens(text, profile.name),
         )

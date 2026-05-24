@@ -27,7 +27,7 @@ class SelfVerificationStrategy:
     def apply(
         self,
         normalized: NormalizedPrompt,
-        profile: ModelProfile,  # noqa: ARG002
+        profile: ModelProfile,
         config: StrategyConfig,  # noqa: ARG002
     ) -> CandidatePrompt:
         text = normalized.cleaned_text + _VERIFICATION_TAIL
@@ -35,5 +35,5 @@ class SelfVerificationStrategy:
             text=text,
             strategy=self.name,
             rationale="Appended an explicit self-check loop to catch missed constraints.",
-            estimated_tokens=estimate_tokens(text),
+            estimated_tokens=estimate_tokens(text, profile.name),
         )

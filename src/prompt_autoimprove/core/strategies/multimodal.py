@@ -30,7 +30,7 @@ class MultimodalStrategy:
     def apply(
         self,
         normalized: NormalizedPrompt,
-        profile: ModelProfile,  # noqa: ARG002
+        profile: ModelProfile,
         config: StrategyConfig,  # noqa: ARG002
     ) -> CandidatePrompt:
         prompt = normalized.source
@@ -48,5 +48,5 @@ class MultimodalStrategy:
             text=text,
             strategy=self.name,
             rationale=f"Attached {len(attachment_lines)} item(s); model supports vision.",
-            estimated_tokens=estimate_tokens(text),
+            estimated_tokens=estimate_tokens(text, profile.name),
         )

@@ -59,9 +59,11 @@ modes.
 ## Token accounting
 
 `core.tokenizer.count_tokens` backs the token-cost term. With the `ml` group
-installed it uses a real BPE tokenizer (tiktoken, `cl100k_base`); otherwise it
-falls back to a `~4 characters per token` heuristic. Any tokenizer error also
-falls back, so zero-dependency runs stay deterministic.
+installed it uses the routed profile's BPE tokenizer (tiktoken): OpenAI models
+get their exact encoding (e.g. `gpt-4o` → `o200k_base`, `gpt-4` → `cl100k_base`)
+and other families (claude, qwen, gemma, …) fall back to `cl100k_base`. Without
+the `ml` group, or on any tokenizer error, it uses a `~4 characters per token`
+heuristic, so zero-dependency runs stay deterministic.
 
 ## Semantic intent preservation
 

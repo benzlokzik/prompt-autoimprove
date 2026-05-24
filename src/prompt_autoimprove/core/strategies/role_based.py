@@ -30,7 +30,7 @@ class RoleBasedStrategy:
     def apply(
         self,
         normalized: NormalizedPrompt,
-        profile: ModelProfile,  # noqa: ARG002
+        profile: ModelProfile,
         config: StrategyConfig,
     ) -> CandidatePrompt:
         role = _ROLE_BY_TASK.get(normalized.detected_task, config.role)
@@ -42,5 +42,5 @@ class RoleBasedStrategy:
             text=text,
             strategy=self.name,
             rationale=f"Assigned role '{role}' based on task '{normalized.detected_task}'.",
-            estimated_tokens=estimate_tokens(text),
+            estimated_tokens=estimate_tokens(text, profile.name),
         )

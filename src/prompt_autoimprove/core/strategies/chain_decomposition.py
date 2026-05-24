@@ -26,7 +26,7 @@ class ChainDecompositionStrategy:
     def apply(
         self,
         normalized: NormalizedPrompt,
-        profile: ModelProfile,  # noqa: ARG002
+        profile: ModelProfile,
         config: StrategyConfig,  # noqa: ARG002
     ) -> CandidatePrompt:
         text = (
@@ -41,5 +41,5 @@ class ChainDecompositionStrategy:
             text=text,
             strategy=self.name,
             rationale="Reasoning-heavy task without native thinking mode — explicit plan added.",
-            estimated_tokens=estimate_tokens(text),
+            estimated_tokens=estimate_tokens(text, profile.name),
         )

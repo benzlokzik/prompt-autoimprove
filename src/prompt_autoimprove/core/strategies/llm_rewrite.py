@@ -91,7 +91,7 @@ class LLMRewriter:
                 f"LLM rewrite via improver '{self.improver.name}' "
                 f"({result.input_tokens}+{result.output_tokens} tokens)."
             ),
-            estimated_tokens=estimate_tokens(rewritten),
+            estimated_tokens=estimate_tokens(rewritten, profile.name),
         )
         if len(self._cache) >= _MAX_CACHE_ENTRIES:
             self._cache.pop(next(iter(self._cache)))
