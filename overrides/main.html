@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+
+{#- Social-share metadata for ALL networks.
+
+    OpenGraph (og:*) is consumed by Facebook, LinkedIn, Slack, Discord, Telegram,
+    WhatsApp, Pinterest, iMessage, Signal, Mastodon. Twitter/X reads twitter:*
+    and falls back to og:* when absent. We emit the full canonical set so every
+    platform renders the same card.
+
+    The image is the brand wordmark card at docs/assets/social-preview.png
+    (1280x640, ~175 KB — well under every platform's size/aspect limits).
+    Material only emits <meta name="description"> on its own, so these tags are
+    the sole source of truth (no duplicates to override). -#}
+{% block extrahead %}
+  {% set social_img = config.site_url ~ "assets/social-preview.png" %}
+  {% set page_title = config.site_name if (page and page.is_homepage) else (page.title ~ " – " ~ config.site_name if page and page.title else config.site_name) %}
+  {% set page_desc = page.meta.description if page and page.meta and page.meta.description else config.site_description %}
+  {% set page_url = page.canonical_url | default(config.site_url, true) if page else config.site_url %}
+  {% set lang = config.theme.language | default('en', true) %}
+
+  <!-- OpenGraph (Facebook, LinkedIn, Slack, Discord, Telegram, WhatsApp, …) -->
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="{{ config.site_name }}">
+  <meta property="og:title" content="{{ page_title }}">
+  <meta property="og:description" content="{{ page_desc }}">
+  <meta property="og:url" content="{{ page_url }}">
+  <meta property="og:locale" content="{{ 'ru_RU' if lang == 'ru' else 'en_US' }}">
+  <meta property="og:image" content="{{ social_img }}">
+  <meta property="og:image:secure_url" content="{{ social_img }}">
+  <meta property="og:image:type" content="image/png">
+  <meta property="og:image:width" content="1280">
+  <meta property="og:image:height" content="640">
+  <meta property="og:image:alt" content="{{ config.site_name }}">
+
+  <!-- Twitter / X -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="{{ page_title }}">
+  <meta name="twitter:description" content="{{ page_desc }}">
+  <meta name="twitter:image" content="{{ social_img }}">
+  <meta name="twitter:image:alt" content="{{ config.site_name }}">
+{% endblock %}
