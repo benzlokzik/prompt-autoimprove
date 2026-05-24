@@ -45,7 +45,7 @@ def header() -> rx.Component:
                     color_scheme="gray",
                     size="2",
                 ),
-                href="https://github.com/benzlokzik-university/prompt-autoimprove",
+                href="https://benzlokzik-university.github.io/prompt-autoimprove/",
                 is_external=True,
             ),
             rx.link(
