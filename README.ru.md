@@ -36,6 +36,8 @@ model probation probe и сохраняет объяснение решения.
 - Хранение через SQLAlchemy 2 и Alembic; события пайплайна через Kafka,
   совместимую с Redpanda в разработке.
 - Веб-фронтенд на Reflex с Radix Themes; см. [docs/frontend.ru.md](docs/frontend.ru.md).
+- Необязательный сигнал спама/злоупотреблений для русских промптов (по умолчанию
+  выключен); см. [docs/moderation.ru.md](docs/moderation.ru.md).
 - CLI-команда: `pai improve --prompt ... --profile qwen3-7b`.
 
 ## Быстрый старт
@@ -103,7 +105,7 @@ MkDocs собирает английскую версию в `/`, а русск�
 
 ## Лицензия
 
-GNU AGPL-3.0-or-later; см. [LICENSE](LICENSE). AGPL-3.0 — строгая copyleft-лицензия
+GNU AGPL-3.0-only; см. [LICENSE](LICENSE). AGPL-3.0 — строгая copyleft-лицензия
 с условием о сетевом использовании: если вы запускаете изменённую версию этого
 сервиса и даёте пользователям работать с ним по сети, вы обязаны предоставить им
 соответствующий исходный код.

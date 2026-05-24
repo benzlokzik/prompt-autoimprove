@@ -34,6 +34,7 @@ class ImproveResponse(BaseModel):
     metrics: list[MetricOut]
     explanation: str
     probation: str | None = None
+    safety_flags: list[str] = Field(default_factory=list)
 
 
 class ProfileOut(BaseModel):

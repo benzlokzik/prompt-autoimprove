@@ -87,6 +87,17 @@ _MAX_ATTACHMENTS = 4
 _MAX_ATTACHMENT_BYTES = 8 * 1024 * 1024
 
 
+def _parse_spam_score(safety_flags: list[str]) -> float:
+    """Read the P(spam) value out of a `spam:<score>` flag, if the backend set one."""
+    for flag in safety_flags:
+        if flag.startswith("spam:"):
+            try:
+                return float(flag[len("spam:") :])
+            except ValueError:
+                return 0.0
+    return 0.0
+
+
 class PipelineState(rx.State):
     prompt: str = ""
     profile: str = "qwen"
@@ -99,6 +110,7 @@ class PipelineState(rx.State):
     candidate_text: str = ""
     candidate_strategy: str = ""
     candidate_rationale: str = ""
+    spam_score: float = 0.0
     integrated_score: float = 0.0
     score_display: str = ""
     explanation: str = ""
@@ -161,6 +173,14 @@ class PipelineState(rx.State):
     def metric_columns(self) -> str:
         n = len(self.metrics)
         return str(n) if n > 0 else "1"
+
+    @rx.var
+    def spam_flagged(self) -> bool:
+        return self.spam_score > 0.0
+
+    @rx.var
+    def spam_percent(self) -> str:
+        return f"{self.spam_score * 100:.0f}%"
 
     @rx.var
     def example_prompts(self) -> list[str]:
@@ -318,6 +338,7 @@ class PipelineState(rx.State):
         self.candidate_text = ""
         self.candidate_strategy = ""
         self.candidate_rationale = ""
+        self.spam_score = 0.0
         self.integrated_score = 0.0
         self.score_display = ""
         self.explanation = ""
@@ -400,6 +421,7 @@ class PipelineState(rx.State):
                     )
                     for m in full.get("metrics", [])
                 ]
+                self.spam_score = _parse_spam_score(full.get("safety_flags", []))
                 if not self.session_ref:
                     self.session_ref = full.get("session_id", "")
         except Exception as exc:

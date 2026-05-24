@@ -1,7 +1,17 @@
+import dataclasses
+
 import pytest
 
 from prompt_autoimprove.domain.prompt import Modality, Prompt, PromptAttachment
-from prompt_autoimprove.services.orchestrator import AutoImproveOrchestrator
+from prompt_autoimprove.services.orchestrator import AutoImproveOrchestrator, PipelineError
+
+
+class _FakeSpam:
+    def __init__(self, value: float) -> None:
+        self.value = value
+
+    def score(self, text: str) -> float:
+        return self.value
 
 
 @pytest.mark.asyncio
@@ -47,3 +57,25 @@ async def test_stream_emits_expected_stages(orchestrator: AutoImproveOrchestrato
     assert "final_decision" in stages
     assert stages.index("normalized") < stages.index("complexity_checked")
     assert stages.index("complexity_checked") < stages.index("strategy_selected")
+
+
+@pytest.mark.asyncio
+async def test_spam_flag_surfaces_for_russian(orchestrator: AutoImproveOrchestrator) -> None:
+    moderated = dataclasses.replace(orchestrator, spam_scorer=_FakeSpam(0.93))
+    result = await moderated.run(Prompt(text="Купите дешёвые таблетки сейчас"), "qwen3-7b")
+    assert "spam:0.9300" in result.normalized.safety_flags
+
+
+@pytest.mark.asyncio
+async def test_spam_block_rejects_above_threshold(orchestrator: AutoImproveOrchestrator) -> None:
+    moderated = dataclasses.replace(
+        orchestrator, spam_scorer=_FakeSpam(0.95), spam_block=True, spam_threshold=0.8
+    )
+    with pytest.raises(PipelineError):
+        await moderated.run(Prompt(text="Купите дешёвые таблетки сейчас"), "qwen3-7b")
+
+
+@pytest.mark.asyncio
+async def test_no_scorer_leaves_output_unchanged(orchestrator: AutoImproveOrchestrator) -> None:
+    result = await orchestrator.run(Prompt(text="Купите дешёвые таблетки сейчас"), "qwen3-7b")
+    assert not any(f.startswith("spam:") for f in result.normalized.safety_flags)

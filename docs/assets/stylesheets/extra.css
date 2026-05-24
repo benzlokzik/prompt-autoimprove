@@ -572,6 +572,84 @@ body {
   color: var(--md-primary-fg-color);
 }
 
+/* ---------- Code block language labels ---------- */
+/* pymdownx.highlight (pygments_lang_class) puts `language-<lang>` on the
+   `.highlight` wrapper; render it as a chip left of the copy button. */
+
+.md-typeset .highlight[class*="language-"]::before {
+  position: absolute;
+  top: 0;
+  right: 2.1rem;
+  z-index: 1;
+  display: none;
+  padding: 0.12rem 0.5rem;
+  border: 1px solid var(--pai-code-border);
+  border-top: 0;
+  border-radius: 0 0 var(--pai-radius-xs) var(--pai-radius-xs);
+  background: var(--pai-accent-soft);
+  color: var(--pai-muted);
+  font-family: var(--md-code-font-family, monospace);
+  font-size: 0.58rem;
+  font-weight: 700;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  pointer-events: none;
+}
+
+.md-typeset .highlight.language-bash::before {
+  display: block;
+  content: "Bash";
+}
+
+.md-typeset .highlight.language-sh::before,
+.md-typeset .highlight.language-shell::before,
+.md-typeset .highlight.language-console::before {
+  display: block;
+  content: "Shell";
+}
+
+.md-typeset .highlight.language-text::before {
+  display: block;
+  content: "Text";
+}
+
+.md-typeset .highlight.language-python::before,
+.md-typeset .highlight.language-py::before {
+  display: block;
+  content: "Python";
+}
+
+.md-typeset .highlight.language-proto::before {
+  display: block;
+  content: "Protobuf";
+}
+
+.md-typeset .highlight.language-json::before {
+  display: block;
+  content: "JSON";
+}
+
+.md-typeset .highlight.language-yaml::before,
+.md-typeset .highlight.language-yml::before {
+  display: block;
+  content: "YAML";
+}
+
+.md-typeset .highlight.language-toml::before {
+  display: block;
+  content: "TOML";
+}
+
+.md-typeset .highlight.language-dockerfile::before {
+  display: block;
+  content: "Dockerfile";
+}
+
+.md-typeset .highlight.language-sql::before {
+  display: block;
+  content: "SQL";
+}
+
 /* ---------- Content action buttons ---------- */
 
 .md-content__button {

@@ -1,7 +1,8 @@
-FROM ghcr.io/astral-sh/uv:python3.13-alpine AS builder
+FROM ghcr.io/astral-sh/uv:python3.13-bookworm-slim AS builder
 
 ARG INCLUDE_ML=0
 ARG INCLUDE_LOCAL_MODELS=0
+ARG INCLUDE_MODERATION=0
 
 ENV UV_COMPILE_BYTECODE=1 \
     UV_LINK_MODE=copy \
@@ -9,15 +10,12 @@ ENV UV_COMPILE_BYTECODE=1 \
 
 WORKDIR /app
 
-# Some deps (e.g. aiokafka) ship no musllinux wheel and compile from sdist;
-# its C extension needs a compiler and zlib headers.
-RUN apk add --no-cache build-base zlib-dev
-
 COPY pyproject.toml uv.lock README.md ./
 RUN --mount=type=cache,target=/root/.cache/uv \
     EXTRA_GROUPS="" && \
     if [ "$INCLUDE_ML" = "1" ]; then EXTRA_GROUPS="$EXTRA_GROUPS --group ml"; fi && \
     if [ "$INCLUDE_LOCAL_MODELS" = "1" ]; then EXTRA_GROUPS="$EXTRA_GROUPS --group local-models"; fi && \
+    if [ "$INCLUDE_MODERATION" = "1" ]; then EXTRA_GROUPS="$EXTRA_GROUPS --group moderation"; fi && \
     uv sync --frozen --no-install-project --no-dev $EXTRA_GROUPS
 
 COPY src ./src
@@ -28,10 +26,14 @@ RUN --mount=type=cache,target=/root/.cache/uv \
     EXTRA_GROUPS="" && \
     if [ "$INCLUDE_ML" = "1" ]; then EXTRA_GROUPS="$EXTRA_GROUPS --group ml"; fi && \
     if [ "$INCLUDE_LOCAL_MODELS" = "1" ]; then EXTRA_GROUPS="$EXTRA_GROUPS --group local-models"; fi && \
+    if [ "$INCLUDE_MODERATION" = "1" ]; then EXTRA_GROUPS="$EXTRA_GROUPS --group moderation"; fi && \
     uv sync --frozen --no-dev $EXTRA_GROUPS
 
 
-FROM python:3.13-alpine AS runtime
+FROM python:3.13-slim AS runtime
+
+ARG INCLUDE_MODERATION=0
+ARG PAI_MODERATION_HF_MODEL=""
 
 ENV PATH="/app/.venv/bin:$PATH" \
     PYTHONDONTWRITEBYTECODE=1 \
@@ -39,11 +41,16 @@ ENV PATH="/app/.venv/bin:$PATH" \
 
 WORKDIR /app
 
-RUN adduser -D -s /sbin/nologin pai
+RUN useradd --create-home --shell /usr/sbin/nologin pai
 
 COPY --from=builder --chown=pai:pai /app /app
 
 USER pai
+
+# Bake the moderation model into the image (downloaded from Hugging Face at build time).
+RUN if [ "$INCLUDE_MODERATION" = "1" ] && [ -n "$PAI_MODERATION_HF_MODEL" ]; then \
+        python -c "import sys; from transformers import AutoModelForSequenceClassification, AutoTokenizer; m = sys.argv[1]; AutoModelForSequenceClassification.from_pretrained(m); AutoTokenizer.from_pretrained(m)" "$PAI_MODERATION_HF_MODEL"; \
+    fi
 
 EXPOSE 8000 50051
 

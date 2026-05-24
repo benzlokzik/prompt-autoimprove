@@ -74,6 +74,7 @@ async def improve(
         ],
         explanation=result.run.explanation,
         probation=result.probation.text if result.probation else None,
+        safety_flags=list(result.normalized.safety_flags),
     )
 
 

@@ -4,7 +4,7 @@ version = "0.1.0"
 description = "Microservices system for automatic improvement of LLM prompts"
 readme = "README.md"
 requires-python = ">=3.13"
-license = { text = "AGPL-3.0-or-later" }
+license = { text = "AGPL-3.0-only" }
 authors = [{ name = "benzlokzik" }]
 dependencies = [
     "pydantic>=2.7",
@@ -60,6 +60,9 @@ ml = [
 local-models = [
     "llama-cpp-python>=0.3",
 ]
+moderation = [
+    "spam-detector[transformers] @ git+https://github.com/benzlokzik/spam-detector@v0.2.0",
+]
 
 [project.scripts]
 pai = "prompt_autoimprove.cli.main:app"
@@ -104,6 +107,7 @@ exclude = [
     "src/prompt_autoimprove/adapters/gguf_local.py",
     "src/prompt_autoimprove/adapters/safetensors_hf.py",
     "src/prompt_autoimprove/core/ml_complexity.py",
+    "src/prompt_autoimprove/core/spam_signal.py",
 ]
 
 [tool.ty.rules]

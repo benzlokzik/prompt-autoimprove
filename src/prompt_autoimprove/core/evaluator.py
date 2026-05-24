@@ -22,6 +22,17 @@ _REASONING_EMPHASIS = 1.3
 _REASONING_TASKS: frozenset[str] = frozenset(t.value for t in REASONING_HEAVY)
 
 
+def _spam_score(safety_flags: tuple[str, ...]) -> float | None:
+    """Extract the P(spam) value from a `spam:<score>` safety flag, if present."""
+    for flag in safety_flags:
+        if flag.startswith("spam:"):
+            try:
+                return float(flag[len("spam:") :])
+            except ValueError:
+                return None
+    return None
+
+
 def _clip(x: float) -> float:
     if x < 0.0:
         return 0.0
@@ -52,6 +63,7 @@ class IntegratedScorer:
     profile_aware: bool = True
     semantic: SemanticSimilarity | None = None
     semantic_blend: float = 0.5
+    moderation_weight: float = 0.5
 
     def __post_init__(self) -> None:
         if self.weights is None:
@@ -87,11 +99,12 @@ class IntegratedScorer:
         task: str | None = None,
         reference: str | None = None,
         target_latency_ms: int = 5000,
+        safety_flags: tuple[str, ...] = (),
     ) -> Score:
         text = candidate.text
         clarity_raw = self._clarity(text)
         compliance_raw = self._compliance_with_intent(text, candidate.rationale, reference)
-        safety_raw = self._safety(report)
+        safety_raw = self._safety(report, safety_flags)
         cost_raw = self._cost(candidate.estimated_tokens, profile)
         latency_raw = self._latency(profile, target_latency_ms)
 
@@ -134,12 +147,15 @@ class IntegratedScorer:
             coverage += 0.1
         return coverage
 
-    @staticmethod
-    def _safety(report: ValidationReport) -> float:
+    def _safety(self, report: ValidationReport, safety_flags: tuple[str, ...] = ()) -> float:
         if not report.ok:
             return 0.0
         warnings = sum(1 for i in report.issues if i.severity == "warning")
-        return max(0.0, 1.0 - 0.1 * warnings)
+        base = max(0.0, 1.0 - 0.1 * warnings)
+        spam = _spam_score(safety_flags)
+        if spam is not None:
+            base *= 1.0 - _clip(self.moderation_weight) * spam
+        return _clip(base)
 
     @staticmethod
     def _cost(tokens: int, profile: ModelProfile) -> float:
