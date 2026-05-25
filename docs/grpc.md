@@ -51,6 +51,7 @@ gRPC separately with `pai serve-grpc`.
 ## Response stream
 
 ```mermaid
+%%{init: {"themeVariables": {"signalColor": "#7c3aed", "activationBkgColor": "#7c3aed", "activationBorderColor": "#a78bfa"}}}%%
 sequenceDiagram
     autonumber
     participant C as Client

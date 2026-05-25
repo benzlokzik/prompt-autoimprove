@@ -659,45 +659,13 @@ body {
 }
 
 /* ---------- Mermaid sequence diagrams ---------- */
-/* Material maps most colors to --md-mermaid-* variables, but the activation bar
-   keeps mermaid's near-white default (#EDF2AE) and the autonumber badge has no
-   fill, so both wash out on the dark scheme. Pin them to a fixed brand violet
-   that contrasts on either scheme, and soften the message lines. */
-
-/* Diagram text follows the theme foreground. */
-.md-typeset .mermaid .messageText,
-.md-typeset .mermaid .labelText,
-.md-typeset .mermaid .labelText tspan,
-.md-typeset .mermaid .loopText,
-.md-typeset .mermaid .loopText tspan,
-.md-typeset .mermaid .noteText,
-.md-typeset .mermaid text.actor,
-.md-typeset .mermaid text.actor tspan {
-  fill: var(--md-default-fg-color) !important;
-}
-
-/* Activation bar: a translucent violet surface instead of the bright default. */
-.md-typeset .mermaid rect.activation0,
-.md-typeset .mermaid rect.activation1,
-.md-typeset .mermaid rect.activation2 {
-  fill: color-mix(in oklab, #7c3aed 32%, transparent) !important;
-  stroke: #7c3aed !important;
-}
-
-/* Autonumber badge: white number on a solid violet circle. */
-.md-typeset .mermaid circle {
-  fill: #7c3aed !important;
-  stroke: none !important;
-}
-
-.md-typeset .mermaid text.sequenceNumber {
-  fill: #ffffff !important;
-}
-
-/* Soften message/arrow lines so they read without glaring white. */
-.md-typeset .mermaid .messageLine0,
-.md-typeset .mermaid .messageLine1 {
-  stroke: var(--pai-muted) !important;
+/* Material renders mermaid into a closed shadow DOM, so external rules cannot
+   reach it. Only CSS custom properties inherit across that boundary: this sets
+   the autonumber text white (it sits on a violet circle set via the diagram's
+   own init directive, the other thing that survives the shadow). */
+[data-md-color-scheme="default"],
+[data-md-color-scheme="slate"] {
+  --md-mermaid-sequence-number-fg-color: #ffffff;
 }
 
 /* ---------- Content action buttons ---------- */

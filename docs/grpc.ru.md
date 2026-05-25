@@ -51,6 +51,7 @@ uv run python -m prompt_autoimprove.api.grpc.server
 ## Поток ответа
 
 ```mermaid
+%%{init: {"themeVariables": {"signalColor": "#7c3aed", "activationBkgColor": "#7c3aed", "activationBorderColor": "#a78bfa"}}}%%
 sequenceDiagram
     autonumber
     participant C as Клиент
