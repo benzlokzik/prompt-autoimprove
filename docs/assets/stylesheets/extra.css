@@ -379,6 +379,16 @@ body {
   text-transform: uppercase;
 }
 
+.pai-pron {
+  margin: 0 0 0.85rem;
+  color: var(--pai-muted);
+  font-size: 0.9rem;
+}
+
+.pai-pron code {
+  font-size: 0.85rem;
+}
+
 .pai-lede {
   max-width: 52rem;
   margin: 0 0 0.95rem;

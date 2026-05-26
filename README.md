@@ -5,6 +5,10 @@
   </picture>
 </p>
 
+<p align="center">
+  <strong>prompt-autoimprove</strong> → <em>pai</em>, <code>/paɪ/</code> (like &ldquo;pie&rdquo;)
+</p>
+
 [![DOI](https://zenodo.org/badge/1240262549.svg)](https://zenodo.org/badge/latestdoi/1240262549)
 [![CI](https://github.com/benzlokzik-university/prompt-autoimprove/actions/workflows/ci.yml/badge.svg)](https://github.com/benzlokzik-university/prompt-autoimprove/actions/workflows/ci.yml)
 [![Docs](https://github.com/benzlokzik-university/prompt-autoimprove/actions/workflows/docs-pages.yml/badge.svg)](https://benzlokzik-university.github.io/prompt-autoimprove/)

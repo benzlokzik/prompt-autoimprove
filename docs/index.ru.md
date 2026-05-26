@@ -2,6 +2,7 @@
 
 <section class="pai-hero" markdown>
 <p class="pai-kicker">Пайплайн оптимизации промптов</p>
+<p class="pai-pron"><strong>prompt-autoimprove</strong> → <em>pai</em>, <code>/paɪ/</code> (как &laquo;пай&raquo;)</p>
 
 `prompt-autoimprove` улучшает исходные промпты до отправки в целевую модель.
 Он нормализует ввод, выбирает стратегии-кандидаты, оценивает результат,
