@@ -2,6 +2,7 @@
 
 <section class="pai-hero" markdown>
 <p class="pai-kicker">Prompt optimization pipeline</p>
+<p class="pai-pron"><strong>prompt-autoimprove</strong> → <em>pai</em>, <code>/paɪ/</code> (like &ldquo;pie&rdquo;)</p>
 
 `prompt-autoimprove` improves raw prompts before they reach a target model. It
 normalizes input, selects candidate strategies, scores the results, routes the
