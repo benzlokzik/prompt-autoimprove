@@ -6,7 +6,7 @@
 </p>
 
 <p align="center">
-  <strong>prompt-autoimprove</strong> → <em>pai</em>, <code>/paɪ/</code> (как &laquo;пай&raquo;)
+  <strong>prompt-autoimprove</strong> → <em>pai</em>, <code>/paɪ/</code> (как &laquo;пай&raquo; или &ldquo;pie&rdquo;)
 </p>
 
 [![DOI](https://zenodo.org/badge/1240262549.svg)](https://zenodo.org/badge/latestdoi/1240262549)
