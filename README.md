@@ -17,6 +17,7 @@
 [![uv](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/uv/main/assets/badge/v0.json)](https://github.com/astral-sh/uv)
 [![Ruff](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json)](https://github.com/astral-sh/ruff)
 [![ty](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ty/main/assets/badge/v0.json)](https://github.com/astral-sh/ty)
+[![pixi](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/prefix-dev/pixi/main/assets/badge/v0.json)](https://pixi.sh)
 
 `prompt-autoimprove` is a Python service for improving prompts before they are
 sent to large language or multimodal models. It normalizes a raw request,
@@ -54,6 +55,19 @@ uv sync --all-groups
 uv run prek install --hook-type pre-commit --hook-type commit-msg
 uv run pai improve --prompt "Summarize this PR" --profile qwen3-7b
 ```
+
+[pixi](https://pixi.sh) manages the conda-forge toolchain (including the C/C++ compilers, CMake, and Ninja that `llama-cpp-python` needs) from the same `pyproject.toml`:
+
+```bash
+# default environment
+pixi install
+pixi run pai improve --prompt "Summarize this PR" --profile qwen3-7b
+
+# dev tools live in the `dev` env
+pixi run -e dev pytest -q
+```
+
+Each dependency group maps to a pixi environment (`dev`, `frontend`, `ml`, `local-models`, `moderation`); see [docs/running.md](docs/running.md#with-pixi).
 
 ## Common commands
 

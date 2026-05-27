@@ -57,7 +57,7 @@ $$
 
 ## Подсчёт токенов
 
-Терм token-cost опирается на `core.tokenizer.count_tokens`. С установленной
+Компонент token-cost опирается на `core.tokenizer.count_tokens`. С установленной
 группой `ml` используется BPE-токенизатор маршрутизированного профиля (tiktoken):
 модели OpenAI получают своё точное кодирование (например, `gpt-4o` →
 `o200k_base`, `gpt-4` → `cl100k_base`), а остальные семейства (claude, qwen,
@@ -68,7 +68,7 @@ gemma, …) откатываются на `cl100k_base`. Без группы `ml
 ## Сохранение исходного намерения
 
 Когда настроен backend `SemanticSimilarity` (`PAI_SCORER__SEMANTIC=1`, который
-загружает `EmbeddingSimilarity` из группы `ml`), терм prompt-compliance
+загружает `EmbeddingSimilarity` из группы `ml`), компонент prompt-compliance
 смешивается с косинусной близостью между кандидатом и исходным запросом:
 
 $$

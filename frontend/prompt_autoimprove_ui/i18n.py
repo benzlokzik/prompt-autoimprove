@@ -75,7 +75,7 @@ STRINGS: dict[str, dict[str, str]] = {
     "complexity": {"en": "Complexity", "ru": "Сложность"},
     "llm_rewrite_candidate": {
         "en": "LLM rewrite candidate",
-        "ru": "Кандидат от LLM-переписи",
+        "ru": "Кандидат от LLM-переписывания",
     },
     "llm_rewrite_note": {
         "en": "The LLM produced this rewrite but the deterministic strategy scored higher.",

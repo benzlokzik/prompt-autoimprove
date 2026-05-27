@@ -82,6 +82,30 @@ A database is optional for the HTTP/CLI happy path — without one the service
 runs in improvement-only mode and history is not persisted (`/healthz` reports
 `persistence: false`).
 
+## With pixi
+
+[pixi](https://pixi.sh) manages the conda-forge toolchain and PyPI packages from the same `pyproject.toml`. It is convenient when you want the native build tools for `llama-cpp-python` (a C/C++ compiler, CMake, Ninja, and Make ship with the `local-models` environment) without installing them by hand.
+
+```bash
+# resolve + install the default environment
+pixi install
+pixi run pai improve --prompt "Summarize this PR" --profile qwen3-7b
+
+# drop into a shell with the dev tools
+pixi shell -e dev
+```
+
+Each dependency group maps to a pixi environment, and all of them share one solve group so versions stay consistent:
+
+| Environment | Adds | Example |
+| --- | --- | --- |
+| `default` | runtime only | `pixi run pai profiles` |
+| `dev` | ruff, ty, pytest, prek, mkdocs | `pixi run -e dev pytest -q` |
+| `frontend` | Reflex | `pixi run -e frontend reflex run` |
+| `ml` | torch, transformers, tiktoken | `pixi run -e ml pai improve …` |
+| `local-models` | llama-cpp-python + C/C++ toolchain | `pixi run -e local-models pai improve …` |
+| `moderation` | spam-detector stack | `pixi run -e moderation uvicorn …` |
+
 ## Configuration
 
 All service settings use the `PAI_*` prefix with `__` as the nested delimiter.

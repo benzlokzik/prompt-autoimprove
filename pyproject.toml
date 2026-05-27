@@ -146,3 +146,31 @@ name = "ruff"
 type = "console_scripts"
 entrypoint = "ruff"
 options = "format REVISION_SCRIPT_FILENAME"
+
+[tool.pixi.workspace]
+channels = ["conda-forge"]
+platforms = ["osx-arm64", "linux-64", "win-64"]
+
+[tool.pixi.pypi-dependencies]
+prompt-autoimprove = { path = ".", editable = true }
+
+[tool.pixi.environments]
+default = { solve-group = "default" }
+dev = { features = ["dev"], solve-group = "default" }
+frontend = { features = ["frontend"], solve-group = "default" }
+local-models = { features = ["local-models"], solve-group = "default" }
+ml = { features = ["ml"], solve-group = "default" }
+moderation = { features = ["moderation"], solve-group = "default" }
+
+[tool.pixi.tasks]
+
+[tool.pixi.feature.dev.dependencies]
+prek = ">=0.4.2,<0.5"
+
+# i think i need to define a native build toolchain for compiling llama-cpp-python
+[tool.pixi.feature.local-models.dependencies]
+c-compiler = ">=1.11.0,<2"
+cxx-compiler = ">=1.11.0,<2"
+cmake = ">=4.3.3,<5"
+ninja = ">=1.13.2,<2"
+make = ">=4.4.1,<5"

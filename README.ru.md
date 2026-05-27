@@ -17,6 +17,7 @@
 [![uv](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/uv/main/assets/badge/v0.json)](https://github.com/astral-sh/uv)
 [![Ruff](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json)](https://github.com/astral-sh/ruff)
 [![ty](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ty/main/assets/badge/v0.json)](https://github.com/astral-sh/ty)
+[![pixi](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/prefix-dev/pixi/main/assets/badge/v0.json)](https://pixi.sh)
 
 `prompt-autoimprove` — Python-сервис для улучшения промптов до отправки в
 большие языковые или мультимодальные модели. Он нормализует исходный запрос,
@@ -51,6 +52,19 @@ uv sync --all-groups
 uv run prek install --hook-type pre-commit --hook-type commit-msg
 uv run pai improve --prompt "Summarize this PR" --profile qwen3-7b
 ```
+
+[pixi](https://pixi.sh) управляет toolchain из conda-forge (включая C/C++ компиляторы, CMake и Ninja для `llama-cpp-python`) из того же `pyproject.toml`:
+
+```bash
+# дефолтное окружение
+pixi install
+pixi run pai improve --prompt "Summarize this PR" --profile qwen3-7b
+
+# dev-инструменты живут в окружении `dev`
+pixi run -e dev pytest -q
+```
+
+Каждая группа зависимостей соответствует окружению pixi (`dev`, `frontend`, `ml`, `local-models`, `moderation`); см. [docs/running.ru.md](docs/running.ru.md#через-pixi).
 
 ## Частые команды
 
