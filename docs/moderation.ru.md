@@ -75,6 +75,6 @@ docker build \
 ```
 
 Базовый образ — glibc Debian (`python:3.13-slim`), потому что у `torch` нет
-колёс musllinux; стандартная сборка остаётся компактной и без `torch`.
+wheels под musllinux; стандартная сборка остаётся компактной и без `torch`.
 
 [spam-detector]: https://github.com/benzlokzik/spam-detector

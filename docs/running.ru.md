@@ -38,7 +38,7 @@ curl http://localhost:8000/healthz
 | app (gRPC) | 50051 | `AutoImproveService`; отключить `PAI_API__GRPC_ENABLED=false` |
 | frontend | 3000 | UI на Reflex (single-port) |
 | postgres | 5432 | |
-| redpanda | 19092 | внешний Kafka-листенер |
+| redpanda | 19092 | внешний Kafka listener |
 | minio | 9000 / 9001 | API / консоль |
 
 Остановка (со сбросом тома, чтобы очистить БД):
