@@ -55,6 +55,19 @@ uv run prek install --hook-type pre-commit --hook-type commit-msg
 uv run pai improve --prompt "Summarize this PR" --profile qwen3-7b
 ```
 
+[pixi](https://pixi.sh) manages the conda-forge toolchain (including the C/C++ compilers, CMake, and Ninja that `llama-cpp-python` needs) from the same `pyproject.toml`:
+
+```bash
+# default environment
+pixi install
+pixi run pai improve --prompt "Summarize this PR" --profile qwen3-7b
+
+# dev tools live in the `dev` env
+pixi run -e dev pytest -q
+```
+
+Each dependency group maps to a pixi environment (`dev`, `frontend`, `ml`, `local-models`, `moderation`); see [docs/running.md](docs/running.md#with-pixi).
+
 ## Common commands
 
 ```bash

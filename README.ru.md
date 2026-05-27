@@ -52,6 +52,19 @@ uv run prek install --hook-type pre-commit --hook-type commit-msg
 uv run pai improve --prompt "Summarize this PR" --profile qwen3-7b
 ```
 
+[pixi](https://pixi.sh) управляет toolchain из conda-forge (включая C/C++ компиляторы, CMake и Ninja для `llama-cpp-python`) из того же `pyproject.toml`:
+
+```bash
+# дефолтное окружение
+pixi install
+pixi run pai improve --prompt "Summarize this PR" --profile qwen3-7b
+
+# dev-инструменты живут в окружении `dev`
+pixi run -e dev pytest -q
+```
+
+Каждая группа зависимостей соответствует окружению pixi (`dev`, `frontend`, `ml`, `local-models`, `moderation`); см. [docs/running.ru.md](docs/running.ru.md#через-pixi).
+
 ## Частые команды
 
 ```bash

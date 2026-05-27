@@ -81,6 +81,30 @@ uv run pai profiles                                                  # спис�
 База данных необязательна для HTTP/CLI: без неё сервис работает в режиме
 улучшения без сохранения истории (`/healthz` показывает `persistence: false`).
 
+## Через pixi
+
+[pixi](https://pixi.sh) управляет toolchain из conda-forge и PyPI-пакетами из того же `pyproject.toml`. Удобно, когда нужны нативные сборочные инструменты для `llama-cpp-python` (C/C++ компилятор, CMake, Ninja и Make входят в окружение `local-models`), чтобы не ставить их вручную.
+
+```bash
+# разрешить и установить дефолтное окружение
+pixi install
+pixi run pai improve --prompt "Summarize this PR" --profile qwen3-7b
+
+# shell с dev-инструментами
+pixi shell -e dev
+```
+
+Каждая группа зависимостей соответствует окружению pixi, и все они в одной solve group, поэтому версии согласованы:
+
+| Окружение | Что добавляет | Пример |
+| --- | --- | --- |
+| `default` | только рантайм | `pixi run pai profiles` |
+| `dev` | ruff, ty, pytest, prek, mkdocs | `pixi run -e dev pytest -q` |
+| `frontend` | Reflex | `pixi run -e frontend reflex run` |
+| `ml` | torch, transformers, tiktoken | `pixi run -e ml pai improve …` |
+| `local-models` | llama-cpp-python + C/C++ toolchain | `pixi run -e local-models pai improve …` |
+| `moderation` | стек spam-detector | `pixi run -e moderation uvicorn …` |
+
 ## Конфигурация
 
 Все настройки сервиса используют префикс `PAI_*` и `__` как разделитель
