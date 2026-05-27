@@ -241,3 +241,6 @@ pai.db
 *.db-journal
 frontend/.web/
 frontend/.states/
+# pixi environments
+.pixi/*
+!.pixi/config.toml
