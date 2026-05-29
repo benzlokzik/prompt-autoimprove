@@ -3,6 +3,11 @@ site_url: https://benzlokzik-university.github.io/prompt-autoimprove/
 site_description: Automatic prompt improvement for LLMs and multimodal models
 site_author: benzlokzik
 
+copyright: >
+  Copyright &copy; 2026 &middot;
+  Licensed under
+  <a href="https://github.com/benzlokzik-university/prompt-autoimprove/blob/main/LICENSE">AGPL-3.0</a>
+
 repo_url: https://github.com/benzlokzik-university/prompt-autoimprove
 repo_name: benzlokzik-university/prompt-autoimprove
 edit_uri: edit/main/docs/
@@ -186,7 +191,7 @@ extra:
     - icon: fontawesome/brands/orcid
       link: https://orcid.org/0009-0003-1848-1674
       name: ORCID
-    - icon: fontawesome/solid/globe
+    - icon: material/web
       link: https://epops.space
       name: Website
   generator: false
