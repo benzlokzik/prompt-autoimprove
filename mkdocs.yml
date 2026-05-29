@@ -191,7 +191,7 @@ extra:
     - icon: fontawesome/brands/orcid
       link: https://orcid.org/0009-0003-1848-1674
       name: ORCID
-    - icon: material/web
+    - icon: fontawesome/solid/globe
       link: https://epops.space
       name: Website
   generator: false
