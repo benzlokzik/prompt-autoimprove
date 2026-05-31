@@ -165,6 +165,22 @@ plugins:
             Frontend: Фронтенд
             Local models: Локальные модели
             Moderation: Модерация
+        - locale: hy
+          name: Հայերեն
+          build: true
+          link: /hy/
+          site_description: Ավտոմատ prompt-ի բարելավում LLM-երի և մուլտիմոդալ մոդելների համար
+          nav_translations:
+            Home: Գլխավոր
+            Running: Գործարկում
+            Architecture: Ճարտարապետություն
+            Strategies: Ստրատեգիաներ
+            Scoring: Գնահատում
+            CLI: CLI
+            gRPC: gRPC
+            Frontend: Frontend
+            Local models: Լոկալ մոդելներ
+            Moderation: Մոդերացիա
   - git-revision-date-localized:
       enable_creation_date: true
       type: date
